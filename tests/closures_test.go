@@ -24,19 +24,21 @@ func TestLocalClosureIsDistinguishableFromHoliday(t *testing.T) {
 		t.Fatalf("AddHoliday: %v", err)
 	}
 
-	local, err := m.GetDayBounds(oct01_2026_Thu)
+	// GetDayDetail, not GetDayBounds: ClosedBy is this module's own
+	// vocabulary and only GetDayDetail carries it (see interfaces.go).
+	local, err := m.GetDayDetail(oct01_2026_Thu)
 	if err != nil {
-		t.Fatalf("GetDayBounds local: %v", err)
+		t.Fatalf("GetDayDetail local: %v", err)
 	}
-	if local.Open || local.ClosedBy != businesscalendar.ClosedLocal {
+	if local.Bounds.Open || local.ClosedBy != businesscalendar.ClosedLocal {
 		t.Errorf("expected a local closure, got %+v", local)
 	}
 
-	holiday, err := m.GetDayBounds(dec25_2026_Fri)
+	holiday, err := m.GetDayDetail(dec25_2026_Fri)
 	if err != nil {
-		t.Fatalf("GetDayBounds holiday: %v", err)
+		t.Fatalf("GetDayDetail holiday: %v", err)
 	}
-	if holiday.Open || holiday.ClosedBy != businesscalendar.ClosedHoliday {
+	if holiday.Bounds.Open || holiday.ClosedBy != businesscalendar.ClosedHoliday {
 		t.Errorf("expected a holiday, got %+v", holiday)
 	}
 }
@@ -59,29 +61,29 @@ func TestGetDayBoundsPrecedenceClosureOverHolidayOverWeekly(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("AddClosure: %v", err)
 	}
-	bounds, err := m.GetDayBounds(sep12_2026_Sat)
+	bounds, err := m.GetDayDetail(sep12_2026_Sat)
 	if err != nil {
-		t.Fatalf("GetDayBounds: %v", err)
+		t.Fatalf("GetDayDetail: %v", err)
 	}
-	if bounds.Open || bounds.ClosedBy != businesscalendar.ClosedLocal {
+	if bounds.Bounds.Open || bounds.ClosedBy != businesscalendar.ClosedLocal {
 		t.Errorf("closure must outrank holiday and weekly, got %+v", bounds)
 	}
 
 	// A plain weekly-closed day with no dated rows reports ClosedWeekly.
-	sun, err := m.GetDayBounds(sep13_2026_Sun)
+	sun, err := m.GetDayDetail(sep13_2026_Sun)
 	if err != nil {
-		t.Fatalf("GetDayBounds: %v", err)
+		t.Fatalf("GetDayDetail: %v", err)
 	}
-	if sun.Open || sun.ClosedBy != businesscalendar.ClosedWeekly {
+	if sun.Bounds.Open || sun.ClosedBy != businesscalendar.ClosedWeekly {
 		t.Errorf("expected weekly closure, got %+v", sun)
 	}
 
 	// A weekday with no business_hours row at all is also closed by default.
-	empty, err := m.GetDayBounds(sep13_2026_Sun)
+	empty, err := m.GetDayDetail(sep13_2026_Sun)
 	if err != nil {
-		t.Fatalf("GetDayBounds: %v", err)
+		t.Fatalf("GetDayDetail: %v", err)
 	}
-	if empty.Open || empty.ClosedBy != businesscalendar.ClosedWeekly {
+	if empty.Bounds.Open || empty.ClosedBy != businesscalendar.ClosedWeekly {
 		t.Errorf("expected closed by default, got %+v", empty)
 	}
 }

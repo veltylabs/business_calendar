@@ -28,11 +28,13 @@ func TestNewHolidayClosesTheDayWithoutRecompile(t *testing.T) {
 		t.Fatalf("AddHoliday: %v", err)
 	}
 
-	after, err := m.GetDayBounds(sep09_2026_Wed)
+	// GetDayDetail, not GetDayBounds: ClosedBy is this module's own vocabulary
+	// and only GetDayDetail carries it (see interfaces.go).
+	after, err := m.GetDayDetail(sep09_2026_Wed)
 	if err != nil {
-		t.Fatalf("GetDayBounds after: %v", err)
+		t.Fatalf("GetDayDetail after: %v", err)
 	}
-	if after.Open || after.ClosedBy != businesscalendar.ClosedHoliday {
+	if after.Bounds.Open || after.ClosedBy != businesscalendar.ClosedHoliday {
 		t.Errorf("expected the day closed by holiday, got %+v", after)
 	}
 }
@@ -97,11 +99,11 @@ func TestMovingHolidayFlipsBothDays(t *testing.T) {
 	if !old.Open {
 		t.Errorf("old date should be open after moving, got %+v", old)
 	}
-	nw, err := m.GetDayBounds(sep16_2026_Wed)
+	nw, err := m.GetDayDetail(sep16_2026_Wed)
 	if err != nil {
-		t.Fatalf("GetDayBounds new: %v", err)
+		t.Fatalf("GetDayDetail new: %v", err)
 	}
-	if nw.Open || nw.ClosedBy != businesscalendar.ClosedHoliday {
+	if nw.Bounds.Open || nw.ClosedBy != businesscalendar.ClosedHoliday {
 		t.Errorf("new date should be closed by holiday, got %+v", nw)
 	}
 }

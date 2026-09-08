@@ -80,21 +80,49 @@ closure `reason`, removal `id`) so the op boundary rejects empty input with a
 400 before reaching the service; every op that mutates still funnels through the
 service's domain checks.
 
-## 4. The Reader port and resolution precedence
+## 4. `GetDayBounds`/`GetDayDetail` and resolution precedence
 
-`interfaces.go` declares the read-only port a neighbour consumes:
+> **Amended 2026-09-08.** The port originally returned a module-local
+> `DayBounds` carrying `ClosedBy`. That forced any consumer to import this
+> module just to name the type — exactly the coupling
+> `veltylabs/appointment_booking` must not have. See
+> `webtyp/docs/AGENDA_DOMAIN_MASTER_PLAN.md` §3-bis for the full rationale.
+
+`interfaces.go` splits the answer in two, by audience:
 
 ```go
-type Reader interface {
-    GetDayBounds(date int64) (DayBounds, error)
+// The value a sibling domain module (e.g. appointment_booking) consumes. It
+// declares its OWN interface returning tinytime.DayBounds — a neutral type in
+// webtyp/time that both sides already import — and this Module satisfies it
+// structurally. No import in either direction, no adapter.
+func (m *Module) GetDayBounds(date int64) (tinytime.DayBounds, error)
+
+// This module's own richer answer: the same bounds PLUS why a closed day is
+// closed. Used by the get_day_bounds op and this module's own UI.
+func (m *Module) GetDayDetail(date int64) (DayDetail, error)
+
+type DayDetail struct {
+    Bounds   tinytime.DayBounds
+    ClosedBy ClosedReason // "" when Bounds.Open is true
 }
 ```
 
-`DayBounds` (an output-only result model that also implements `model.Encodable`
-for the `get_day_bounds` op) reports `Open`, `OpenMin`, `CloseMin`, and
-`ClosedBy` — a `ClosedReason` naming the origin.
+`Reader` (declared here) is a **convenience alias for this module's own
+consumers**, not the contract a sibling module names — a sibling declares its
+own interface shaped like `GetDayBounds`'s signature and this `Module` satisfies
+it structurally:
 
-`GetDayBounds` resolution, in this exact precedence:
+```go
+type Reader interface {
+    GetDayBounds(date int64) (tinytime.DayBounds, error)
+}
+```
+
+`GetDayBounds` is a thin wrapper — `GetDayDetail` is the single resolution path;
+`GetDayBounds` calls it and discards `ClosedBy`. There is exactly one place the
+precedence is decided.
+
+Resolution, in this exact order (unchanged by the amendment):
 
 1. A `Closure` on that date → `{Open: false, ClosedBy: ClosedLocal}`.
 2. A `Holiday` on that date → `{Open: false, ClosedBy: ClosedHoliday}`.
@@ -129,7 +157,7 @@ business-hours events carry `0,0` and a subscriber recomputes its whole horizon.
 |----|--------|----------|--------------|
 | `list_business_hours` | `r` | `business_hours` | All 7 weekday rows, by `day_of_week` |
 | `upsert_business_hours` | `cr` | `business_hours` | Create-or-update one weekday window |
-| `get_day_bounds` | `r` | `business_hours` | `DayBounds` for one date |
+| `get_day_bounds` | `r` | `business_hours` | `DayDetail` for one date (bounds + `ClosedBy`) |
 | `list_holidays` | `r` | `holiday` | All holidays |
 | `add_holiday` | `c` | `holiday` | Register a holiday (duplicate date → 409) |
 | `remove_holiday` | `d` | `holiday` | Remove by id (missing → 404) |
@@ -162,8 +190,13 @@ if err != nil { /* ... */ }
 
 cal.MountOperations(opRegistry) // router.OperationRegistry
 
-var reader businesscalendar.Reader = cal // the port appointment_booking consumes
-bounds, err := reader.GetDayBounds(midnightUTC)
+// appointment_booking never imports this package — it declares its own
+// interface shaped like GetDayBounds's signature, and *cal satisfies it
+// structurally. This module's own Reader alias is for THIS module's callers:
+var reader businesscalendar.Reader = cal
+bounds, err := reader.GetDayBounds(midnightUTC) // tinytime.DayBounds — no ClosedBy
+
+detail, err := cal.GetDayDetail(midnightUTC) // DayDetail — WITH ClosedBy, this module's own UI
 
 hoursView := businesscalendar.NewBusinessHoursView(caller) // router.Caller
 holidaysView := businesscalendar.NewHolidaysView(caller)

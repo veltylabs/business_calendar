@@ -111,12 +111,16 @@ func (m *Module) opGetDayBounds(ctx router.Context) {
 		ctx.WriteStatus(400)
 		return
 	}
-	bounds, err := m.GetDayBounds(args.Date)
+	// GetDayDetail, not GetDayBounds: an over-the-wire caller (this module's
+	// own UI, an admin tool) gets ClosedBy too. A Go-level sibling that only
+	// wants the neutral bounds calls GetDayBounds directly through Reader —
+	// it never goes through this op.
+	detail, err := m.GetDayDetail(args.Date)
 	if err != nil {
 		ctx.WriteStatus(500)
 		return
 	}
-	if err := ctx.Encode(&bounds); err != nil {
+	if err := ctx.Encode(&detail); err != nil {
 		ctx.WriteStatus(500)
 	}
 }
