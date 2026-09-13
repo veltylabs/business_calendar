@@ -29,11 +29,11 @@ func TestMigrate_CreatesThreeTables(t *testing.T) {
 	compiler := &dummyCompiler{}
 
 	if err := migrate.Migrate(execer, compiler); err != nil {
-		t.Fatalf("Migrate failed: %v", err)
+		t.Fatalf("Migrate falló: %v", err)
 	}
 
 	if len(execer.calls) != 3 {
-		t.Fatalf("expected 3 calls, got %d", len(execer.calls))
+		t.Fatalf("se esperaban 3 llamadas, se obtuvieron %d", len(execer.calls))
 	}
 }
 
@@ -42,16 +42,16 @@ func TestMigrate_TableOrder(t *testing.T) {
 	compiler := &dummyCompiler{}
 
 	if err := migrate.Migrate(execer, compiler); err != nil {
-		t.Fatalf("Migrate failed: %v", err)
+		t.Fatalf("Migrate falló: %v", err)
 	}
 
 	expected := []string{"business_hours", "holiday", "closure"}
 	if len(execer.calls) != len(expected) {
-		t.Fatalf("expected calls %v, got %v", expected, execer.calls)
+		t.Fatalf("se esperaban llamadas %v, se obtuvieron %v", expected, execer.calls)
 	}
 	for i, name := range expected {
 		if execer.calls[i] != name {
-			t.Fatalf("call %d: expected %s, got %s", i, name, execer.calls[i])
+			t.Fatalf("llamada %d: se esperaba %s, se obtuvo %s", i, name, execer.calls[i])
 		}
 	}
 }

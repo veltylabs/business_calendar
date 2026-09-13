@@ -6,18 +6,18 @@ import (
 	businesscalendar "github.com/veltylabs/business_calendar"
 )
 
-// Migrate reconciles the database schema business_calendar owns: BusinessHours, Holiday, Closure.
+// Migrate reconcilia el esquema de base de datos que posee business_calendar: BusinessHours, Holiday, Closure.
 //
-// It is deliberately NOT called by New, and deliberately lives in its own
-// package rather than a new file in the root package: nothing on a
-// consuming app's WASM build path (its view.go, which imports the root
-// businesscalendar package for businesscalendar.NewView) ever imports
-// "github.com/veltylabs/business_calendar/migrate" — so webtyp.com/ddl never
-// enters that build graph, regardless of build tags on the consumer's side.
+// Deliberadamente NO es llamado por New, y vive deliberadamente en su propio
+// paquete en lugar de un nuevo archivo en el paquete raíz: nada en la ruta de
+// construcción WASM de una aplicación consumidora (su view.go, que importa el
+// paquete raíz businesscalendar para businesscalendar.NewView) importa jamás
+// "github.com/veltylabs/business_calendar/migrate", por lo que webtyp.com/ddl nunca
+// entra en ese grafo de construcción, independientemente de los build tags en el lado del consumidor.
 //
-// conn is a ddl.Execer, not an *orm.DB, so a deploy-time transport that can
-// only execute DDL satisfies it. An *orm.DB's RawConn() also satisfies it,
-// for local/test callers:
+// conn es un ddl.Execer, no un *orm.DB, por lo que un transporte en tiempo de despliegue que solo
+// puede ejecutar DDL lo satisface. El RawConn() de un *orm.DB también lo satisface,
+// para llamadas locales/de prueba:
 //
 //	conn, _ := postgres.Open(dsn)
 //	compiler, _ := conn.(ddl.Compiler)
