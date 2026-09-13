@@ -1,116 +1,73 @@
-# business_calendar Architecture
+# Arquitectura de business_calendar
 
-## 1. Domain scope
+## 1. Alcance del dominio
 
-The **institutional calendar**: when the establishment is open, and when it is
-closed regardless of any professional's schedule. One bounded concern — *when is
-the establishment available* — owned by this module, consumed read-only by
-`appointment_booking` (which owns *when a professional is available*: a
-different owner, a different editor, a different permission).
+El **calendario institucional**: cuándo está abierto el establecimiento y cuándo está cerrado, independientemente del horario de cualquier profesional. Una preocupación delimitada —*cuándo está disponible el establecimiento*— propiedad de este módulo, consumida en modo de solo lectura por `appointment_booking` (que posee *cuándo está disponible un profesional*: un propietario diferente, un editor diferente, un permiso diferente).
 
-It owns three entities:
+Posee tres entidades:
 
-- **BusinessHours** — one row per day of week (0=Sunday … 6=Saturday),
-  `day_of_week` UNIQUE. Times are **minutes from midnight** (`0..1439`), the same
-  encoding `appointment_booking` uses for work blocks.
-- **Holiday** — a dated closure with a legal/administrative origin (`name`),
-  editable at runtime (a new holiday appears by law; nobody recompiles).
-- **Closure** — a dated closure the establishment itself decided (`reason`):
-  maintenance, an event.
+- **BusinessHours** — una fila por día de la semana (0=Domingo … 6=Sábado), `day_of_week` ÚNICO. Los tiempos son **minutos desde la medianoche** (`0..1439`), la misma codificación que utiliza `appointment_booking` para los bloques de trabajo.
+- **Holiday** — un cierre fechado con un origen legal/administrativo (`name`), editable en tiempo de ejecución (un nuevo feriado aparece por ley; nadie recompila).
+- **Closure** — un cierre fechado decidido por el propio establecimiento (`reason`): mantenimiento, un evento.
 
-### Why holidays and closures are separate tables
+### Por qué los feriados y los cierres son tablas separadas
 
-The **origin** is what the UI shows and what an administrator filters by.
-Collapsing both into one table with a `type` column would make the origin a
-magic string; two tables make it a first-class, greppable `ClosedReason`. Both
-are dated, but a local closure **outranks** a holiday in resolution (below) —
-the more specific, more recent decision wins, and a holiday the establishment
-chose to work through must not be reopened by removing the closure.
+El **origen** es lo que muestra la interfaz de usuario y por lo que filtra un administrador. Colapsar ambos en una tabla con una columna `type` convertiría el origen en una cadena mágica; dos tablas lo convierten en un `ClosedReason` de primera clase y buscable. Ambos están fechados, pero un cierre local **supera** a un feriado en la resolución (a continuación): la decisión más específica y reciente gana, y un feriado en el que el establecimiento decidió trabajar no debe reabrirse eliminando el cierre.
 
-## 2. Not multi-tenant (signed-off decision)
+## 2. No multitenant (decisión aprobada)
 
-Unlike most modules in this ecosystem, `business_calendar` has **no `tenant_id`
-field** on any table: the institutional calendar is one global schedule per
-composition-root app, not scoped per tenant. This is a deliberate, explicit
-decision (per `AGENTS.md` "Domain-specific notes"); do not add `tenant_id` as a
-casual change — that would be a domain change, not a harness-adoption change.
+A diferencia de la mayoría de los módulos de este ecosistema, `business_calendar` **no tiene un campo `tenant_id`** en ninguna tabla: el calendario institucional es un esquema global único por aplicación de raíz de composición, no delimitado por inquilino (tenant). Esta es una decisión deliberada y explícita (según `AGENTS.md` "Notas específicas del dominio"); no agregue `tenant_id` como un cambio casual —eso sería un cambio de dominio, no un cambio de adopción del arnés.
 
-Because there is no tenant column, `UPDATE`/`DELETE` conditions are keyed on the
-row `id` (and `day_of_week` for hours), which is safe for a single-tenant
-singleton. The cross-tenant-write concern that `tenant_id` guards against does
-not exist here.
+Debido a que no hay columna de inquilino, las condiciones `UPDATE`/`DELETE` se basan en el `id` de la fila (y `day_of_week` para los horarios), lo cual es seguro para un singleton de un solo inquilino. La preocupación de escritura entre inquilinos que protege `tenant_id` no existe aquí.
 
-## 3. Patterns applied
+## 3. Patrones aplicados
 
-Coupled only to the published `webtyp.com/*` ports, never to concrete
-infrastructure — see `AGENTS.md` (repo root) for the whitelist/blacklist:
+Acoplado únicamente a los puertos publicados en `webtyp.com/*`, nunca a infraestructura concreta —consulte `AGENTS.md` (raíz del repositorio) para la lista blanca/lista negra:
 
-- **`orm.DB` for storage** — backend-agnostic over whatever `storage.Conn` the
-  composition root injects (`storage/mem` in this module's own tests).
-- **`ddl`** for the module's own schema migration via `migrate.Migrate(conn, ddlCompiler)`
-  at deploy time — deliberately separated from `New()` and isolated in the `migrate` subpackage.
-- **`router.OperationModule`** (`ModelName()` + `MountOperations`) for transport
-  — the module never sees a concrete server or `net/http`.
-- **`model.IDGenerator`** for identity (`Deps.IDs`, required — the module never
-  builds one).
-- **`events.Publisher`** (`Deps.Publisher`, optional — nil disables silently)
-  for `EventCalendarChanged` after every successful write.
-- **`view.Presenter`** (`NewBusinessHoursView`/`NewHolidaysView`/
-  `NewClosuresView(caller router.Caller)`) built with only `view`+`model`+`router`
-  (+ `date` and `fmt/lang` for translation) — the app chooses the renderer.
+- **`orm.DB` para almacenamiento** — independiente del backend sobre cualquier `storage.Conn` que inyecte la raíz de composición (`storage/mem` en las pruebas de este módulo).
+- **`ddl`** para la migración de esquema del propio módulo a través de `migrate.Migrate(conn, ddlCompiler)` en tiempo de despliegue —separado deliberadamente de `New()` e aislado en el subpaquete `migrate`.
+- **`router.OperationModule`** (`ModelName()` + `MountOperations`) para transporte —el módulo nunca ve un servidor concreto o `net/http`.
+- **`model.IDGenerator`** para identidad (`Deps.IDs`, requerido —el módulo nunca construye uno).
+- **`events.Publisher`** (`Deps.Publisher`, opcional —nil lo deshabilita silenciosamente) para `EventCalendarChanged` después de cada escritura exitosa.
+- **`view.Presenter`** (`NewBusinessHoursView`/`NewHolidaysView`/`NewClosuresView(caller router.Caller)`) construido únicamente con `view`+`model`+`router` (+ `date` y `fmt/lang` para traducción) —la aplicación elige el renderizador.
 
-### NotNull semantics and where validation lives
+### Semántica de NotNull y dónde vive la validación
 
-On a base `model.Int()`/`model.Bool()` kind, `NotNull` rejects the **zero value**
-(`ValidateFields`: `NotNull && IsZeroPtr`) — so `day_of_week` 0 (Sunday),
-`is_open == false`, and midnight (`0` minutes) are all legitimate values that
-must not be rejected. The domain records therefore carry `NotNull` only to drive
-`NOT NULL` DDL; the *semantic* invariants live in the service methods — the
-single fail-closed chokepoint every write path crosses:
+En un tipo base `model.Int()`/`model.Bool()`, `NotNull` rechaza el **valor cero** (`ValidateFields`: `NotNull && IsZeroPtr`), por lo que `day_of_week` 0 (Domingo), `is_open == false` y la medianoche (`0` minutos) son todos valores legítimos que no deben rechazarse. Por lo tanto, los registros del dominio llevan `NotNull` solo para impulsar el DDL `NOT NULL`; los invariantes *semánticos* viven en los métodos de servicio —el único punto de control a prueba de fallos que cruza cada ruta de escritura:
 
-| Invariant | Sentinel |
+| Invariante | Centinela |
 |-----------|----------|
-| `day_of_week` in 0..6 | `ErrInvalidDay` |
-| open window within 0..1439, `open_min < close_min` | `ErrInvalidMinutes` |
-| second holiday/closure on the same date | `ErrDuplicateDate` |
-| missing row | `ErrNotFound` |
+| `day_of_week` en 0..6 | `ErrInvalidDay` |
+| ventana abierta dentro de 0..1439, `open_min < close_min` | `ErrInvalidMinutes` |
+| segundo feriado/cierre en la misma fecha | `ErrDuplicateDate` |
+| fila faltante | `ErrNotFound` |
 
-Transport args repeat required **text** fields with `NotNull` (holiday `name`,
-closure `reason`, removal `id`) so the op boundary rejects empty input with a
-400 before reaching the service; every op that mutates still funnels through the
-service's domain checks.
+Los argumentos de transporte repiten los campos de **texto** requeridos con `NotNull` (nombre de feriado `name`, razón de cierre `reason`, `id` de eliminación) para que el límite de la operación rechace la entrada vacía con un 400 antes de llegar al servicio; cada operación que muta se canaliza a través de las verificaciones de dominio del servicio.
 
-## 4. `GetDayBounds`/`GetDayDetail` and resolution precedence
+## 4. `GetDayBounds`/`GetDayDetail` y precedencia de resolución
 
-> **Amended 2026-09-08.** The port originally returned a module-local
-> `DayBounds` carrying `ClosedBy`. That forced any consumer to import this
-> module just to name the type — exactly the coupling
-> `veltylabs/appointment_booking` must not have. See
-> `webtyp/docs/AGENDA_DOMAIN_MASTER_PLAN.md` §3-bis for the full rationale.
+> **Enmendado el 2026-09-08.** El puerto originalmente devolvía un `DayBounds` local del módulo que llevaba `ClosedBy`. Eso forzaba a cualquier consumidor a importar este módulo solo para nombrar el tipo —exactamente el acoplamiento que `veltylabs/appointment_booking` no debe tener. Consulte `webtyp/docs/AGENDA_DOMAIN_MASTER_PLAN.md` §3-bis para ver la justificación completa.
 
-`interfaces.go` splits the answer in two, by audience:
+`interfaces.go` divide la respuesta en dos, según la audiencia:
 
 ```go
-// The value a sibling domain module (e.g. appointment_booking) consumes. It
-// declares its OWN interface returning tinytime.DayBounds — a neutral type in
-// webtyp/time that both sides already import — and this Module satisfies it
-// structurally. No import in either direction, no adapter.
+// El valor que consume un módulo de dominio vecino (por ejemplo, appointment_booking).
+// Declara su PROPIA interfaz devolviendo tinytime.DayBounds —un tipo neutral en
+// webtyp/time que ambas partes ya importan— y este Module la satisface
+// estructuralmente. Sin importación en ninguna dirección, sin adaptador.
 func (m *Module) GetDayBounds(date int64) (tinytime.DayBounds, error)
 
-// This module's own richer answer: the same bounds PLUS why a closed day is
-// closed. Used by the get_day_bounds op and this module's own UI.
+// La respuesta más rica de este módulo: los mismos límites MÁS por qué un día cerrado
+// está cerrado. Utilizado por la operación get_day_bounds y la propia interfaz de usuario de este módulo.
 func (m *Module) GetDayDetail(date int64) (DayDetail, error)
 
 type DayDetail struct {
     Bounds   tinytime.DayBounds
-    ClosedBy ClosedReason // "" when Bounds.Open is true
+    ClosedBy ClosedReason // "" cuando Bounds.Open es true
 }
 ```
 
-`Reader` (declared here) is a **convenience alias for this module's own
-consumers**, not the contract a sibling module names — a sibling declares its
-own interface shaped like `GetDayBounds`'s signature and this `Module` satisfies
-it structurally:
+`Reader` (declarado aquí) es un **alias de conveniencia para los consumidores de este propio módulo**, no el contrato que nombra un módulo vecino; un vecino declara su propia interfaz con una forma idéntica a la firma de `GetDayBounds` y este `Module` la satisface estructuralmente:
 
 ```go
 type Reader interface {
@@ -118,91 +75,75 @@ type Reader interface {
 }
 ```
 
-`GetDayBounds` is a thin wrapper — `GetDayDetail` is the single resolution path;
-`GetDayBounds` calls it and discards `ClosedBy`. There is exactly one place the
-precedence is decided.
+`GetDayBounds` es un envoltorio ligero: `GetDayDetail` es la única ruta de resolución; `GetDayBounds` lo llama y descarta `ClosedBy`. Hay exactamente un lugar donde se decide la precedencia.
 
-Resolution, in this exact order (unchanged by the amendment):
+Resolución, en este orden exacto (sin cambios por la enmienda):
 
-1. A `Closure` on that date → `{Open: false, ClosedBy: ClosedLocal}`.
-2. A `Holiday` on that date → `{Open: false, ClosedBy: ClosedHoliday}`.
-3. `BusinessHours` for that weekday with `is_open == false` (or no row at all —
-   absence of a schedule is closed) → `{Open: false, ClosedBy: ClosedWeekly}`.
-4. Otherwise `{Open: true, OpenMin, CloseMin}`.
+1. Un `Closure` en esa fecha → `{Open: false, ClosedBy: ClosedLocal}`.
+2. Un `Holiday` en esa fecha → `{Open: false, ClosedBy: ClosedHoliday}`.
+3. `BusinessHours` para ese día de la semana con `is_open == false` (o sin fila alguna —la ausencia de un horario equivale a cerrado) → `{Open: false, ClosedBy: ClosedWeekly}`.
+4. De lo contrario, `{Open: true, OpenMin, CloseMin}`.
 
-## 5. Events
+## 5. Eventos
 
-Every successful mutation publishes `EventCalendarChanged` with a fully
-populated `CalendarChangedPayload` (implements `model.Encodable`):
+Cada mutación exitosa publica `EventCalendarChanged` con un `CalendarChangedPayload` completamente poblado (implementa `model.Encodable`):
 
-| Method | Kind | Closed | Range |
+| Método | Tipo (Kind) | Cerrado | Rango |
 |--------|------|--------|-------|
 | `AddHoliday` | `HOLIDAY` | true | `[date, date]` |
 | `RemoveHoliday` | `HOLIDAY` | false | `[date, date]` |
 | `AddClosure` | `CLOSURE` | true | `[date, date]` |
 | `RemoveClosure` | `CLOSURE` | false | `[date, date]` |
-| `UpsertBusinessHours` (new row) | `BUSINESS_HOURS` | false | `0,0` |
-| `UpsertBusinessHours` (narrowing) | `BUSINESS_HOURS` | true | `0,0` |
-| `UpsertBusinessHours` (widening) | `BUSINESS_HOURS` | false | `0,0` |
+| `UpsertBusinessHours` (nueva fila) | `BUSINESS_HOURS` | false | `0,0` |
+| `UpsertBusinessHours` (reducción) | `BUSINESS_HOURS` | true | `0,0` |
+| `UpsertBusinessHours` (ampliación) | `BUSINESS_HOURS` | false | `0,0` |
 
-`Closed` is the field a subscriber trusts: `true` only when the change closes
-time — the only direction that can invalidate an existing reservation. When in
-doubt the module publishes `Closed: true` (a recompute is cheap; a skipped real
-closure strands a patient on a shut day). A weekly rule has no bounded range, so
-business-hours events carry `0,0` and a subscriber recomputes its whole horizon.
+`Closed` es el campo en el que confía un suscriptor: `true` solo cuando el cambio cierra el tiempo (un feriado agregado, horarios reducidos), la única dirección que puede invalidar una reserva existente. En caso de duda, el módulo publica `Closed: true` (un recálculo es económico; omitir un cierre real deja desamparado a un paciente en un día cerrado). Una regla semanal no tiene un rango acotado, por lo que los eventos de horarios de atención llevan `0,0` y un suscriptor recalcula todo su horizonte.
 
-## 6. Ops
+## 6. Operaciones (Ops)
 
-| Op | Action | Resource | Description |
+| Op | Acción | Recurso | Descripción |
 |----|--------|----------|--------------|
-| `list_business_hours` | `r` | `business_hours` | All 7 weekday rows, by `day_of_week` |
-| `upsert_business_hours` | `cr` | `business_hours` | Create-or-update one weekday window |
-| `get_day_bounds` | `r` | `business_hours` | `DayDetail` for one date (bounds + `ClosedBy`) |
-| `list_holidays` | `r` | `holiday` | All holidays |
-| `add_holiday` | `c` | `holiday` | Register a holiday (duplicate date → 409) |
-| `remove_holiday` | `d` | `holiday` | Remove by id (missing → 404) |
-| `list_closures` | `r` | `closure` | All closures |
-| `add_closure` | `c` | `closure` | Register a closure (duplicate date → 409) |
-| `remove_closure` | `d` | `closure` | Remove by id (missing → 404) |
+| `list_business_hours` | `r` | `business_hours` | Las 7 filas de días de la semana, por `day_of_week` |
+| `upsert_business_hours` | `cr` | `business_hours` | Crear o actualizar una ventana de día de la semana |
+| `get_day_bounds` | `r` | `business_hours` | `DayDetail` para una fecha (límites + `ClosedBy`) |
+| `list_holidays` | `r` | `holiday` | Todos los feriados |
+| `add_holiday` | `c` | `holiday` | Registrar un feriado (fecha duplicada → 409) |
+| `remove_holiday` | `d` | `holiday` | Eliminar por id (faltante → 404) |
+| `list_closures` | `r` | `closure` | Todos los cierres |
+| `add_closure` | `c` | `closure` | Registrar un cierre (fecha duplicada → 409) |
+| `remove_closure` | `d` | `closure` | Eliminar por id (faltante → 404) |
 
-Status mapping: `400` decode/validation (`ErrInvalidDay`/`ErrInvalidMinutes`) ·
-`404` not-found (`ErrNotFound`) · `409` conflict (`ErrDuplicateDate`) · `500`
-genuine internal errors only.
+Mapeo de estados: `400` decodificación/validación (`ErrInvalidDay`/`ErrInvalidMinutes`) · `404` no encontrado (`ErrNotFound`) · `409` conflicto (`ErrDuplicateDate`) · solo errores internos reales `500`.
 
-The upsert op declares `model.Create|model.Update` (a bitmask) because it really
-can do both; declaring only `Update` would let an update-only principal create
-rows. Three resources (`business_hours`, `holiday`, `closure`) because an
-administrator who may add a holiday is not necessarily the one who may rewrite
-opening hours.
+La operación de upsert declara `model.Create|model.Update` (una máscara de bits) porque realmente puede hacer ambas cosas; declarar solo `Update` permitiría que un principal con permisos solo de actualización cree filas. Tres recursos (`business_hours`, `holiday`, `closure`) porque un administrador que puede agregar un feriado no es necesariamente el que puede reescribir los horarios de apertura.
 
-Range filtering (`ListHolidays(from, to)`, `ListClosures(from, to)`) lives on
-the **service** methods for in-process consumers; the list **ops** take no args
-and return the whole horizon (a view lists all).
+El filtrado por rango (`ListHolidays(from, to)`, `ListClosures(from, to)`) vive en los métodos de **servicio** para consumidores dentro del proceso; las **operaciones** de lista no toman argumentos y devuelven todo el horizonte (una vista lista todo).
 
-## 7. Composition root example
+## 7. Ejemplo de raíz de composición
 
 ```go
 cal, err := businesscalendar.New(db, businesscalendar.Deps{
-    IDs:      unixid.NewUnixID(), // injected — the module never builds one
-    Publisher: broker,            // events.Broker, or nil
+    IDs:      unixid.NewUnixID(), // inyectado —el módulo nunca construye uno
+    Publisher: broker,            // events.Broker, o nil
 })
 if err != nil { /* ... */ }
 
 cal.MountOperations(opRegistry) // router.OperationRegistry
 
-// appointment_booking never imports this package — it declares its own
-// interface shaped like GetDayBounds's signature, and *cal satisfies it
-// structurally. This module's own Reader alias is for THIS module's callers:
+// appointment_booking nunca importa este paquete —declara su propia
+// interfaz con la forma de la firma de GetDayBounds, y *cal la satisface
+// estructuralmente. El alias Reader de este módulo es para los usuarios de ESTE módulo:
 var reader businesscalendar.Reader = cal
-bounds, err := reader.GetDayBounds(midnightUTC) // tinytime.DayBounds — no ClosedBy
+bounds, err := reader.GetDayBounds(midnightUTC) // tinytime.DayBounds —sin ClosedBy
 
-detail, err := cal.GetDayDetail(midnightUTC) // DayDetail — WITH ClosedBy, this module's own UI
+detail, err := cal.GetDayDetail(midnightUTC) // DayDetail —CON ClosedBy, interfaz propia del módulo
 
 hoursView := businesscalendar.NewBusinessHoursView(caller) // router.Caller
 holidaysView := businesscalendar.NewHolidaysView(caller)
 closuresView := businesscalendar.NewClosuresView(caller)
 ```
 
-## 8. Schema
+## 8. Esquema
 
-See [`docs/diagrams/database.md`](diagrams/database.md).
+Consulte [`docs/diagrams/database.md`](diagrams/database.md).

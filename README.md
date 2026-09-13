@@ -1,54 +1,47 @@
 # business_calendar
 <img src="docs/img/badges.svg">
 
-The **institutional calendar** for the Velty ecosystem: when the establishment is
-open, and when it is closed regardless of any professional's schedule.
+El **calendario institucional** para el ecosistema Velty: cuándo está abierto el establecimiento y cuándo está cerrado, independientemente del horario de cualquier profesional.
 
-It owns three things:
+Posee tres cosas:
 
-1. **Business hours** — the weekly opening window, one row per day of week.
-2. **Holidays** — dated closures with a legal/administrative origin, editable at
-   runtime (a new holiday appears by law; nobody recompiles).
-3. **Closures** — dated closures with a local origin (maintenance, an event).
+1. **Horarios de atención (`business_hours`)** — la ventana semanal de apertura, una fila por día de la semana.
+2. **Feriados (`holidays`)** — cierres fechados con un origen legal/administrativo, editables en tiempo de ejecución (un nuevo feriado aparece por ley; nadie recompila).
+3. **Cierres (`closures`)** — cierres fechados con un origen local (mantenimiento, un evento).
 
-It does **not** own any professional's agenda. `appointment_booking` owns that and
-consumes this module through the read-only [`Reader`](#the-reader-port) bound.
+**No** posee la agenda de ningún profesional. `appointment_booking` posee eso y consume este módulo a través del contrato de solo lectura [`Reader`](#el-puerto-reader).
 
-> Replaces the archived `github.com/veltylabs/business_hours`, whose clock-time
-> ("HH:MM") text encoding is fixed here to **minutes from midnight** — the same
-> encoding `appointment_booking` uses for work blocks — and whose hardcoded
-> Spanish day names are gone (translation lives in the consuming app).
+> Reemplaza al archivado `github.com/veltylabs/business_hours`, cuya codificación de texto de hora de reloj ("HH:MM") se corrige aquí a **minutos desde la medianoche** —la misma codificación que usa `appointment_booking` para los bloques de trabajo— y cuyos nombres de días en español prefijados han desaparecido (la traducción vive en la aplicación consumidora).
 
-## Quick start
+## Inicio rápido
 
 ```go
-// At deploy time, run schema migrations:
+// En tiempo de despliegue, ejecutar las migraciones de esquema:
 err := migrate.Migrate(conn, ddlCompiler)
 if err != nil { /* ... */ }
 
-// At process start:
+// Al iniciar el proceso:
 cal, err := businesscalendar.New(db, businesscalendar.Deps{
-    IDs: idGenerator, // model.IDGenerator — required
-    Publisher: broker, // events.Publisher — optional; nil disables publishing
+    IDs: idGenerator, // model.IDGenerator — requerido
+    Publisher: broker, // events.Publisher — opcional; nil deshabilita la publicación
 })
 if err != nil { /* ... */ }
 
 cal.MountOperations(opRegistry) // router.OpRegistry
 
-reader := businesscalendar.Reader(cal) // the port a neighbour module consumes
+reader := businesscalendar.Reader(cal) // el puerto que consume un módulo vecino
 bounds, err := reader.GetDayBounds(dateMidnightUTC)
 ```
 
-`New` assumes the database schema (`business_hours`, `holiday`, `closure`) already
-exists. The deploying application calls `migrate.Migrate(conn, compiler)` once, at deploy time.
+`New` asume que el esquema de la base de datos (`business_hours`, `holiday`, `closure`) ya existe. La aplicación que despliega llama a `migrate.Migrate(conn, compiler)` una vez, en tiempo de despliegue.
 
-## Ops
+## Operaciones (Ops)
 
-| Op | Resource | Action | Args |
+| Op | Recurso | Acción | Args |
 |----|----------|--------|------|
 | `list_business_hours` | `business_hours` | read | — |
 | `upsert_business_hours` | `business_hours` | create \| update | `day_of_week`, `open_min`, `close_min`, `is_open`, `notes` |
-| `get_day_bounds` | `business_hours` | read | `date` (midnight UTC, seconds) |
+| `get_day_bounds` | `business_hours` | read | `date` (medianoche UTC, segundos) |
 | `list_holidays` | `holiday` | read | — |
 | `add_holiday` | `holiday` | create | `specific_date`, `name`, `notes` |
 | `remove_holiday` | `holiday` | delete | `id` |
@@ -56,12 +49,11 @@ exists. The deploying application calls `migrate.Migrate(conn, compiler)` once, 
 | `add_closure` | `closure` | create | `specific_date`, `reason` |
 | `remove_closure` | `closure` | delete | `id` |
 
-Times are **minutes from midnight** (`0..1439`); `get_day_bounds` answers "is the
-establishment open this date, and between which minutes".
+Los tiempos son **minutos desde la medianoche** (`0..1439`); `get_day_bounds` responde "si el establecimiento está abierto esta fecha y entre qué minutos".
 
-## The Reader port
+## El puerto Reader
 
-`interfaces.go` declares the read-only port a neighbour depends on:
+`interfaces.go` declara el puerto de solo lectura del que depende un vecino:
 
 ```go
 type Reader interface {
@@ -69,44 +61,34 @@ type Reader interface {
 }
 ```
 
-`*Module` satisfies it structurally. `DayBounds` carries `Open`, `OpenMin`,
-`CloseMin`, and `ClosedBy` — a `ClosedReason` naming the origin
-(`WEEKLY` | `HOLIDAY` | `CLOSURE`). Resolution precedence: **Closure > Holiday >
-weekly rule**.
+`*Module` lo satisface estructuralmente. `DayBounds` lleva `Open`, `OpenMin`, `CloseMin` y `ClosedBy` —un `ClosedReason` que nombra el origen (`WEEKLY` | `HOLIDAY` | `CLOSURE`). Precedencia de resolución: **Cierre local > Feriado > Regla semanal**.
 
-## Events
+## Eventos
 
-Every successful write publishes `EventCalendarChanged`
-(`business.calendar.changed`) with a typed `CalendarChangedPayload` saying
-*what* changed, its affected date range, and `Closed` — the direction. `Closed`
-is `true` only when the change closes time (a holiday added, hours narrowed),
-which is the only direction that can invalidate an existing reservation.
+Cada escritura exitosa publica `EventCalendarChanged` (`business.calendar.changed`) con un `CalendarChangedPayload` tipado que indica *qué* cambió, su rango de fechas afectado y `Closed` —la dirección. `Closed` es `true` solo cuando el cambio cierra el tiempo (un feriado agregado, horarios reducidos), que es la única dirección que puede invalidar una reserva existente.
 
-## Translation keys
+## Claves de traducción
 
-This module renders no hardcoded human language. It introduces these English
-canonical keys, translated by the consuming app via `webtyp.com/fmt/lang`:
-`Business hours`, `Holidays`, `Closures`, `Open`, `Closed`, plus the seven
-weekday names from `webtyp.com/date` (`date.WeekdayName`).
+Este módulo no renderiza ningún lenguaje humano codificado de forma rígida. Introduce estas claves canónicas en inglés, traducidas por la aplicación consumidora a través de `webtyp.com/fmt/lang`: `Business hours`, `Holidays`, `Closures`, `Open`, `Closed`, más los siete nombres de días de la semana de `webtyp.com/date` (`date.WeekdayName`).
 
-## Key files
+## Archivos clave
 
-| File | Role |
+| Archivo | Rol |
 |------|------|
-| `model.go` | Definitions (records + transport args), errors, event topic/payload |
-| `model_orm.go` | Generated by `ormc` — **do not edit** |
-| `module.go` | `Module`, `Deps`, `New`, service methods, event publishing |
-| `migrate/` | Deploy-time schema migration (`Migrate`) |
-| `interfaces.go` | The `Reader` port + `GetDayBounds` precedence |
-| `ops.go` | Op constants, `MountOperations`, handlers |
-| `view.go` | Three presenters (`NewBusinessHoursView`, `NewHolidaysView`, `NewClosuresView`) |
-| `tests/` | Use-case tests, ops tests, conformance (over `storage/mem` + `router/mock`/`loopback`) |
+| `model.go` | Definiciones (registros + args de transporte), errores, tópico/payload de eventos |
+| `model_orm.go` | Generado por `ormc` — **no editar** |
+| `module.go` | `Module`, `Deps`, `New`, métodos de servicio, publicación de eventos |
+| `migrate/` | Migración de esquema en tiempo de despliegue (`Migrate`) |
+| `interfaces.go` | El puerto `Reader` + precedencia de `GetDayBounds` |
+| `ops.go` | Constantes de Op, `MountOperations`, manejadores |
+| `view.go` | Tres presentadores (`NewBusinessHoursView`, `NewHolidaysView`, `NewClosuresView`) |
+| `tests/` | Pruebas de casos de uso, pruebas de ops, conformidad (sobre `storage/mem` + `router/mock`/`loopback`) |
 
-## Documentation
+## Documentación
 
-- [ARCHITECTURE.md](docs/ARCHITECTURE.md) — domain scope, patterns, ops, composition root.
-- [Database diagram](docs/diagrams/database.md) — Mermaid ERD.
+- [ARCHITECTURE.md](docs/ARCHITECTURE.md) — alcance del dominio, patrones, ops, ejemplo de raíz de composición.
+- [Diagrama de base de datos](docs/diagrams/database.md) — Mermaid ERD.
 
 ---
 
-*This module is part of the Velty Labs modules collection.*
+*Este módulo forma parte de la colección de módulos de Velty Labs.*
