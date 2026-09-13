@@ -1,7 +1,6 @@
 package businesscalendar
 
 import (
-	"webtyp.com/ddl"
 	"webtyp.com/events"
 	"webtyp.com/fmt"
 	"webtyp.com/model"
@@ -23,24 +22,11 @@ type Module struct {
 	pub events.Publisher
 }
 
+// New connects the module to an already-connected *orm.DB; the schema is assumed
+// to already exist — see the migrate subpackage.
 func New(db *orm.DB, deps Deps) (*Module, error) {
 	if deps.IDs == nil {
 		return nil, fmt.Err("business_calendar: Deps.IDs is required")
-	}
-	// ddl.Compiler is an optional capability — only SQL backends (sqlt,
-	// postgres) implement it; storage/mem creates tables lazily and needs no
-	// DDL. The type assertion, not an unconditional call, is what keeps the
-	// module backend-agnostic here.
-	if ddlCompiler, ok := db.RawConn().(ddl.Compiler); ok {
-		if err := ddl.New(db.RawConn(), ddlCompiler).CreateTable(&BusinessHours{}); err != nil {
-			return nil, err
-		}
-		if err := ddl.New(db.RawConn(), ddlCompiler).CreateTable(&Holiday{}); err != nil {
-			return nil, err
-		}
-		if err := ddl.New(db.RawConn(), ddlCompiler).CreateTable(&Closure{}); err != nil {
-			return nil, err
-		}
 	}
 	return &Module{db: db, ids: deps.IDs, pub: deps.Publisher}, nil
 }

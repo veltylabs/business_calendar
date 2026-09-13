@@ -47,8 +47,8 @@ infrastructure — see `AGENTS.md` (repo root) for the whitelist/blacklist:
 
 - **`orm.DB` for storage** — backend-agnostic over whatever `storage.Conn` the
   composition root injects (`storage/mem` in this module's own tests).
-- **`ddl`** for the module's own schema migration in `New()`, behind the
-  `db.RawConn().(ddl.Compiler)` type assertion — a no-op against `storage/mem`.
+- **`ddl`** for the module's own schema migration via `migrate.Migrate(conn, ddlCompiler)`
+  at deploy time — deliberately separated from `New()` and isolated in the `migrate` subpackage.
 - **`router.OperationModule`** (`ModelName()` + `MountOperations`) for transport
   — the module never sees a concrete server or `net/http`.
 - **`model.IDGenerator`** for identity (`Deps.IDs`, required — the module never
