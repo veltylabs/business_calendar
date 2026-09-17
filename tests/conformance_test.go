@@ -16,8 +16,10 @@ func TestNewBusinessHoursView_ListsWeek(t *testing.T) {
 	seedWeek(t, m)
 
 	p := businesscalendar.NewBusinessHoursView(loopback.New(m))
-	if err := p.Reload(); err != nil {
-		t.Fatalf("Reload: %v", err)
+	var rerr error
+	p.Reload(func(err error) { rerr = err })
+	if rerr != nil {
+		t.Fatalf("Reload: %v", rerr)
 	}
 	items := p.Items()
 	if len(items) != 7 {
@@ -52,8 +54,10 @@ func TestNewHolidaysView_CRUD(t *testing.T) {
 	if _, ok := p.(view.Deleter); !ok {
 		t.Error("holidays presenter must be delete-capable")
 	}
-	if err := p.Reload(); err != nil {
-		t.Fatalf("Reload: %v", err)
+	var rerr error
+	p.Reload(func(err error) { rerr = err })
+	if rerr != nil {
+		t.Fatalf("Reload: %v", rerr)
 	}
 	items := p.Items()
 	if len(items) != 1 || items[0].Label != "Independence Day" {
@@ -76,8 +80,10 @@ func TestNewClosuresView_CRUD(t *testing.T) {
 	if _, ok := p.(view.Deleter); !ok {
 		t.Error("closures presenter must be delete-capable")
 	}
-	if err := p.Reload(); err != nil {
-		t.Fatalf("Reload: %v", err)
+	var rerr error
+	p.Reload(func(err error) { rerr = err })
+	if rerr != nil {
+		t.Fatalf("Reload: %v", rerr)
 	}
 	items := p.Items()
 	if len(items) != 1 || items[0].Label != "Maintenance" {

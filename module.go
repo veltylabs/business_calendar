@@ -31,7 +31,15 @@ func New(db *orm.DB, deps Deps) (*Module, error) {
 	return &Module{db: db, ids: deps.IDs, pub: deps.Publisher}, nil
 }
 
-func (m *Module) ModelName() string { return "business_calendar" }
+// ModelName is this module's identity: mcp.HarvestOps qualifies every op as
+// "business_calendar.<name>" on the wire — the qualification that makes its
+// own "get_day_bounds" distinct from appointment_booking's op of the same
+// bare name (the collision this whole mechanism exists to make
+// unrepresentable). view.go's three NewXView constructors pass this same
+// constant as view.Ops.Module.
+const ModelName = "business_calendar"
+
+func (m *Module) ModelName() string { return ModelName }
 
 // publish fires EventCalendarChanged only when a publisher is wired in. Every
 // successful mutation funnels through here so the direction field stays right

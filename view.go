@@ -62,7 +62,7 @@ func minutesHHMM(minutes int) string {
 // (upsert). The app decides which renderer draws it.
 func NewBusinessHoursView(caller router.Caller) view.Presenter {
 	b := view.NewCallerLister(caller,
-		view.Ops{List: OpListBusinessHours, Save: OpUpsertBusinessHours},
+		view.Ops{Module: ModelName, List: OpListBusinessHours, Save: OpUpsertBusinessHours},
 		func() model.ModelSlice { return &BusinessHoursList{} })
 	return view.New(b, &BusinessHours{}, view.WithTitle(lang.Translate("Business hours").String()))
 }
@@ -70,7 +70,7 @@ func NewBusinessHoursView(caller router.Caller) view.Presenter {
 // NewHolidaysView builds the holidays Presenter — full CRUD (list, add, remove).
 func NewHolidaysView(caller router.Caller) view.Presenter {
 	b := view.NewCallerLister(caller,
-		view.Ops{List: OpListHolidays, Save: OpAddHoliday, Delete: OpRemoveHoliday},
+		view.Ops{Module: ModelName, List: OpListHolidays, Save: OpAddHoliday, Delete: OpRemoveHoliday},
 		func() model.ModelSlice { return &HolidayList{} })
 	return view.New(b, &Holiday{}, view.WithTitle(lang.Translate("Holidays").String()))
 }
@@ -78,7 +78,7 @@ func NewHolidaysView(caller router.Caller) view.Presenter {
 // NewClosuresView builds the closures Presenter — full CRUD (list, add, remove).
 func NewClosuresView(caller router.Caller) view.Presenter {
 	b := view.NewCallerLister(caller,
-		view.Ops{List: OpListClosures, Save: OpAddClosure, Delete: OpRemoveClosure},
+		view.Ops{Module: ModelName, List: OpListClosures, Save: OpAddClosure, Delete: OpRemoveClosure},
 		func() model.ModelSlice { return &ClosureList{} })
 	return view.New(b, &Closure{}, view.WithTitle(lang.Translate("Closures").String()))
 }
