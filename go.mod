@@ -15,4 +15,7 @@ require (
 	webtyp.com/view v0.6.2
 )
 
-require webtyp.com/json v0.5.25 // indirect
+require (
+	webtyp.com/input v0.0.9 // indirect
+	webtyp.com/json v0.5.25 // indirect
+)

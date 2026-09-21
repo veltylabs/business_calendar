@@ -2,6 +2,7 @@ package businesscalendar
 
 import (
 	"webtyp.com/fmt"
+	"webtyp.com/input"
 	"webtyp.com/model"
 )
 
@@ -12,15 +13,22 @@ import (
 // appointment_booking uses for work blocks. The archived business_hours module
 // stored clock-time text and forced a conversion at the one boundary that has
 // to compare the two; the encoding is fixed here instead.
+//
+// Renderable fields use input.* widgets (Storage() unchanged: input.Number()
+// is still FieldInt, input.Checkbox() still FieldBool, input.Textarea() still
+// FieldText) — a plain model.Kind is not a form.Field.Type (see
+// form-codegen skill): crudview.New called form.New(Presenter.Record(), ...)
+// against a record with zero renderable fields and panicked BuildClient for
+// every module in the registry, not just this one.
 var BusinessHoursModel = model.Definition{
 	Name: "business_hours",
 	Fields: model.Fields{
 		{Name: "id", Type: model.Text(), DB: &model.FieldDB{PK: true}},
-		{Name: "day_of_week", Type: model.Int(), NotNull: true, DB: &model.FieldDB{Unique: true}},
-		{Name: "open_min", Type: model.Int(), NotNull: true},
-		{Name: "close_min", Type: model.Int(), NotNull: true},
-		{Name: "is_open", Type: model.Bool(), NotNull: true},
-		{Name: "notes", Type: model.Text()},
+		{Name: "day_of_week", Type: input.Number(), NotNull: true, DB: &model.FieldDB{Unique: true}},
+		{Name: "open_min", Type: input.Number(), NotNull: true},
+		{Name: "close_min", Type: input.Number(), NotNull: true},
+		{Name: "is_open", Type: input.Checkbox(), NotNull: true},
+		{Name: "notes", Type: input.Textarea()},
 		{Name: "updated_at", Type: model.Int(), NotNull: true},
 	},
 }
@@ -31,9 +39,9 @@ var HolidayModel = model.Definition{
 	Name: "holiday",
 	Fields: model.Fields{
 		{Name: "id", Type: model.Text(), DB: &model.FieldDB{PK: true}},
-		{Name: "specific_date", Type: model.Int(), NotNull: true}, // midnight UTC, seconds
-		{Name: "name", Type: model.Text(), NotNull: true},
-		{Name: "notes", Type: model.Text()},
+		{Name: "specific_date", Type: input.Number(), NotNull: true}, // midnight UTC, seconds
+		{Name: "name", Type: input.Text(), NotNull: true},
+		{Name: "notes", Type: input.Textarea()},
 		{Name: "updated_at", Type: model.Int(), NotNull: true},
 	},
 }
@@ -46,8 +54,8 @@ var ClosureModel = model.Definition{
 	Name: "closure",
 	Fields: model.Fields{
 		{Name: "id", Type: model.Text(), DB: &model.FieldDB{PK: true}},
-		{Name: "specific_date", Type: model.Int(), NotNull: true},
-		{Name: "reason", Type: model.Text(), NotNull: true},
+		{Name: "specific_date", Type: input.Number(), NotNull: true},
+		{Name: "reason", Type: input.Text(), NotNull: true},
 		{Name: "updated_at", Type: model.Int(), NotNull: true},
 	},
 }
