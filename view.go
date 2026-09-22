@@ -22,12 +22,27 @@ func (r *BusinessHours) Item() view.Item {
 	}
 }
 
+// specificDateLabel renders a SpecificDate (SECONDS, midnight UTC — see
+// model.go's own doc comment) as its calendar-date string. Deliberately
+// tinytime.FormatISO8601, never tinytime.FormatDate: FormatDate applies the
+// LOCAL timezone offset, which is correct for a genuine point in time but
+// wrong for a value that already encodes a calendar day at UTC midnight —
+// subtracting hours from UTC midnight crosses into the previous day in any
+// negative offset (Chile, UTC-3/-4). This is the same trap
+// mjosefa-cms/modules/appointment_booking's unixToDay already documents and
+// avoids for the identical reason. FormatISO8601 takes UnixNANO, matching
+// tinytime.Now()/ParseDate's own convention — hence *1e9 from the stored
+// seconds — and its first 10 characters are exactly "YYYY-MM-DD".
+func specificDateLabel(seconds int64) string {
+	return tinytime.FormatISO8601(seconds * 1000000000)[:10]
+}
+
 // Item projects a Holiday as a view.Item.
 func (h *Holiday) Item() view.Item {
 	return view.Item{
 		ID:          h.Id,
 		Label:       lang.Translate(h.Name).String(),
-		Description: tinytime.FormatDate(h.SpecificDate),
+		Description: specificDateLabel(h.SpecificDate),
 	}
 }
 
@@ -36,7 +51,7 @@ func (c *Closure) Item() view.Item {
 	return view.Item{
 		ID:          c.Id,
 		Label:       lang.Translate(c.Reason).String(),
-		Description: tinytime.FormatDate(c.SpecificDate),
+		Description: specificDateLabel(c.SpecificDate),
 	}
 }
 
