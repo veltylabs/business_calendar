@@ -71,6 +71,14 @@ Cada escritura exitosa publica `EventCalendarChanged` (`business.calendar.change
 
 Este módulo no renderiza ningún lenguaje humano codificado de forma rígida. Introduce estas claves canónicas en inglés, traducidas por la aplicación consumidora a través de `webtyp.com/fmt/lang`: `Business hours`, `Holidays`, `Closures`, `Open`, `Closed`, más los siete nombres de días de la semana de `webtyp.com/date` (`date.WeekdayName`).
 
+## View and demo
+
+The module exports its own UI view, seed demo data, and executable WASM demo shell:
+
+- `ui/` — exports `ui.ID`, `ui.Label`, and `ui.Browser(caller, ids, tenantID)`.
+- `seed/` — `seed.Load(module)` writes initial weekly business hours and Chilean holidays through domain service methods.
+- `web/` — runnable in-browser demo (`client.go`). Run `webtyp` at the repository root to launch the demo (in-browser, in-memory, no login).
+
 ## Archivos clave
 
 | Archivo | Rol |
@@ -82,6 +90,9 @@ Este módulo no renderiza ningún lenguaje humano codificado de forma rígida. I
 | `interfaces.go` | El puerto `Reader` + precedencia de `GetDayBounds` |
 | `ops.go` | Constantes de Op, `MountOperations`, manejadores |
 | `view.go` | Tres presentadores (`NewBusinessHoursView`, `NewHolidaysView`, `NewClosuresView`) |
+| `ui/` | Vista UI del módulo (`ui.Browser`, `ui.ID`, `ui.Label`) |
+| `seed/` | Datos semilla de demostración (`seed.Load`) |
+| `web/` | Demo ejecutable en el navegador (`web/client.go`) |
 | `tests/` | Pruebas de casos de uso, pruebas de ops, conformidad (sobre `storage/mem` + `router/mock`/`loopback`) |
 
 ## Documentación

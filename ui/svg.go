@@ -1,6 +1,6 @@
 //go:build !wasm
 
-package business_calendar
+package ui
 
 import (
 	"webtyp.com/svg"
