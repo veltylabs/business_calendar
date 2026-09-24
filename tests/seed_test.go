@@ -6,7 +6,6 @@ import (
 	"webtyp.com/events/mock"
 	"webtyp.com/orm"
 	"webtyp.com/storage/mem"
-	tinytime "webtyp.com/time"
 
 	businesscalendar "github.com/veltylabs/business_calendar"
 	"github.com/veltylabs/business_calendar/seed"
@@ -50,7 +49,10 @@ func TestSeed_Load(t *testing.T) {
 		t.Fatalf("holiday 'Fiestas Patrias' not found")
 	}
 
-	formattedDate := tinytime.FormatDate(sept18.SpecificDate * 1_000_000_000)
+	// What the user sees: the view's own date label (FormatISO8601, UTC) —
+	// never tinytime.FormatDate, which applies the local offset and turns a
+	// UTC-midnight date into the previous day in Chile (UTC-3).
+	formattedDate := sept18.Item().Description
 	if formattedDate != "2026-09-18" {
 		t.Errorf("expected 2026-09-18 date roundtrip, got %q", formattedDate)
 	}
