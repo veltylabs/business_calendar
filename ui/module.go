@@ -1,4 +1,4 @@
-package business_calendar
+package ui
 
 // ID is this module's identity: RBAC resource prefix on the server, nav
 // route on the client. Shared by svg.go and browser.go.

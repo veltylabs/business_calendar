@@ -1,4 +1,4 @@
-package business_calendar
+package ui
 
 import (
 	businesscalendar "github.com/veltylabs/business_calendar"
@@ -10,6 +10,15 @@ import (
 	"webtyp.com/svg"
 )
 
+const (
+	TabHoursID       = "hours"
+	TabHoursLabel    = "Horario"
+	TabHolidaysID    = "holidays"
+	TabHolidaysLabel = "Feriados"
+	TabClosuresID    = "closures"
+	TabClosuresLabel = "Cierres"
+)
+
 // Browser composes this module's three own screens (business hours,
 // holidays, closures) into a single nav item with decktabs — not a plain
 // crudview.New like the other modules, because this module has no single
@@ -19,7 +28,7 @@ import (
 // parameter.
 func Browser(caller router.Caller, ids model.IDGenerator, tenantID string) (platformd.UIModule, error) {
 	hoursView, err := crudview.New(crudview.Config{
-		ParentID:  ID + ".hours",
+		ParentID:  ID + "." + TabHoursID,
 		Presenter: businesscalendar.NewBusinessHoursView(caller),
 		IDs:       ids,
 	})
@@ -27,7 +36,7 @@ func Browser(caller router.Caller, ids model.IDGenerator, tenantID string) (plat
 		return nil, err
 	}
 	holidaysView, err := crudview.New(crudview.Config{
-		ParentID:  ID + ".holidays",
+		ParentID:  ID + "." + TabHolidaysID,
 		Presenter: businesscalendar.NewHolidaysView(caller),
 		IDs:       ids,
 	})
@@ -35,7 +44,7 @@ func Browser(caller router.Caller, ids model.IDGenerator, tenantID string) (plat
 		return nil, err
 	}
 	closuresView, err := crudview.New(crudview.Config{
-		ParentID:  ID + ".closures",
+		ParentID:  ID + "." + TabClosuresID,
 		Presenter: businesscalendar.NewClosuresView(caller),
 		IDs:       ids,
 	})
@@ -44,11 +53,11 @@ func Browser(caller router.Caller, ids model.IDGenerator, tenantID string) (plat
 	}
 
 	tabs := &decktabs.DeckTabs{
-		Label: "Calendario",
+		Label: Label,
 		Items: []decktabs.Item{
-			{ID: "hours", Label: "Horario", Panel: hoursView},
-			{ID: "holidays", Label: "Feriados", Panel: holidaysView},
-			{ID: "closures", Label: "Cierres", Panel: closuresView},
+			{ID: TabHoursID, Label: TabHoursLabel, Panel: hoursView},
+			{ID: TabHolidaysID, Label: TabHolidaysLabel, Panel: holidaysView},
+			{ID: TabClosuresID, Label: TabClosuresLabel, Panel: closuresView},
 		},
 	}
 	return platformd.NewUIModule(ID, Label, svg.Icon(ID), tabs), nil

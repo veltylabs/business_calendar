@@ -121,7 +121,7 @@ reflection-free and TinyGo-sized. A module targets `wasm`/TinyGo first, so it fo
   from a genuinely form-bound field silently renders an empty form — so the rule cuts both ways.
 - **Intra-module foreign keys are declared** (`Ref: &OtherModel` + `DB: &model.FieldDB{RefColumn:
   "id"}` — drives DDL constraint generation; the Go type stays the plain scalar). Cross-module
-  references stay soft (a plain string id/SKU) — modules never import each other.
+  references stay soft (a plain string id/SKU) — the root domain package never imports another module (see "ui/, seed/ and web/" for the DAG rule).
 
 ## Op handlers — decode → validate → respond
 
@@ -185,8 +185,17 @@ reflection-free and TinyGo-sized. A module targets `wasm`/TinyGo first, so it fo
   never a bare `map` or `any` payload.
 - **Cross-module wiring**: when module A needs data from module B, A declares the narrow interface it
   needs (`CatalogReader`, `StaffReader`, …) in its own package; B's `*Module` satisfies it structurally
-  (no import of A). The composition root wires concrete instances together. Modules never import each
-  other.
+  (no import of A). The composition root wires concrete instances together. Root domain packages never import each other; only ui/, seed/ and web/ may, upstream only.
+
+## ui/, seed/ and web/ — the module's own view and demo
+
+The whitelist and blacklist above apply to the **root domain package**. Three sub-packages are exempt, and only them:
+
+- `ui/` (package `ui`, no build tag; `css.go`/`svg.go` tagged `!wasm`) may import `webtyp.com/layout/*`, `webtyp.com/components/*`, `dom`, `html`, `css`, `svg`, `widget`. It is the module's screen: `const ID`, `const Label` and `Browser(caller router.Caller, ids model.IDGenerator, tenantID string) (platformd.UIModule, error)`.
+- `seed/` (package `seed`, no build tag) holds demo data: `Load(...) (Data, error)`, which writes through the module's own methods so every row is validated, and returns the rows it created so downstream demos can reference them.
+- `web/` (package `main`, `web/client.go` tagged `wasm`) is the runnable demo and may additionally import the concrete `webtyp.com/storage/mem`, `webtyp.com/router/loopback`, `webtyp.com/events/mock`, `webtyp.com/unixid` and `webtyp.com/auth/trusted_ip` (for `ValidateRUT`).
+
+**Dependencies between modules form a DAG.** The root domain package still imports no sibling module. `ui/`, `seed/` and `web/` may import the domain, `ui/` and `seed/` packages of **upstream** modules only. Current graph: `device_manager`, `item_catalog`, `patient_directory`, `business_calendar` (leaves) ← `staff_manager` ← `appointment_booking` ← `clinical_encounter` (`appointment_booking` also depends on `item_catalog`, `patient_directory`, `business_calendar`; `clinical_encounter` also on `patient_directory` and `staff_manager`). A screen that mixes modules lives in the most-downstream module it touches.
 
 ## Testing
 
