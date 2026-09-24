@@ -2,6 +2,8 @@
 PLAN: "feat(ui): el Calendario institucional (horario, feriados, cierres), su semilla y su demo viven en el módulo"
 EXECUTOR: jules
 REVIEWER: none
+STATUS: running
+SESSION: 15339635127703996382
 ---
 
 > Este plan se despacha con el flujo CodeJob. Ver skill: agents-workflow.
