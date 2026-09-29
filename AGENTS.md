@@ -24,7 +24,7 @@ A module's **non-test** Go files may import, from `github.com/webtyp/*`:
 | Package | Role | Why it's a port, not a concrete dependency |
 |---|---|---|
 | `model` | `Model`/`Fielder`/`Encodable`/`Decodable`/`IDGenerator`/`Definition` | Schema + codec *interfaces*; concrete encoders (`json`, `jsvalue`) live outside |
-| `router` | `OpModule`/`OpRegistry`/`Context`/`Caller` | Transport-agnostic; a module implements `OpModule`, never a concrete server |
+| `router` | `OperationModule`/`OperationRegistry`/`Context`/`Caller` | Transport-agnostic; a module implements `OperationModule`, never a concrete server |
 | `view` | `Presenter`, `view.New(...)` | UI contract; the renderer (`layout/crudview` or any other) is injected by the app |
 | `events` | `Publisher`/`Subscriber`/`Event` | Pub/sub contract; the broker (in-proc, `sse`, a queue) is injected |
 | `orm` | `*orm.DB`, query builder (`Create`/`Update`/`Delete`/`Query`) | Ergonomic layer over `storage.Conn` — the equivalent of `database/sql`, backend-agnostic by construction |
@@ -50,7 +50,7 @@ calls `orm.New(conn)`. A module importing them does **not** know or care which b
   this whitelist exists to prevent. Backend integration tests belong to the composition-root app
   repo, never to the module.
 - **A concrete transport**: `webtyp/mcp`, `webtyp/server`/`httpd`, or anything importing
-  `net/http`. A module speaks `router.OpModule`; the app decides which transport harvests it.
+  `net/http`. A module speaks `router.OperationModule`; the app decides which transport harvests it.
 - **A concrete ID generator**: `webtyp/unixid`. Accept `model.IDGenerator` via `Deps` instead —
   never construct one inside the module.
 - **A concrete encoder**: `webtyp/json`, `webtyp/jsvalue`. A module's models implement
@@ -62,7 +62,7 @@ calls `orm.New(conn)`. A module importing them does **not** know or care which b
   renderer that draws that `Presenter`.
 - **A self-declared port that duplicates an ecosystem contract**: no local `EventPublisher`,
   `UIAdapter`, `IDGenerator`, or `CatalogService`-as-transport-shim interface that intersects
-  `events.Publisher`/`view.Presenter`/`model.IDGenerator`/`router.OpModule`. If a boundary needs a
+  `events.Publisher`/`view.Presenter`/`model.IDGenerator`/`router.OperationModule`. If a boundary needs a
   contract this list doesn't name, that is a defect **upstream** (in `model`/`router`/`view`/`events`/
   `orm`), fixed there and consumed here — never patched locally. A module may still declare its own
   narrow cross-module reader interfaces (`CatalogReader`, `StaffReader`, …) for **domain** data it
@@ -173,8 +173,8 @@ reflection-free and TinyGo-sized. A module targets `wasm`/TinyGo first, so it fo
   Against `storage/mem` (module tests) this is a no-op — nothing to create. Against a real SQL
   backend it migrates the schema, exactly like the old `orm.DB.CreateTable` did. The module never
   receives a raw connection string or picks a driver.
-- **Transport**: the module implements `router.OpModule` — `ModelName() string` +
-  `MountOps(reg router.OpRegistry)`, registering each operation with `.Requires(resource, action)`
+- **Transport**: the module implements `router.OperationModule` — `ModelName() string` +
+  `MountOperations(reg router.OperationRegistry)`, registering each operation with `.Requires(resource, action)`
   and `.Accepts(&ArgsType{})`. It never implements `router.APIModule`/`Router`, and never sees
   `mcp.Tool`/`mcp.ToolProvider`.
 - **View**: `NewView(caller router.Caller) view.Presenter`, built with `view.New(...)` — importing
@@ -202,7 +202,7 @@ The whitelist and blacklist above apply to the **root domain package**. Three su
 - Runner: `gotest`, never `go test` directly (once installed via
   `go install github.com/webtyp/devflow/cmd/gotest@latest`).
 - A module's own tests build its `*orm.DB` over `storage/mem` (`orm.New(mem.New())`), drive
-  `MountOps` against `router/mock` (satisfies `router.OpRegistry`), and exercise the `view.Presenter`
+  `MountOperations` against `router/mock` (satisfies `router.OperationRegistry`), and exercise the `view.Presenter`
   against `view/conformance`'s `FakeCaller` or a hand-rolled fake `router.Caller` — never a concrete
   DB, transport, or renderer.
 - Tests live in `tests/` (package `tests`, external — exercises only the exported API), per the
@@ -220,7 +220,7 @@ The whitelist and blacklist above apply to the **root domain package**. Three su
 - A module whose Definitions carry form widgets includes the widget-regression test: `form.New(id,
   &GeneratedArgs{})` yields exactly the expected inputs — catches a regeneration that silently
   loses widgets.
-- Compile-time contract checks belong next to the implementation: `var _ router.OpModule =
+- Compile-time contract checks belong next to the implementation: `var _ router.OperationModule =
   (*Module)(nil)`.
 
 ## Publishing / dispatch
