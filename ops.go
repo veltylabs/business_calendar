@@ -15,39 +15,58 @@ const (
 	OpAddClosure          = "add_closure"
 	OpRemoveClosure       = "remove_closure"
 	OpGetDayBounds        = "get_day_bounds"
+
+	DescListBusinessHours   = "Horario de atención del consultorio para cada día de la semana: día (Monday … Sunday), si abre, y la hora de apertura y de cierre (HH:MM)."
+	DescUpsertBusinessHours = "Crea o cambia el horario de atención de un día de la semana."
+	DescGetDayBounds        = "Si el consultorio abre en una fecha y en qué minutos del día, considerando feriados y cierres."
+	DescListHolidays        = "Feriados registrados del consultorio."
+	DescAddHoliday          = "Registra un feriado: el consultorio no atiende esa fecha."
+	DescRemoveHoliday       = "Elimina un feriado registrado."
+	DescListClosures        = "Cierres extraordinarios del consultorio (fechas u horas sin atención)."
+	DescAddClosure          = "Registra un cierre extraordinario."
+	DescRemoveClosure       = "Elimina un cierre extraordinario."
 )
 
 func (m *Module) MountOperations(reg router.OperationRegistry) {
 	reg.Operation(OpListBusinessHours, m.opListBusinessHours).
+		Describe(DescListBusinessHours).
 		Requires("business_hours", model.Read).
 		Accepts(nil)
 	// Upsert creates on the not-found branch AND updates otherwise — it must
 	// declare BOTH actions (model.Action is a bitmask). Declaring only Update
 	// would let an update-only principal create rows.
 	reg.Operation(OpUpsertBusinessHours, m.opUpsertBusinessHours).
+		Describe(DescUpsertBusinessHours).
 		Requires("business_hours", model.Create|model.Update).
 		Accepts(&UpsertBusinessHoursArgs{})
 	reg.Operation(OpGetDayBounds, m.opGetDayBounds).
+		Describe(DescGetDayBounds).
 		Requires("business_hours", model.Read).
 		Accepts(&GetDayBoundsArgs{})
 
 	reg.Operation(OpListHolidays, m.opListHolidays).
+		Describe(DescListHolidays).
 		Requires("holiday", model.Read).
 		Accepts(nil)
 	reg.Operation(OpAddHoliday, m.opAddHoliday).
+		Describe(DescAddHoliday).
 		Requires("holiday", model.Create).
 		Accepts(&AddHolidayArgs{})
 	reg.Operation(OpRemoveHoliday, m.opRemoveHoliday).
+		Describe(DescRemoveHoliday).
 		Requires("holiday", model.Delete).
 		Accepts(&RemoveHolidayArgs{})
 
 	reg.Operation(OpListClosures, m.opListClosures).
+		Describe(DescListClosures).
 		Requires("closure", model.Read).
 		Accepts(nil)
 	reg.Operation(OpAddClosure, m.opAddClosure).
+		Describe(DescAddClosure).
 		Requires("closure", model.Create).
 		Accepts(&AddClosureArgs{})
 	reg.Operation(OpRemoveClosure, m.opRemoveClosure).
+		Describe(DescRemoveClosure).
 		Requires("closure", model.Delete).
 		Accepts(&RemoveClosureArgs{})
 }
@@ -76,9 +95,9 @@ func (m *Module) opListBusinessHours(ctx router.Context) {
 		ctx.WriteStatus(500)
 		return
 	}
-	list := make(BusinessHoursList, len(rows))
+	list := make(businessHoursViewList, len(rows))
 	for i := range rows {
-		list[i] = &rows[i]
+		list[i] = &businessHoursView{row: &rows[i]}
 	}
 	if err := ctx.Encode(&list); err != nil {
 		ctx.WriteStatus(500)
