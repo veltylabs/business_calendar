@@ -3,8 +3,9 @@ PLAN: "feat: operations say what they do (Route.Describe), and list_business_hou
 TAG: v0.4.0
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 8057019763708886764
+PR: https://github.com/veltylabs/business_calendar/pull/3
 ---
 
 > This plan is dispatched via the CodeJob workflow. See skill: agents-workflow.
