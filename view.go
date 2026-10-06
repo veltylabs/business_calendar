@@ -3,7 +3,7 @@ package businesscalendar
 import (
 	"webtyp.com/date"
 	"webtyp.com/fmt"
-	"webtyp.com/fmt/lang"
+	"webtyp.com/lang"
 	"webtyp.com/model"
 	"webtyp.com/router"
 	tinytime "webtyp.com/time"
