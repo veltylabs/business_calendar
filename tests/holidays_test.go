@@ -117,14 +117,14 @@ func TestDuplicateHolidayOnSameDateIsRejected(t *testing.T) {
 		t.Fatalf("AddHoliday: %v", err)
 	}
 	err := m.AddHoliday(businesscalendar.Holiday{SpecificDate: oct01_2026_Thu, Name: "Second"})
-	if err != businesscalendar.ErrDuplicateDate {
+	if err == nil || err.Error() != businesscalendar.ErrDuplicateDate.Error() {
 		t.Errorf("expected ErrDuplicateDate, got %v", err)
 	}
 }
 
 func TestRemoveHoliday_NotFound(t *testing.T) {
 	m, _ := newModule(t, nil)
-	if err := m.RemoveHoliday("does-not-exist"); err != businesscalendar.ErrNotFound {
+	if err := m.RemoveHoliday("does-not-exist"); err == nil || err.Error() != businesscalendar.ErrNotFound.Error() {
 		t.Errorf("expected ErrNotFound, got %v", err)
 	}
 }

@@ -96,14 +96,14 @@ func TestDuplicateClosureOnSameDateIsRejected(t *testing.T) {
 		t.Fatalf("AddClosure: %v", err)
 	}
 	err := m.AddClosure(businesscalendar.Closure{SpecificDate: sep15_2026_Tue, Reason: "Second"})
-	if err != businesscalendar.ErrDuplicateDate {
+	if err == nil || err.Error() != businesscalendar.ErrDuplicateDate.Error() {
 		t.Errorf("expected ErrDuplicateDate, got %v", err)
 	}
 }
 
 func TestRemoveClosure_NotFound(t *testing.T) {
 	m, _ := newModule(t, nil)
-	if err := m.RemoveClosure("does-not-exist"); err != businesscalendar.ErrNotFound {
+	if err := m.RemoveClosure("does-not-exist"); err == nil || err.Error() != businesscalendar.ErrNotFound.Error() {
 		t.Errorf("expected ErrNotFound, got %v", err)
 	}
 }

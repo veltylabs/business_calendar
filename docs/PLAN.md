@@ -2,8 +2,9 @@
 PLAN: "fix: detect sentinel errors without == between interfaces (no reflection in wasm)"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 11604534656909899668
+PR: https://github.com/veltylabs/business_calendar/pull/4
 ---
 
 # Plan — `business_calendar`: errores centinela sin `==` entre interfaces

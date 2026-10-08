@@ -107,7 +107,7 @@ func TestInvalidMinutesRejected(t *testing.T) {
 		{DayOfWeek: 1, OpenMin: 0, CloseMin: 1441, IsOpen: true},   // 1441 out of range
 	}
 	for i, c := range cases {
-		if err := m.UpsertBusinessHours(c); err != businesscalendar.ErrInvalidMinutes {
+		if err := m.UpsertBusinessHours(c); err == nil || err.Error() != businesscalendar.ErrInvalidMinutes.Error() {
 			t.Errorf("case %d: expected ErrInvalidMinutes, got %v", i, err)
 		}
 	}
@@ -118,7 +118,7 @@ func TestInvalidDayRejected(t *testing.T) {
 	err := m.UpsertBusinessHours(businesscalendar.BusinessHours{
 		DayOfWeek: 7, OpenMin: 480, CloseMin: 1080, IsOpen: true,
 	})
-	if err != businesscalendar.ErrInvalidDay {
+	if err == nil || err.Error() != businesscalendar.ErrInvalidDay.Error() {
 		t.Errorf("expected ErrInvalidDay, got %v", err)
 	}
 }

@@ -77,7 +77,7 @@ func (m *Module) GetDayDetail(date int64) (DayDetail, error) {
 	if err == nil {
 		return DayDetail{ClosedBy: ClosedLocal}, nil
 	}
-	if err != orm.ErrNotFound {
+	if !orm.IsNotFound(err) {
 		return DayDetail{}, err
 	}
 
@@ -86,13 +86,13 @@ func (m *Module) GetDayDetail(date int64) (DayDetail, error) {
 	if err == nil {
 		return DayDetail{ClosedBy: ClosedHoliday}, nil
 	}
-	if err != orm.ErrNotFound {
+	if !orm.IsNotFound(err) {
 		return DayDetail{}, err
 	}
 
 	bh, err := m.businessHoursByDay(tinytime.Weekday(date))
 	if err != nil {
-		if err == ErrNotFound {
+		if e, ok := err.(domainError); ok && e == ErrNotFound {
 			return DayDetail{ClosedBy: ClosedWeekly}, nil
 		}
 		return DayDetail{}, err

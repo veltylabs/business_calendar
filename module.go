@@ -60,7 +60,7 @@ func (m *Module) businessHoursByDay(day int) (BusinessHours, error) {
 	var bh BusinessHours
 	_, err := ReadOneBusinessHours(m.db.Query(&bh).Where(BusinessHours_.DayOfWeek).Eq(int64(day)), &bh)
 	if err != nil {
-		if err == orm.ErrNotFound {
+		if orm.IsNotFound(err) {
 			return BusinessHours{}, ErrNotFound
 		}
 		return BusinessHours{}, err
@@ -101,10 +101,11 @@ func (m *Module) UpsertBusinessHours(h BusinessHours) error {
 	}
 
 	prev, err := m.businessHoursByDay(int(h.DayOfWeek))
-	if err != nil && err != ErrNotFound {
+	e, isDomainErr := err.(domainError)
+	if err != nil && (!isDomainErr || e != ErrNotFound) {
 		return err
 	}
-	if err == ErrNotFound {
+	if isDomainErr && e == ErrNotFound {
 		h.Id = m.ids.NewID()
 		h.UpdatedAt = tinytime.Now()
 		if err := m.db.Create(&h); err != nil {
@@ -150,7 +151,7 @@ func (m *Module) AddHoliday(h Holiday) error {
 	if err == nil {
 		return ErrDuplicateDate
 	}
-	if err != orm.ErrNotFound {
+	if !orm.IsNotFound(err) {
 		return err
 	}
 	h.Id = m.ids.NewID()
@@ -167,7 +168,7 @@ func (m *Module) RemoveHoliday(id string) error {
 	var h Holiday
 	_, err := ReadOneHoliday(m.db.Query(&h).Where(Holiday_.Id).Eq(id), &h)
 	if err != nil {
-		if err == orm.ErrNotFound {
+		if orm.IsNotFound(err) {
 			return ErrNotFound
 		}
 		return err
@@ -213,7 +214,7 @@ func (m *Module) AddClosure(c Closure) error {
 	if err == nil {
 		return ErrDuplicateDate
 	}
-	if err != orm.ErrNotFound {
+	if !orm.IsNotFound(err) {
 		return err
 	}
 	c.Id = m.ids.NewID()
@@ -230,7 +231,7 @@ func (m *Module) RemoveClosure(id string) error {
 	var c Closure
 	_, err := ReadOneClosure(m.db.Query(&c).Where(Closure_.Id).Eq(id), &c)
 	if err != nil {
-		if err == orm.ErrNotFound {
+		if orm.IsNotFound(err) {
 			return ErrNotFound
 		}
 		return err
