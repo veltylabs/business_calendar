@@ -76,14 +76,18 @@ var _ router.OperationModule = (*Module)(nil)
 // writeError maps known sentinels to a status and writes the message. A real
 // internal error is never collapsed into 404 — it propagates as the 500 it is.
 func writeError(ctx router.Context, err error) {
-	switch err {
-	case ErrNotFound:
-		ctx.WriteStatus(404)
-	case ErrDuplicateDate:
-		ctx.WriteStatus(409)
-	case ErrInvalidDay, ErrInvalidMinutes:
-		ctx.WriteStatus(400)
-	default:
+	if e, ok := err.(domainError); ok {
+		switch e {
+		case ErrNotFound:
+			ctx.WriteStatus(404)
+		case ErrDuplicateDate:
+			ctx.WriteStatus(409)
+		case ErrInvalidDay, ErrInvalidMinutes:
+			ctx.WriteStatus(400)
+		default:
+			ctx.WriteStatus(500)
+		}
+	} else {
 		ctx.WriteStatus(500)
 	}
 	ctx.Write([]byte(err.Error()))

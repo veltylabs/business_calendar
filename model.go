@@ -1,7 +1,6 @@
 package businesscalendar
 
 import (
-	"webtyp.com/fmt"
 	"webtyp.com/input"
 	"webtyp.com/model"
 )
@@ -60,11 +59,19 @@ var ClosureModel = model.Definition{
 	},
 }
 
-var (
-	ErrNotFound       = fmt.Err("business_calendar: record not found")
-	ErrInvalidDay     = fmt.Err("business_calendar: day_of_week must be 0..6")
-	ErrInvalidMinutes = fmt.Err("business_calendar: minutes must be 0..1439 and open_min < close_min")
-	ErrDuplicateDate  = fmt.Err("business_calendar: a record already exists for that date")
+// domainError is the concrete type of this package's sentinel errors. Code
+// compares them by asserting this type and comparing the value: == between two
+// error values compiles, under TinyGo, to runtime.interfaceEqual, which pulls
+// internal/reflectlite into the wasm binary.
+type domainError string
+
+func (e domainError) Error() string { return string(e) }
+
+const (
+	ErrNotFound       domainError = "business_calendar: record not found"
+	ErrInvalidDay     domainError = "business_calendar: day_of_week must be 0..6"
+	ErrInvalidMinutes domainError = "business_calendar: minutes must be 0..1439 and open_min < close_min"
+	ErrDuplicateDate  domainError = "business_calendar: a record already exists for that date"
 )
 
 // EventCalendarChanged fires on every write. appointment_booking subscribes so
