@@ -2,6 +2,8 @@
 PLAN: "feat(business_calendar): GetWeekdayBounds — the regular hours of a weekday, without holidays or closures"
 EXECUTOR: jules
 REVIEWER: none
+STATUS: running
+SESSION: 6063762943828576642
 ---
 
 # Plan — `GetWeekdayBounds(dayOfWeek)`
