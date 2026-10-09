@@ -51,6 +51,16 @@ type Reader interface {
 	// GetDayBounds answers "is the establishment open on this date, and
 	// between which minutes". date is midnight UTC in seconds.
 	GetDayBounds(date int64) (tinytime.DayBounds, error)
+
+	// GetWeekdayBounds answers "between which minutes does the establishment
+	// normally work on this weekday" (0 = Sunday … 6 = Saturday) — the weekly
+	// template only: holidays and local closures are date exceptions and are NOT
+	// applied here (GetDayBounds applies them). A consumer validating a weekly
+	// schedule uses this; one validating a concrete date uses GetDayBounds.
+	//
+	// A weekday with no business_hours row, or with is_open == false, is closed
+	// (closed by default, same rule as GetDayDetail step 3).
+	GetWeekdayBounds(dayOfWeek int) (tinytime.DayBounds, error)
 }
 
 // GetDayDetail resolves the establishment's status for one date, INCLUDING
@@ -71,6 +81,20 @@ type Reader interface {
 // through must not be reopened by removing the closure. A weekday with no
 // business_hours row at all is closed (closed by default — the absence of a
 // schedule never means open).
+func (m *Module) getWeeklyBounds(dayOfWeek int) (DayDetail, error) {
+	bh, err := m.businessHoursByDay(dayOfWeek)
+	if err != nil {
+		if e, ok := err.(domainError); ok && e == ErrNotFound {
+			return DayDetail{ClosedBy: ClosedWeekly}, nil
+		}
+		return DayDetail{}, err
+	}
+	if !bh.IsOpen {
+		return DayDetail{ClosedBy: ClosedWeekly}, nil
+	}
+	return DayDetail{Bounds: tinytime.DayBounds{Open: true, OpenMin: int(bh.OpenMin), CloseMin: int(bh.CloseMin)}}, nil
+}
+
 func (m *Module) GetDayDetail(date int64) (DayDetail, error) {
 	var c Closure
 	_, err := ReadOneClosure(m.db.Query(&c).Where(Closure_.SpecificDate).Eq(date), &c)
@@ -90,17 +114,7 @@ func (m *Module) GetDayDetail(date int64) (DayDetail, error) {
 		return DayDetail{}, err
 	}
 
-	bh, err := m.businessHoursByDay(tinytime.Weekday(date))
-	if err != nil {
-		if e, ok := err.(domainError); ok && e == ErrNotFound {
-			return DayDetail{ClosedBy: ClosedWeekly}, nil
-		}
-		return DayDetail{}, err
-	}
-	if !bh.IsOpen {
-		return DayDetail{ClosedBy: ClosedWeekly}, nil
-	}
-	return DayDetail{Bounds: tinytime.DayBounds{Open: true, OpenMin: int(bh.OpenMin), CloseMin: int(bh.CloseMin)}}, nil
+	return m.getWeeklyBounds(tinytime.Weekday(date))
 }
 
 // GetDayBounds is the Reader port: the neutral bounds only, no reason
@@ -108,6 +122,14 @@ func (m *Module) GetDayDetail(date int64) (DayDetail, error) {
 // structurally.
 func (m *Module) GetDayBounds(date int64) (tinytime.DayBounds, error) {
 	d, err := m.GetDayDetail(date)
+	return d.Bounds, err
+}
+
+func (m *Module) GetWeekdayBounds(dayOfWeek int) (tinytime.DayBounds, error) {
+	if dayOfWeek < 0 || dayOfWeek > 6 {
+		return tinytime.DayBounds{}, ErrInvalidWeekday
+	}
+	d, err := m.getWeeklyBounds(dayOfWeek)
 	return d.Bounds, err
 }
 

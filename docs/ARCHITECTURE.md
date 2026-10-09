@@ -72,10 +72,13 @@ type DayDetail struct {
 ```go
 type Reader interface {
     GetDayBounds(date int64) (tinytime.DayBounds, error)
+    GetWeekdayBounds(dayOfWeek int) (tinytime.DayBounds, error)
 }
 ```
 
 `GetDayBounds` es un envoltorio ligero: `GetDayDetail` es la única ruta de resolución; `GetDayBounds` lo llama y descarta `ClosedBy`. Hay exactamente un lugar donde se decide la precedencia.
+
+`GetWeekdayBounds` responde con los horarios regulares de un día de la semana (plantilla semanal), excluyendo las excepciones por fecha (feriados o cierres locales). Un consumidor debe usar `GetWeekdayBounds` al validar una plantilla semanal y `GetDayBounds` al validar la disponibilidad para una fecha concreta.
 
 Resolución, en este orden exacto (sin cambios por la enmienda):
 

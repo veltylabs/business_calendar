@@ -70,6 +70,7 @@ func (e domainError) Error() string { return string(e) }
 const (
 	ErrNotFound       domainError = "business_calendar: record not found"
 	ErrInvalidDay     domainError = "business_calendar: day_of_week must be 0..6"
+	ErrInvalidWeekday domainError = "business_calendar: day of week must be 0..6"
 	ErrInvalidMinutes domainError = "business_calendar: minutes must be 0..1439 and open_min < close_min"
 	ErrDuplicateDate  domainError = "business_calendar: a record already exists for that date"
 )
