@@ -81,6 +81,8 @@ type Reader interface {
 // through must not be reopened by removing the closure. A weekday with no
 // business_hours row at all is closed (closed by default — the absence of a
 // schedule never means open).
+// getWeeklyBounds is steps 3–4 of GetDayDetail: the weekly template alone. The
+// single implementation shared by GetDayDetail and GetWeekdayBounds.
 func (m *Module) getWeeklyBounds(dayOfWeek int) (DayDetail, error) {
 	bh, err := m.businessHoursByDay(dayOfWeek)
 	if err != nil {
@@ -125,6 +127,9 @@ func (m *Module) GetDayBounds(date int64) (tinytime.DayBounds, error) {
 	return d.Bounds, err
 }
 
+// GetWeekdayBounds returns the regular hours of a weekday (0 = Sunday … 6 =
+// Saturday) — the weekly template, without holidays or local closures. See
+// Reader for when to use it instead of GetDayBounds.
 func (m *Module) GetWeekdayBounds(dayOfWeek int) (tinytime.DayBounds, error) {
 	if dayOfWeek < 0 || dayOfWeek > 6 {
 		return tinytime.DayBounds{}, ErrInvalidWeekday
