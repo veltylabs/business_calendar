@@ -2,8 +2,10 @@
 PLAN: "feat(ui)!: Calendario is a platformd group (Horario, Feriados, Cierres) — decktabs is gone from components"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 7873193190015770557
+PR: https://github.com/veltylabs/business_calendar/pull/6
+REVIEWED_COMMIT: cd82c498343cac89c4ed8772c64354892db06cf8
 ---
 
 > Read AGENTS.md at the repo root before any change.
