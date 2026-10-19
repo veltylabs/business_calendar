@@ -97,3 +97,10 @@ git diff --stat main                                    # only the files named a
 | 1 | dependencies | `go.mod`, `go.sum` |
 | 2 | group instead of tabs | `ui/browser.go` |
 | 3 | tests and docs | `tests/ui_view_wasm_test.go`, `docs/ARCHITECTURE.md`, `README.md` |
+
+## Executor notes
+- Added the executor notes below.
+- Executed stages 1-3.
+- Using `~/go/bin/gotest` instead of just `gotest`.
+- Used manual wasm build checking due to missing `wasmbrowsertest` binary.
+- Did not update README.md because it did not mention tabs.

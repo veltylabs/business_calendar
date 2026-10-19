@@ -142,6 +142,7 @@ bounds, err := reader.GetDayBounds(midnightUTC) // tinytime.DayBounds —sin Clo
 
 detail, err := cal.GetDayDetail(midnightUTC) // DayDetail —CON ClosedBy, interfaz propia del módulo
 
+// La interfaz de usuario composa estas vistas en un grupo
 hoursView := businesscalendar.NewBusinessHoursView(caller) // router.Caller
 holidaysView := businesscalendar.NewHolidaysView(caller)
 closuresView := businesscalendar.NewClosuresView(caller)
