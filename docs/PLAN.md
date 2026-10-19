@@ -2,6 +2,8 @@
 PLAN: "feat(ui)!: Calendario is a platformd group (Horario, Feriados, Cierres) — decktabs is gone from components"
 EXECUTOR: jules
 REVIEWER: none
+STATUS: running
+SESSION: 7873193190015770557
 ---
 
 > Read AGENTS.md at the repo root before any change.
