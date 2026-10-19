@@ -3,7 +3,6 @@
 package tests
 
 import (
-	"strings"
 	"testing"
 
 	"webtyp.com/dom"
@@ -56,7 +55,7 @@ func initView(m interface{ View() dom.Component }) string {
 	return comp.String()
 }
 
-func TestWASM_BusinessCalendar_ViewListsItsThreeTabsOnInit(t *testing.T) {
+func TestWASM_BusinessCalendar_BrowserIsAGroupOfItsThreeScreens(t *testing.T) {
 	mock := &mockCaller{
 		onCall: func(op string, args model.Encodable, into model.Decodable) error {
 			return nil
@@ -91,9 +90,11 @@ func TestWASM_BusinessCalendar_ViewListsItsThreeTabsOnInit(t *testing.T) {
 	}
 
 	for i, label := range []string{"Horario", "Feriados", "Cierres"} {
-		html := initView(children[i])
-		if !strings.Contains(html, label) {
-			t.Errorf("falta la pestaña %q en la pantalla del hijo %d", label, i)
+		if got := children[i].Label(); got != label {
+			t.Errorf("el hijo %d debería llamarse %q, pero se llama %q", i, label, got)
+		}
+		if html := initView(children[i]); html == "" {
+			t.Errorf("la pantalla del hijo %d (%s) no renderiza nada", i, label)
 		}
 	}
 
