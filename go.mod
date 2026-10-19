@@ -3,7 +3,7 @@ module github.com/veltylabs/business_calendar
 go 1.26.8
 
 require (
-	webtyp.com/components v0.8.30
+	webtyp.com/components v0.8.34
 	webtyp.com/date v0.0.9
 	webtyp.com/ddl v0.0.15
 	webtyp.com/dom v0.13.26
@@ -12,7 +12,7 @@ require (
 	webtyp.com/input v0.0.20
 	webtyp.com/json v0.5.29
 	webtyp.com/lang v0.1.6
-	webtyp.com/layout v0.3.50
+	webtyp.com/layout v0.3.52
 	webtyp.com/model v0.2.3
 	webtyp.com/orm v0.12.8
 	webtyp.com/router v0.4.3

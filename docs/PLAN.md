@@ -2,8 +2,10 @@
 PLAN: "feat(ui)!: Calendario is a platformd group (Horario, Feriados, Cierres) — decktabs is gone from components"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 7873193190015770557
+PR: https://github.com/veltylabs/business_calendar/pull/6
+REVIEWED_COMMIT: fc53b0fea93a23c96d7479b2f244b515e189bdc1
 ---
 
 > Read AGENTS.md at the repo root before any change.
@@ -97,3 +99,10 @@ git diff --stat main                                    # only the files named a
 | 1 | dependencies | `go.mod`, `go.sum` |
 | 2 | group instead of tabs | `ui/browser.go` |
 | 3 | tests and docs | `tests/ui_view_wasm_test.go`, `docs/ARCHITECTURE.md`, `README.md` |
+
+## Executor notes
+- Added the executor notes below.
+- Executed stages 1-3.
+- Using `~/go/bin/gotest` instead of just `gotest`.
+- Used manual wasm build checking due to missing `wasmbrowsertest` binary.
+- Did not update README.md because it did not mention tabs.
