@@ -2,8 +2,10 @@
 PLAN: "refactor: typed instants of webtyp/time v0.6 in business_calendar — every instant field is time.Unix or time.Nano, no unit arithmetic"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 6665448410150028315
+PR: https://github.com/veltylabs/business_calendar/pull/7
+REVIEWED_COMMIT: 46888bc0bbba457acea4d94392e01c1927f99c93
 ---
 
 > Read AGENTS.md at the repo root before any change. This plan is complete: do not guess; if something does not fit, stop and ask in the PR.
