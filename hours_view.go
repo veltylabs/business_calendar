@@ -14,19 +14,6 @@ var weekdays = [7]string{
 	"Saturday",
 }
 
-func hhmm(min int64) string {
-	h := min / 60
-	m := min % 60
-	buf := [5]byte{
-		byte('0' + (h/10)%10),
-		byte('0' + h%10),
-		':',
-		byte('0' + (m/10)%10),
-		byte('0' + m%10),
-	}
-	return string(buf[:])
-}
-
 type businessHoursView struct {
 	row *BusinessHours
 }
@@ -45,8 +32,8 @@ func (v *businessHoursView) EncodeFields(w model.FieldWriter) {
 		w.String("day", weekdays[v.row.DayOfWeek])
 	}
 	if v.row.IsOpen {
-		w.String("opens", hhmm(v.row.OpenMin))
-		w.String("closes", hhmm(v.row.CloseMin))
+		w.String("opens", v.row.OpenMin)
+		w.String("closes", v.row.CloseMin)
 	}
 }
 

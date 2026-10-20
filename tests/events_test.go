@@ -15,13 +15,13 @@ func TestEventCalendarChanged_EveryMutation(t *testing.T) {
 
 	// A brand-new open weekday only opens time: Closed false.
 	if err := m.UpsertBusinessHours(businesscalendar.BusinessHours{
-		DayOfWeek: 1, OpenMin: 480, CloseMin: 1080, IsOpen: true,
+		DayOfWeek: 1, OpenMin: "08:00", CloseMin: "18:00", IsOpen: true,
 	}); err != nil {
 		t.Fatalf("upsert: %v", err)
 	}
 	// Narrowing the same day closes time: Closed true.
 	if err := m.UpsertBusinessHours(businesscalendar.BusinessHours{
-		DayOfWeek: 1, OpenMin: 540, CloseMin: 960, IsOpen: true,
+		DayOfWeek: 1, OpenMin: "09:00", CloseMin: "16:00", IsOpen: true,
 	}); err != nil {
 		t.Fatalf("upsert narrow: %v", err)
 	}

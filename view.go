@@ -2,7 +2,6 @@ package businesscalendar
 
 import (
 	"webtyp.com/calendar"
-	"webtyp.com/fmt"
 	"webtyp.com/lang"
 	"webtyp.com/model"
 	"webtyp.com/router"
@@ -65,12 +64,7 @@ func hoursLabel(r *BusinessHours) string {
 		}
 		return lang.Translate("Closed").String()
 	}
-	return minutesHHMM(int(r.OpenMin)) + "–" + minutesHHMM(int(r.CloseMin))
-}
-
-// minutesHHMM renders minutes-from-midnight as a two-digit clock pair.
-func minutesHHMM(minutes int) string {
-	return fmt.Sprintf("%02d:%02d", minutes/60, minutes%60)
+	return r.OpenMin + "–" + r.CloseMin
 }
 
 // NewBusinessHoursView builds the weekly-hours Presenter — read + save

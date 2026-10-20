@@ -6,7 +6,7 @@ El **calendario institucional**: cuándo está abierto el establecimiento y cuá
 
 Posee tres entidades:
 
-- **BusinessHours** — una fila por día de la semana (0=Domingo … 6=Sábado), `day_of_week` ÚNICO. Los tiempos son **minutos desde la medianoche** (`0..1439`), la misma codificación que utiliza `appointment_booking` para los bloques de trabajo.
+- **BusinessHours** — una fila por día de la semana (0=Domingo … 6=Sábado), `day_of_week` ÚNICO. Los tiempos son **24h clock string (HH:MM)**, la misma codificación que utiliza `appointment_booking` para los bloques de trabajo.
 - **Holiday** — un cierre fechado con un origen legal/administrativo (`name`), editable en tiempo de ejecución (un nuevo feriado aparece por ley; nadie recompila).
 - **Closure** — un cierre fechado decidido por el propio establecimiento (`reason`): mantenimiento, un evento.
 

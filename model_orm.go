@@ -11,8 +11,8 @@ import (
 type BusinessHours struct {
 	Id        string
 	DayOfWeek int64
-	OpenMin   int64
-	CloseMin  int64
+	OpenMin   string
+	CloseMin  string
 	IsOpen    bool
 	Notes     string
 	UpdatedAt time.Nano
@@ -31,8 +31,8 @@ func (m *BusinessHours) IsNil() bool { return m == nil }
 func (m *BusinessHours) EncodeFields(w model.FieldWriter) {
 	w.String("id", m.Id)
 	w.Int("day_of_week", m.DayOfWeek)
-	w.Int("open_min", m.OpenMin)
-	w.Int("close_min", m.CloseMin)
+	w.String("open_min", m.OpenMin)
+	w.String("close_min", m.CloseMin)
 	w.Bool("is_open", m.IsOpen)
 	w.String("notes", m.Notes)
 	w.Int("updated_at", int64(m.UpdatedAt))
@@ -45,10 +45,10 @@ func (m *BusinessHours) DecodeFields(r model.FieldReader) {
 	if v, ok := r.Int("day_of_week"); ok {
 		m.DayOfWeek = v
 	}
-	if v, ok := r.Int("open_min"); ok {
+	if v, ok := r.String("open_min"); ok {
 		m.OpenMin = v
 	}
-	if v, ok := r.Int("close_min"); ok {
+	if v, ok := r.String("close_min"); ok {
 		m.CloseMin = v
 	}
 	if v, ok := r.Bool("is_open"); ok {
@@ -285,8 +285,8 @@ func ReadAllClosure(qb *orm.QB) (ClosureList, error) {
 
 type UpsertBusinessHoursArgs struct {
 	DayOfWeek int64
-	OpenMin   int64
-	CloseMin  int64
+	OpenMin   string
+	CloseMin  string
 	IsOpen    bool
 	Notes     string
 }
@@ -303,8 +303,8 @@ func (m *UpsertBusinessHoursArgs) IsNil() bool { return m == nil }
 
 func (m *UpsertBusinessHoursArgs) EncodeFields(w model.FieldWriter) {
 	w.Int("day_of_week", m.DayOfWeek)
-	w.Int("open_min", m.OpenMin)
-	w.Int("close_min", m.CloseMin)
+	w.String("open_min", m.OpenMin)
+	w.String("close_min", m.CloseMin)
 	w.Bool("is_open", m.IsOpen)
 	w.String("notes", m.Notes)
 }
@@ -313,10 +313,10 @@ func (m *UpsertBusinessHoursArgs) DecodeFields(r model.FieldReader) {
 	if v, ok := r.Int("day_of_week"); ok {
 		m.DayOfWeek = v
 	}
-	if v, ok := r.Int("open_min"); ok {
+	if v, ok := r.String("open_min"); ok {
 		m.OpenMin = v
 	}
-	if v, ok := r.Int("close_min"); ok {
+	if v, ok := r.String("close_min"); ok {
 		m.CloseMin = v
 	}
 	if v, ok := r.Bool("is_open"); ok {
