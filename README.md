@@ -11,7 +11,7 @@ Posee tres cosas:
 
 **No** posee la agenda de ningún profesional. `appointment_booking` posee eso y consume este módulo a través del contrato de solo lectura [`Reader`](#el-puerto-reader).
 
-> Reemplaza al archivado `github.com/veltylabs/business_hours`, cuya codificación de texto de hora de reloj ("HH:MM") se corrige aquí a **minutos desde la medianoche** —la misma codificación que usa `appointment_booking` para los bloques de trabajo— y cuyos nombres de días en español prefijados han desaparecido (la traducción vive en la aplicación consumidora).
+> Reemplaza al archivado `github.com/veltylabs/business_hours`, cuya codificación de texto de hora de reloj ("HH:MM") se corrige aquí a **24h clock string (HH:MM)** —la misma codificación que usa `appointment_booking` para los bloques de trabajo— y cuyos nombres de días en español prefijados han desaparecido (la traducción vive en la aplicación consumidora).
 
 ## Inicio rápido
 
@@ -49,7 +49,7 @@ bounds, err := reader.GetDayBounds(dateMidnightUTC)
 | `add_closure` | `closure` | create | `specific_date`, `reason` |
 | `remove_closure` | `closure` | delete | `id` |
 
-Los tiempos se almacenan como **minutos desde la medianoche** (`0..1439`); `get_day_bounds` responde "si el establecimiento está abierto esta fecha y entre qué minutos".
+Los tiempos se almacenan como **24h clock string (HH:MM)**; `get_day_bounds` responde "si el establecimiento está abierto esta fecha y entre qué minutos".
 
 Para facilitar la lectura por parte de asistentes de IA, `list_business_hours` incluye campos legibles adicionales en cada fila (`"day":"Tuesday"`, `"opens":"08:00"`, `"closes":"18:00"`). Por ejemplo:
 

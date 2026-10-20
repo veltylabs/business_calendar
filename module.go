@@ -79,7 +79,13 @@ func hoursCloseTime(prev, next BusinessHours) bool {
 	if !prev.IsOpen {
 		return false // closed → open only opens
 	}
-	return next.OpenMin > prev.OpenMin || next.CloseMin < prev.CloseMin
+
+	nextOpen, _ := parseClock(next.OpenMin)
+	nextClose, _ := parseClock(next.CloseMin)
+	prevOpen, _ := parseClock(prev.OpenMin)
+	prevClose, _ := parseClock(prev.CloseMin)
+
+	return nextOpen > prevOpen || nextClose < prevClose
 }
 
 // UpsertBusinessHours creates or updates the weekly rule for one weekday. A
@@ -91,13 +97,15 @@ func (m *Module) UpsertBusinessHours(h BusinessHours) error {
 		return ErrInvalidDay
 	}
 	if h.IsOpen {
-		if h.OpenMin < 0 || h.OpenMin > 1439 || h.CloseMin < 0 || h.CloseMin > 1439 || h.OpenMin >= h.CloseMin {
+		openMin, err1 := parseClock(h.OpenMin)
+		closeMin, err2 := parseClock(h.CloseMin)
+		if err1 != nil || err2 != nil || openMin >= closeMin {
 			return ErrInvalidMinutes
 		}
 	} else {
 		// A closed day carries no meaningful minutes — normalize to a single
 		// encoding so GetDayBounds never has to interpret them.
-		h.OpenMin, h.CloseMin = 0, 0
+		h.OpenMin, h.CloseMin = "00:00", "00:00"
 	}
 
 	prev, err := m.businessHoursByDay(int(h.DayOfWeek))

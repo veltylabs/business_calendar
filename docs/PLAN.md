@@ -2,8 +2,10 @@
 PLAN: "fix(ui): business hours editor shows a 24h clock, not minutes-since-midnight"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 15090588848331827000
+PR: https://github.com/veltylabs/business_calendar/pull/8
+REVIEWED_COMMIT: 29159239fc8a8073adc9cd5da02b5f0dc33f1c9b
 ---
 
 > Read AGENTS.md at the repo root before any change. This plan is complete: do not guess; if something does not fit, stop and ask in the PR.
@@ -151,3 +153,7 @@ midnight" — update to "24h clock string (HH:MM)".
 | 3 | `convert.go` (new), `module.go`, `interfaces.go`, `hours_view.go`, `view.go` | boundary conversion, delete now-dead `hhmm`/`minutesHHMM` |
 | 4 | `tests/*` | string literals, new validation tests |
 | 5 | `README.md`/`docs/ARCHITECTURE.md` | encoding note, if present |
+
+## Executor notes
+- Added `convert.go` and implemented string-integer clock logic safely.
+- All testing paths, WASM binaries, schema validations check out.

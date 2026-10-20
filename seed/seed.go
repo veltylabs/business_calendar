@@ -35,13 +35,13 @@ func Load(m *businesscalendar.Module) (Data, error) {
 
 	// 1. Business hours seed
 	hoursToSeed := []businesscalendar.BusinessHours{
-		{DayOfWeek: 1, OpenMin: 480, CloseMin: 1080, IsOpen: true},
-		{DayOfWeek: 2, OpenMin: 480, CloseMin: 1080, IsOpen: true},
-		{DayOfWeek: 3, OpenMin: 480, CloseMin: 1080, IsOpen: true},
-		{DayOfWeek: 4, OpenMin: 480, CloseMin: 1080, IsOpen: true},
-		{DayOfWeek: 5, OpenMin: 480, CloseMin: 1080, IsOpen: true},
-		{DayOfWeek: 6, OpenMin: 540, CloseMin: 780, IsOpen: true},
-		{DayOfWeek: 0, OpenMin: 0, CloseMin: 0, IsOpen: false},
+		{DayOfWeek: 1, OpenMin: "08:00", CloseMin: "18:00", IsOpen: true},
+		{DayOfWeek: 2, OpenMin: "08:00", CloseMin: "18:00", IsOpen: true},
+		{DayOfWeek: 3, OpenMin: "08:00", CloseMin: "18:00", IsOpen: true},
+		{DayOfWeek: 4, OpenMin: "08:00", CloseMin: "18:00", IsOpen: true},
+		{DayOfWeek: 5, OpenMin: "08:00", CloseMin: "18:00", IsOpen: true},
+		{DayOfWeek: 6, OpenMin: "09:00", CloseMin: "13:00", IsOpen: true},
+		{DayOfWeek: 0, OpenMin: "00:00", CloseMin: "00:00", IsOpen: false},
 	}
 
 	for _, h := range hoursToSeed {
