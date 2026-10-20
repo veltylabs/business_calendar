@@ -2,8 +2,10 @@
 PLAN: "fix(ui): business hours editor shows a 24h clock, not minutes-since-midnight"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 15090588848331827000
+PR: https://github.com/veltylabs/business_calendar/pull/8
+REVIEWED_COMMIT: c82865de76d678e28c8cb41b0b80a3ce80554ded
 ---
 
 > Read AGENTS.md at the repo root before any change. This plan is complete: do not guess; if something does not fit, stop and ask in the PR.
