@@ -2,6 +2,8 @@
 PLAN: "fix(ui): business hours editor shows a 24h clock, not minutes-since-midnight"
 EXECUTOR: jules
 REVIEWER: none
+STATUS: running
+SESSION: 15090588848331827000
 ---
 
 > Read AGENTS.md at the repo root before any change. This plan is complete: do not guess; if something does not fit, stop and ask in the PR.
