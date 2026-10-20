@@ -28,7 +28,7 @@ var BusinessHoursModel = model.Definition{
 		{Name: "close_min", Type: input.Number(), NotNull: true},
 		{Name: "is_open", Type: input.Checkbox(), NotNull: true},
 		{Name: "notes", Type: input.Textarea()},
-		{Name: "updated_at", Type: model.Int(), NotNull: true},
+		{Name: "updated_at", Type: model.NanoTime(), NotNull: true},
 	},
 }
 
@@ -41,7 +41,7 @@ var HolidayModel = model.Definition{
 		{Name: "specific_date", Type: input.Number(), NotNull: true}, // midnight UTC, seconds
 		{Name: "name", Type: input.Text(), NotNull: true},
 		{Name: "notes", Type: input.Textarea()},
-		{Name: "updated_at", Type: model.Int(), NotNull: true},
+		{Name: "updated_at", Type: model.NanoTime(), NotNull: true},
 	},
 }
 
@@ -55,7 +55,7 @@ var ClosureModel = model.Definition{
 		{Name: "id", Type: model.Text(), DB: &model.FieldDB{PK: true}},
 		{Name: "specific_date", Type: input.Number(), NotNull: true},
 		{Name: "reason", Type: input.Text(), NotNull: true},
-		{Name: "updated_at", Type: model.Int(), NotNull: true},
+		{Name: "updated_at", Type: model.NanoTime(), NotNull: true},
 	},
 }
 
@@ -173,7 +173,7 @@ var ListHolidaysArgsModel = model.Definition{
 var AddHolidayArgsModel = model.Definition{
 	Name: "add_holiday_args",
 	Fields: model.Fields{
-		{Name: "specific_date", Type: model.Int()},
+		{Name: "specific_date", Type: model.UnixTime()},
 		{Name: "name", Type: model.Text(), NotNull: true},
 		{Name: "notes", Type: model.Text()},
 	},
@@ -197,7 +197,7 @@ var ListClosuresArgsModel = model.Definition{
 var AddClosureArgsModel = model.Definition{
 	Name: "add_closure_args",
 	Fields: model.Fields{
-		{Name: "specific_date", Type: model.Int()},
+		{Name: "specific_date", Type: model.UnixTime()},
 		{Name: "reason", Type: model.Text(), NotNull: true},
 	},
 }

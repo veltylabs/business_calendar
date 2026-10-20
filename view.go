@@ -1,7 +1,7 @@
 package businesscalendar
 
 import (
-	"webtyp.com/date"
+	"webtyp.com/calendar"
 	"webtyp.com/fmt"
 	"webtyp.com/lang"
 	"webtyp.com/model"
@@ -11,13 +11,13 @@ import (
 )
 
 // Item projects a BusinessHours row as a view.Item (view.Itemizer). The weekday
-// label is rendered from the canonical English name (date.WeekdayName) through
+// label is rendered from the canonical English name (calendar.WeekdayName) through
 // lang.Translate — this module hardcodes no human language; the consuming app
 // registers the dictionary.
 func (r *BusinessHours) Item() view.Item {
 	return view.Item{
 		ID:          r.Id,
-		Label:       lang.Translate(date.WeekdayName(int(r.DayOfWeek))).String(),
+		Label:       lang.Translate(calendar.WeekdayName(int(r.DayOfWeek))).String(),
 		Description: hoursLabel(r),
 	}
 }
@@ -30,11 +30,11 @@ func (r *BusinessHours) Item() view.Item {
 // subtracting hours from UTC midnight crosses into the previous day in any
 // negative offset (Chile, UTC-3/-4). This is the same trap
 // mjosefa-cms/modules/appointment_booking's unixToDay already documents and
-// avoids for the identical reason. FormatISO8601 takes UnixNANO, matching
-// tinytime.Now()/ParseDate's own convention — hence *1e9 from the stored
-// seconds — and its first 10 characters are exactly "YYYY-MM-DD".
+// avoids for the identical reason. FormatISO8601 takes Unix, matching
+// tinytime.NowUnix()/ParseDate's own convention — and its first 10
+// characters are exactly "YYYY-MM-DD".
 func specificDateLabel(seconds int64) string {
-	return tinytime.FormatISO8601(seconds * 1000000000)[:10]
+	return tinytime.FormatISO8601(tinytime.Unix(seconds))[:10]
 }
 
 // Item projects a Holiday as a view.Item.

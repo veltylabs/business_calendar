@@ -50,7 +50,7 @@ func (d *DayDetail) IsNil() bool { return d == nil }
 type Reader interface {
 	// GetDayBounds answers "is the establishment open on this date, and
 	// between which minutes". date is midnight UTC in seconds.
-	GetDayBounds(date int64) (tinytime.DayBounds, error)
+	GetDayBounds(date tinytime.Unix) (tinytime.DayBounds, error)
 
 	// GetWeekdayBounds answers "between which minutes does the establishment
 	// normally work on this weekday" (0 = Sunday … 6 = Saturday) — the weekly
@@ -97,9 +97,9 @@ func (m *Module) getWeeklyBounds(dayOfWeek int) (DayDetail, error) {
 	return DayDetail{Bounds: tinytime.DayBounds{Open: true, OpenMin: int(bh.OpenMin), CloseMin: int(bh.CloseMin)}}, nil
 }
 
-func (m *Module) GetDayDetail(date int64) (DayDetail, error) {
+func (m *Module) GetDayDetail(date tinytime.Unix) (DayDetail, error) {
 	var c Closure
-	_, err := ReadOneClosure(m.db.Query(&c).Where(Closure_.SpecificDate).Eq(date), &c)
+	_, err := ReadOneClosure(m.db.Query(&c).Where(Closure_.SpecificDate).Eq(int64(date)), &c)
 	if err == nil {
 		return DayDetail{ClosedBy: ClosedLocal}, nil
 	}
@@ -108,7 +108,7 @@ func (m *Module) GetDayDetail(date int64) (DayDetail, error) {
 	}
 
 	var h Holiday
-	_, err = ReadOneHoliday(m.db.Query(&h).Where(Holiday_.SpecificDate).Eq(date), &h)
+	_, err = ReadOneHoliday(m.db.Query(&h).Where(Holiday_.SpecificDate).Eq(int64(date)), &h)
 	if err == nil {
 		return DayDetail{ClosedBy: ClosedHoliday}, nil
 	}
@@ -122,7 +122,7 @@ func (m *Module) GetDayDetail(date int64) (DayDetail, error) {
 // GetDayBounds is the Reader port: the neutral bounds only, no reason
 // attached. Satisfies any sibling's own BoundsReader-shaped interface
 // structurally.
-func (m *Module) GetDayBounds(date int64) (tinytime.DayBounds, error) {
+func (m *Module) GetDayBounds(date tinytime.Unix) (tinytime.DayBounds, error) {
 	d, err := m.GetDayDetail(date)
 	return d.Bounds, err
 }

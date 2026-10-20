@@ -58,13 +58,12 @@ func Load(m *businesscalendar.Module) (Data, error) {
 
 	// 2. Holidays seed
 	for _, hs := range chileHolidays2026 {
-		nano, err := tinytime.ParseDate(hs.dateStr)
+		sec, err := tinytime.ParseDate(hs.dateStr)
 		if err != nil {
 			return Data{}, err
 		}
-		sec := nano / 1_000_000_000
 		h := businesscalendar.Holiday{
-			SpecificDate: sec,
+			SpecificDate: int64(sec),
 			Name:         hs.name,
 		}
 		if err := m.AddHoliday(h); err != nil {
