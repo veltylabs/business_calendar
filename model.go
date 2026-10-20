@@ -23,11 +23,11 @@ var BusinessHoursModel = model.Definition{
 	Name: "business_hours",
 	Fields: model.Fields{
 		{Name: "id", Type: model.Text(), DB: &model.FieldDB{PK: true}},
-		{Name: "day_of_week", Type: input.Number(), NotNull: true, DB: &model.FieldDB{Unique: true}},
-		{Name: "open_min", Type: input.Number(), NotNull: true},
-		{Name: "close_min", Type: input.Number(), NotNull: true},
-		{Name: "is_open", Type: input.Checkbox(), NotNull: true},
-		{Name: "notes", Type: input.Textarea()},
+		{Name: "day_of_week", Type: input.Number(), Label: "Day of week", NotNull: true, DB: &model.FieldDB{Unique: true}},
+		{Name: "open_min", Type: input.Number(), Label: "Opens at (minutes)", NotNull: true},
+		{Name: "close_min", Type: input.Number(), Label: "Closes at (minutes)", NotNull: true},
+		{Name: "is_open", Type: input.Checkbox(), Label: "Open", NotNull: true},
+		{Name: "notes", Type: input.Textarea(), Label: "Notes"},
 		{Name: "updated_at", Type: model.NanoTime(), NotNull: true},
 	},
 }
@@ -38,9 +38,9 @@ var HolidayModel = model.Definition{
 	Name: "holiday",
 	Fields: model.Fields{
 		{Name: "id", Type: model.Text(), DB: &model.FieldDB{PK: true}},
-		{Name: "specific_date", Type: input.Number(), NotNull: true}, // midnight UTC, seconds
-		{Name: "name", Type: input.Text(), NotNull: true},
-		{Name: "notes", Type: input.Textarea()},
+		{Name: "specific_date", Type: input.Number(), Label: "Date", NotNull: true}, // midnight UTC, seconds
+		{Name: "name", Type: input.Text(), Label: "Name", NotNull: true},
+		{Name: "notes", Type: input.Textarea(), Label: "Notes"},
 		{Name: "updated_at", Type: model.NanoTime(), NotNull: true},
 	},
 }
@@ -53,8 +53,8 @@ var ClosureModel = model.Definition{
 	Name: "closure",
 	Fields: model.Fields{
 		{Name: "id", Type: model.Text(), DB: &model.FieldDB{PK: true}},
-		{Name: "specific_date", Type: input.Number(), NotNull: true},
-		{Name: "reason", Type: input.Text(), NotNull: true},
+		{Name: "specific_date", Type: input.Number(), Label: "Date", NotNull: true},
+		{Name: "reason", Type: input.Text(), Label: "Reason", NotNull: true},
 		{Name: "updated_at", Type: model.NanoTime(), NotNull: true},
 	},
 }
