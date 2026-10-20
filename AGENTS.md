@@ -257,13 +257,13 @@ never runs `codejob` or `gopush` itself — dispatch and close are the human's c
   isolation tests, and write/delete conditions are keyed on the row `id` (or
   `day_of_week`), which is safe for a single-tenant singleton.
 - **Time encoding on `open_min`/`close_min` is `"HH:MM"` (`input.Hour()`), decided 2026-10-20**,
-  reversing an earlier minutes-from-midinight (`0..1439`) encoding: a plain number input made the
+  reversing an earlier minutes-from-midnight (`0..1439`) encoding: a plain number input made the
   admin type raw minutes ("480") instead of picking a time — bad UX, flagged by the user. The
   **consumer-facing port** (`Reader.GetDayBounds`/`GetWeekdayBounds`, `tinytime.DayBounds.OpenMin/
   CloseMin`) still returns **minutes-from-midnight `int`** unchanged — `appointment_booking`/
   `room_layout` see no change. The "HH:MM" encoding is local to this module's own stored column and
   edit form; every read of it as an int converts through `time.ParseTime`/`time.FormatMinutes` at
-  this module's own boundary (`convert.go`). Current plan: `docs/PLAN.md` (2026-10-20).
+  this module's own boundary (`convert.go`).
 - **`NotNull` on `model.Int()`/`model.Bool()` rejects the zero value**, so the
   domain records carry it only to drive `NOT NULL` DDL; the semantic invariants
   (`ErrInvalidDay`, `ErrInvalidMinutes`, `ErrDuplicateDate`) are enforced in the

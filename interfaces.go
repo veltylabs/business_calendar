@@ -94,7 +94,7 @@ func (m *Module) getWeeklyBounds(dayOfWeek int) (DayDetail, error) {
 	if !bh.IsOpen {
 		return DayDetail{ClosedBy: ClosedWeekly}, nil
 	}
-	return DayDetail{Bounds: tinytime.DayBounds{Open: true, OpenMin: int(bh.OpenMin), CloseMin: int(bh.CloseMin)}}, nil
+	return DayDetail{Bounds: tinytime.DayBounds{Open: true, OpenMin: mustParseClock(bh.OpenMin), CloseMin: mustParseClock(bh.CloseMin)}}, nil
 }
 
 func (m *Module) GetDayDetail(date tinytime.Unix) (DayDetail, error) {

@@ -70,8 +70,8 @@ func seedWeek(t *testing.T, m *businesscalendar.Module) {
 	for day := int64(0); day < 7; day++ {
 		err := m.UpsertBusinessHours(businesscalendar.BusinessHours{
 			DayOfWeek: day,
-			OpenMin:   480,
-			CloseMin:  1080,
+			OpenMin:   "08:00",
+			CloseMin:  "18:00",
 			IsOpen:    day != 0 && day != 6,
 		})
 		if err != nil {

@@ -24,8 +24,8 @@ var BusinessHoursModel = model.Definition{
 	Fields: model.Fields{
 		{Name: "id", Type: model.Text(), DB: &model.FieldDB{PK: true}},
 		{Name: "day_of_week", Type: input.Number(), Label: "Day of week", NotNull: true, DB: &model.FieldDB{Unique: true}},
-		{Name: "open_min", Type: input.Number(), Label: "Opens at (minutes)", NotNull: true},
-		{Name: "close_min", Type: input.Number(), Label: "Closes at (minutes)", NotNull: true},
+		{Name: "open_min", Type: input.Hour(), Label: "Opens at", NotNull: true},
+		{Name: "close_min", Type: input.Hour(), Label: "Closes at", NotNull: true},
 		{Name: "is_open", Type: input.Checkbox(), Label: "Open", NotNull: true},
 		{Name: "notes", Type: input.Textarea(), Label: "Notes"},
 		{Name: "updated_at", Type: model.NanoTime(), NotNull: true},
@@ -148,8 +148,8 @@ var UpsertBusinessHoursArgsModel = model.Definition{
 	Name: "upsert_business_hours_args",
 	Fields: model.Fields{
 		{Name: "day_of_week", Type: model.Int()},
-		{Name: "open_min", Type: model.Int()},
-		{Name: "close_min", Type: model.Int()},
+		{Name: "open_min", Type: model.Text()},
+		{Name: "close_min", Type: model.Text()},
 		{Name: "is_open", Type: model.Bool()},
 		{Name: "notes", Type: model.Text()},
 	},

@@ -12,13 +12,13 @@ func TestGetWeekdayBounds_RegularHours(t *testing.T) {
 	m, _ := newModule(t, nil)
 	seedWeek(t, m)
 
-	// Monday (1) is seeded as open 480-1080.
+	// Monday (1) is seeded as open 08:00-18:00.
 	bounds, err := m.GetWeekdayBounds(1)
 	if err != nil {
 		t.Fatalf("GetWeekdayBounds: %v", err)
 	}
 	if !bounds.Open || bounds.OpenMin != 480 || bounds.CloseMin != 1080 {
-		t.Errorf("expected open 480-1080, got %+v", bounds)
+		t.Errorf("expected open 08:00-18:00, got %+v", bounds)
 	}
 }
 

@@ -11,8 +11,8 @@ import (
 
 type decodedItem struct {
 	DayOfWeek int64
-	OpenMin   int64
-	CloseMin  int64
+	OpenMin   string
+	CloseMin  string
 	IsOpen    bool
 	Day       string
 	Opens     string
@@ -28,10 +28,10 @@ func (d *decodedItem) DecodeFields(r model.FieldReader) {
 	if v, ok := r.Int("day_of_week"); ok {
 		d.DayOfWeek = v
 	}
-	if v, ok := r.Int("open_min"); ok {
+	if v, ok := r.String("open_min"); ok {
 		d.OpenMin = v
 	}
-	if v, ok := r.Int("close_min"); ok {
+	if v, ok := r.String("close_min"); ok {
 		d.CloseMin = v
 	}
 	if v, ok := r.Bool("is_open"); ok {
@@ -66,22 +66,22 @@ func (s *decodedItemList) DecodeFields(_ model.FieldReader) {}
 func TestOpListBusinessHours_ReadableFieldsAndHHMM(t *testing.T) {
 	m, _ := newModule(t, nil)
 
-	// Insert Tuesday (day 2): 08:00 (480) - 18:00 (1080), open
+	// Insert Tuesday (day 2): 08:00 - 18:00, open
 	err := m.UpsertBusinessHours(businesscalendar.BusinessHours{
 		DayOfWeek: 2,
-		OpenMin:   480,
-		CloseMin:  1080,
+		OpenMin:   "08:00",
+		CloseMin:  "18:00",
 		IsOpen:    true,
 	})
 	if err != nil {
 		t.Fatalf("upsert Tuesday: %v", err)
 	}
 
-	// Insert Sunday (day 0): 00:00 (0) - 00:00 (0), closed
+	// Insert Sunday (day 0): 00:00 - 00:00, closed
 	err = m.UpsertBusinessHours(businesscalendar.BusinessHours{
 		DayOfWeek: 0,
-		OpenMin:   0,
-		CloseMin:  0,
+		OpenMin:   "00:00",
+		CloseMin:  "00:00",
 		IsOpen:    false,
 	})
 	if err != nil {
@@ -133,11 +133,11 @@ func TestOpListBusinessHours_ReadableFieldsAndHHMM(t *testing.T) {
 	if tueItem.Closes != "18:00" {
 		t.Errorf("Tuesday closes = %q, want %q", tueItem.Closes, "18:00")
 	}
-	if tueItem.OpenMin != 480 {
-		t.Errorf("Tuesday open_min = %d, want 480", tueItem.OpenMin)
+	if tueItem.OpenMin != "08:00" {
+		t.Errorf("Tuesday open_min = %s, want \"08:00\"", tueItem.OpenMin)
 	}
-	if tueItem.CloseMin != 1080 {
-		t.Errorf("Tuesday close_min = %d, want 1080", tueItem.CloseMin)
+	if tueItem.CloseMin != "18:00" {
+		t.Errorf("Tuesday close_min = %s, want \"18:00\"", tueItem.CloseMin)
 	}
 
 	// Sunday check
@@ -155,16 +155,16 @@ func TestOpListBusinessHours_ReadableFieldsAndHHMM(t *testing.T) {
 func TestHHMM_Boundaries(t *testing.T) {
 	m, _ := newModule(t, nil)
 
-	// Test minutes 0, 480, 1080, 1439
+	// Test hours strings
 	cases := []struct {
 		dayMin    int64
-		openMin   int64
-		closeMin  int64
+		openMin   string
+		closeMin  string
 		wantOpen  string
 		wantClose string
 	}{
-		{1, 0, 1439, "00:00", "23:59"},
-		{3, 480, 1080, "08:00", "18:00"},
+		{1, "00:00", "23:59", "00:00", "23:59"},
+		{3, "08:00", "18:00", "08:00", "18:00"},
 	}
 
 	for _, tc := range cases {

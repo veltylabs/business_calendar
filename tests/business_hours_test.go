@@ -21,14 +21,14 @@ func TestAdminDefinesWeeklyBusinessHours(t *testing.T) {
 	}
 
 	// Open weekdays (Monday=1, Friday=5) carry the window.
-	if !rows[1].IsOpen || rows[1].OpenMin != 480 || rows[1].CloseMin != 1080 {
+	if !rows[1].IsOpen || rows[1].OpenMin != "08:00" || rows[1].CloseMin != "18:00" {
 		t.Errorf("Monday incorrect: %+v", rows[1])
 	}
 	// Closed weekend days normalize their minutes to 0.
-	if rows[0].IsOpen || rows[0].OpenMin != 0 || rows[0].CloseMin != 0 {
+	if rows[0].IsOpen || rows[0].OpenMin != "00:00" || rows[0].CloseMin != "00:00" {
 		t.Errorf("Sunday incorrect: %+v", rows[0])
 	}
-	if rows[6].IsOpen || rows[6].OpenMin != 0 || rows[6].CloseMin != 0 {
+	if rows[6].IsOpen || rows[6].OpenMin != "00:00" || rows[6].CloseMin != "00:00" {
 		t.Errorf("Saturday incorrect: %+v", rows[6])
 	}
 }
@@ -41,7 +41,7 @@ func TestWideningHoursIsVisibleToReaderImmediately(t *testing.T) {
 
 	// Monday, 08:00–18:00.
 	if err := m.UpsertBusinessHours(businesscalendar.BusinessHours{
-		DayOfWeek: 1, OpenMin: 480, CloseMin: 1080, IsOpen: true,
+		DayOfWeek: 1, OpenMin: "08:00", CloseMin: "18:00", IsOpen: true,
 	}); err != nil {
 		t.Fatalf("upsert narrow: %v", err)
 	}
@@ -55,7 +55,7 @@ func TestWideningHoursIsVisibleToReaderImmediately(t *testing.T) {
 
 	// Widen to 07:00–20:00.
 	if err := m.UpsertBusinessHours(businesscalendar.BusinessHours{
-		DayOfWeek: 1, OpenMin: 420, CloseMin: 1200, IsOpen: true,
+		DayOfWeek: 1, OpenMin: "07:00", CloseMin: "20:00", IsOpen: true,
 	}); err != nil {
 		t.Fatalf("upsert widen: %v", err)
 	}
@@ -76,12 +76,12 @@ func TestUpsertBusinessHours_NarrowingCloses(t *testing.T) {
 	m, _ := newModule(t, pub)
 
 	if err := m.UpsertBusinessHours(businesscalendar.BusinessHours{
-		DayOfWeek: 2, OpenMin: 480, CloseMin: 1080, IsOpen: true,
+		DayOfWeek: 2, OpenMin: "08:00", CloseMin: "18:00", IsOpen: true,
 	}); err != nil {
 		t.Fatalf("upsert: %v", err)
 	}
 	if err := m.UpsertBusinessHours(businesscalendar.BusinessHours{
-		DayOfWeek: 2, OpenMin: 540, CloseMin: 1020, IsOpen: true,
+		DayOfWeek: 2, OpenMin: "09:00", CloseMin: "17:00", IsOpen: true,
 	}); err != nil {
 		t.Fatalf("upsert narrow: %v", err)
 	}
@@ -101,10 +101,10 @@ func TestInvalidMinutesRejected(t *testing.T) {
 	m, _ := newModule(t, nil)
 
 	cases := []businesscalendar.BusinessHours{
-		{DayOfWeek: 1, OpenMin: 1080, CloseMin: 480, IsOpen: true}, // open >= close
-		{DayOfWeek: 1, OpenMin: -1, CloseMin: 480, IsOpen: true},   // negative
-		{DayOfWeek: 1, OpenMin: 0, CloseMin: 1440, IsOpen: true},   // 1440 out of range
-		{DayOfWeek: 1, OpenMin: 0, CloseMin: 1441, IsOpen: true},   // 1441 out of range
+		{DayOfWeek: 1, OpenMin: "18:00", CloseMin: "08:00", IsOpen: true}, // open >= close
+		{DayOfWeek: 1, OpenMin: "09:00", CloseMin: "09:00", IsOpen: true}, // open >= close
+		{DayOfWeek: 1, OpenMin: "25:00", CloseMin: "08:00", IsOpen: true}, // invalid clock
+		{DayOfWeek: 1, OpenMin: "08:60", CloseMin: "14:00", IsOpen: true}, // invalid clock
 	}
 	for i, c := range cases {
 		if err := m.UpsertBusinessHours(c); err == nil || err.Error() != businesscalendar.ErrInvalidMinutes.Error() {
@@ -116,7 +116,7 @@ func TestInvalidMinutesRejected(t *testing.T) {
 func TestInvalidDayRejected(t *testing.T) {
 	m, _ := newModule(t, nil)
 	err := m.UpsertBusinessHours(businesscalendar.BusinessHours{
-		DayOfWeek: 7, OpenMin: 480, CloseMin: 1080, IsOpen: true,
+		DayOfWeek: 7, OpenMin: "08:00", CloseMin: "18:00", IsOpen: true,
 	})
 	if err == nil || err.Error() != businesscalendar.ErrInvalidDay.Error() {
 		t.Errorf("expected ErrInvalidDay, got %v", err)
