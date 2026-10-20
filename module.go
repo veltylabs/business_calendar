@@ -107,7 +107,7 @@ func (m *Module) UpsertBusinessHours(h BusinessHours) error {
 	}
 	if isDomainErr && e == ErrNotFound {
 		h.Id = m.ids.NewID()
-		h.UpdatedAt = tinytime.Now()
+		h.UpdatedAt = tinytime.NowNano()
 		if err := m.db.Create(&h); err != nil {
 			return err
 		}
@@ -117,7 +117,7 @@ func (m *Module) UpsertBusinessHours(h BusinessHours) error {
 
 	closed := hoursCloseTime(prev, h)
 	h.Id = prev.Id
-	h.UpdatedAt = tinytime.Now()
+	h.UpdatedAt = tinytime.NowNano()
 	if err := m.db.Update(&h, orm.Eq(BusinessHours_.Id, prev.Id)); err != nil {
 		return err
 	}
@@ -155,7 +155,7 @@ func (m *Module) AddHoliday(h Holiday) error {
 		return err
 	}
 	h.Id = m.ids.NewID()
-	h.UpdatedAt = tinytime.Now()
+	h.UpdatedAt = tinytime.NowNano()
 	if err := m.db.Create(&h); err != nil {
 		return err
 	}
@@ -218,7 +218,7 @@ func (m *Module) AddClosure(c Closure) error {
 		return err
 	}
 	c.Id = m.ids.NewID()
-	c.UpdatedAt = tinytime.Now()
+	c.UpdatedAt = tinytime.NowNano()
 	if err := m.db.Create(&c); err != nil {
 		return err
 	}

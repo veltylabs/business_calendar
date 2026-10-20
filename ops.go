@@ -3,6 +3,7 @@ package businesscalendar
 import (
 	"webtyp.com/model"
 	"webtyp.com/router"
+	tinytime "webtyp.com/time"
 )
 
 const (
@@ -138,7 +139,7 @@ func (m *Module) opGetDayBounds(ctx router.Context) {
 	// own UI, an admin tool) gets ClosedBy too. A Go-level sibling that only
 	// wants the neutral bounds calls GetDayBounds directly through Reader —
 	// it never goes through this op.
-	detail, err := m.GetDayDetail(args.Date)
+	detail, err := m.GetDayDetail(tinytime.Unix(args.Date))
 	if err != nil {
 		ctx.WriteStatus(500)
 		return
@@ -175,7 +176,7 @@ func (m *Module) opAddHoliday(ctx router.Context) {
 		ctx.WriteStatus(400)
 		return
 	}
-	h := Holiday{SpecificDate: args.SpecificDate, Name: args.Name, Notes: args.Notes}
+	h := Holiday{SpecificDate: int64(args.SpecificDate), Name: args.Name, Notes: args.Notes}
 	if err := m.AddHoliday(h); err != nil {
 		writeError(ctx, err)
 		return
@@ -223,7 +224,7 @@ func (m *Module) opAddClosure(ctx router.Context) {
 		ctx.WriteStatus(400)
 		return
 	}
-	c := Closure{SpecificDate: args.SpecificDate, Reason: args.Reason}
+	c := Closure{SpecificDate: int64(args.SpecificDate), Reason: args.Reason}
 	if err := m.AddClosure(c); err != nil {
 		writeError(ctx, err)
 		return

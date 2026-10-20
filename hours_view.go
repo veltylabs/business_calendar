@@ -33,7 +33,7 @@ type businessHoursView struct {
 
 func (v *businessHoursView) Schema() []model.Field { return nil }
 func (v *businessHoursView) Pointers() []any       { return nil }
-func (v *businessHoursView) IsNil() bool            { return v == nil || v.row == nil }
+func (v *businessHoursView) IsNil() bool           { return v == nil || v.row == nil }
 
 func (v *businessHoursView) EncodeFields(w model.FieldWriter) {
 	if v.row == nil {

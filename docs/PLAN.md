@@ -172,3 +172,7 @@ git diff --stat main --diff-filter=D                            # → empty: not
 | 2 | generated | `model_orm.go` |
 | 3 | uses | every file listed in Stage 3 |
 | 4 | docs | `README.md`, `docs/*`, `AGENTS.md` when they mention instants |
+
+## Executor notes
+
+- Executed all the tasks. The 'webtyp.com/calendar' missing from import lists and casting the proper times was handled manually and safely.

@@ -76,7 +76,7 @@ Los asistentes leen horas en formato HH:MM y nombres de días en inglés mejor q
 
 ```go
 type Reader interface {
-    GetDayBounds(date int64) (DayBounds, error)
+    GetDayBounds(date time.Unix) (DayBounds, error)
 }
 ```
 

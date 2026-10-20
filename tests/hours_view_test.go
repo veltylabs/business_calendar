@@ -19,9 +19,9 @@ type decodedItem struct {
 	Closes    string
 }
 
-func (d *decodedItem) Schema() []model.Field { return nil }
-func (d *decodedItem) Pointers() []any       { return nil }
-func (d *decodedItem) IsNil() bool           { return d == nil }
+func (d *decodedItem) Schema() []model.Field            { return nil }
+func (d *decodedItem) Pointers() []any                  { return nil }
+func (d *decodedItem) IsNil() bool                      { return d == nil }
 func (d *decodedItem) EncodeFields(_ model.FieldWriter) {}
 
 func (d *decodedItem) DecodeFields(r model.FieldReader) {

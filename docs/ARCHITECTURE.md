@@ -55,11 +55,11 @@ Los argumentos de transporte repiten los campos de **texto** requeridos con `Not
 // Declara su PROPIA interfaz devolviendo tinytime.DayBounds —un tipo neutral en
 // webtyp/time que ambas partes ya importan— y este Module la satisface
 // estructuralmente. Sin importación en ninguna dirección, sin adaptador.
-func (m *Module) GetDayBounds(date int64) (tinytime.DayBounds, error)
+func (m *Module) GetDayBounds(date time.Unix) (tinytime.DayBounds, error)
 
 // La respuesta más rica de este módulo: los mismos límites MÁS por qué un día cerrado
 // está cerrado. Utilizado por la operación get_day_bounds y la propia interfaz de usuario de este módulo.
-func (m *Module) GetDayDetail(date int64) (DayDetail, error)
+func (m *Module) GetDayDetail(date time.Unix) (DayDetail, error)
 
 type DayDetail struct {
     Bounds   tinytime.DayBounds
@@ -71,7 +71,7 @@ type DayDetail struct {
 
 ```go
 type Reader interface {
-    GetDayBounds(date int64) (tinytime.DayBounds, error)
+    GetDayBounds(date time.Unix) (tinytime.DayBounds, error)
     GetWeekdayBounds(dayOfWeek int) (tinytime.DayBounds, error)
 }
 ```

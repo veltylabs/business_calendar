@@ -1,8 +1,8 @@
 package tests
 
 import (
-	"testing"
 	businesscalendar "github.com/veltylabs/business_calendar"
+	"testing"
 )
 
 func TestSentinelErrorMessages(t *testing.T) {
