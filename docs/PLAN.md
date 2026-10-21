@@ -2,8 +2,10 @@
 PLAN: "refactor!: build destinations — web/browser.go and ui/browser.go with //go:build browser"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 5202149115176402781
+PR: https://github.com/veltylabs/business_calendar/pull/9
+REVIEWED_COMMIT: 70cda1503534e8d14d6a375be37f62634dc7917f
 ---
 
 > Read AGENTS.md at the repo root before any change.
