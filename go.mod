@@ -11,7 +11,7 @@ require (
 	webtyp.com/input v0.0.20
 	webtyp.com/json v0.5.30
 	webtyp.com/lang v0.1.7
-	webtyp.com/layout v0.3.58
+	webtyp.com/layout v0.3.63
 	webtyp.com/model v0.2.4
 	webtyp.com/orm v0.12.8
 	webtyp.com/router v0.4.5
@@ -29,7 +29,7 @@ require (
 	webtyp.com/escape v0.1.0 // indirect
 	webtyp.com/font v0.0.5 // indirect
 	webtyp.com/form v0.4.43 // indirect
-	webtyp.com/html v0.0.27 // indirect
+	webtyp.com/html v0.0.28 // indirect
 	webtyp.com/icons v0.0.7 // indirect
 	webtyp.com/msgtype v0.1.0 // indirect
 	webtyp.com/widget v0.6.44 // indirect
