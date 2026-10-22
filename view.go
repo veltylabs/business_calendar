@@ -67,8 +67,9 @@ func hoursLabel(r *BusinessHours) string {
 	return r.OpenMin + "–" + r.CloseMin
 }
 
-// NewBusinessHoursView builds the weekly-hours Presenter — read + save
-// (upsert). The app decides which renderer draws it.
+// NewBusinessHoursView construye el Presenter de horas semanales — lectura + guardado
+// (upsert). La aplicación decide qué renderizador lo dibuja.
+// Ejemplo: view := businesscalendar.NewBusinessHoursView(caller)
 func NewBusinessHoursView(caller router.Caller) view.Presenter {
 	b := view.NewCallerLister(caller,
 		view.Ops{Module: ModelName, List: OpListBusinessHours, Save: OpUpsertBusinessHours},
@@ -76,7 +77,8 @@ func NewBusinessHoursView(caller router.Caller) view.Presenter {
 	return view.New(b, &BusinessHours{}, view.WithTitle(lang.Translate("Business hours").String()))
 }
 
-// NewHolidaysView builds the holidays Presenter — full CRUD (list, add, remove).
+// NewHolidaysView construye el Presenter de feriados — CRUD completo (listar, agregar, eliminar).
+// Ejemplo: view := businesscalendar.NewHolidaysView(caller)
 func NewHolidaysView(caller router.Caller) view.Presenter {
 	b := view.NewCallerLister(caller,
 		view.Ops{Module: ModelName, List: OpListHolidays, Save: OpAddHoliday, Delete: OpRemoveHoliday},
@@ -84,7 +86,8 @@ func NewHolidaysView(caller router.Caller) view.Presenter {
 	return view.New(b, &Holiday{}, view.WithTitle(lang.Translate("Holidays").String()))
 }
 
-// NewClosuresView builds the closures Presenter — full CRUD (list, add, remove).
+// NewClosuresView construye el Presenter de cierres — CRUD completo (listar, agregar, eliminar).
+// Ejemplo: view := businesscalendar.NewClosuresView(caller)
 func NewClosuresView(caller router.Caller) view.Presenter {
 	b := view.NewCallerLister(caller,
 		view.Ops{Module: ModelName, List: OpListClosures, Save: OpAddClosure, Delete: OpRemoveClosure},

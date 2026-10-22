@@ -151,3 +151,7 @@ closuresView := businesscalendar.NewClosuresView(caller)
 ## 8. Esquema
 
 Consulte [`docs/diagrams/database.md`](diagrams/database.md).
+
+## Días hábiles bancarios
+
+Un banco no cierra porque la clínica lo haga. `BankDayAfter(desde, días)` calcula la fecha de abono saltando fines de semana y feriados legales, pero ignorando el horario (`BusinessHours`) y los cierres propios de la clínica (`Closure`). Ejemplo: un cobro del viernes (`B4`) con abono a 1 día, si el lunes es feriado legal, se abona el martes.

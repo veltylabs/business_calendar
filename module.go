@@ -8,22 +8,26 @@ import (
 	tinytime "webtyp.com/time"
 )
 
-// Deps carries the injected collaborators a module may never construct itself.
-// IDs is required; Publisher is optional — nil disables event publishing
-// silently (no-op).
+// Deps lleva los colaboradores inyectados que un módulo nunca debe construir por sí mismo.
+// IDs es obligatorio; Publisher es opcional — nil deshabilita la publicación de eventos
+// de forma silenciosa (no-op).
+// Ejemplo: deps := businesscalendar.Deps{IDs: ids, Publisher: pub}
 type Deps struct {
 	IDs       model.IDGenerator
 	Publisher events.Publisher
 }
 
+// Module representa el módulo de dominio de horas y feriados.
+// Ejemplo: var m *businesscalendar.Module = cal
 type Module struct {
 	db  *orm.DB
 	ids model.IDGenerator
 	pub events.Publisher
 }
 
-// New connects the module to an already-connected *orm.DB; the schema is assumed
-// to already exist — see the migrate subpackage.
+// New conecta el módulo a un *orm.DB ya conectado; se asume que el esquema
+// ya existe — consulte el subpaquete migrate.
+// Ejemplo: cal, err := businesscalendar.New(db, deps)
 func New(db *orm.DB, deps Deps) (*Module, error) {
 	if deps.IDs == nil {
 		return nil, fmt.Err("business_calendar: Deps.IDs is required")
@@ -31,19 +35,19 @@ func New(db *orm.DB, deps Deps) (*Module, error) {
 	return &Module{db: db, ids: deps.IDs, pub: deps.Publisher}, nil
 }
 
-// ModelName is this module's identity: mcp.HarvestOps qualifies every op as
-// "business_calendar.<name>" on the wire — the qualification that makes its
-// own "get_day_bounds" distinct from appointment_booking's op of the same
-// bare name (the collision this whole mechanism exists to make
-// unrepresentable). view.go's three NewXView constructors pass this same
-// constant as view.Ops.Module.
+// ModelName es la identidad de este módulo: mcp.HarvestOps califica cada operación como
+// "business_calendar.<name>" en la red — la calificación que hace que su
+// propio "get_day_bounds" sea distinto de la operación de appointment_booking con el mismo
+// nombre base (la colisión que este mecanismo hace
+// irrepresentable). Los tres constructores NewXView de view.go pasan esta misma
+// constante como view.Ops.Module.
+// Ejemplo: name := cal.ModelName()
 const ModelName = "business_calendar"
 
 func (m *Module) ModelName() string { return ModelName }
 
-// publish fires EventCalendarChanged only when a publisher is wired in. Every
-// successful mutation funnels through here so the direction field stays right
-// in one place.
+// publish dispara EventCalendarChanged solo cuando hay un publisher conectado. Cada
+// mutación exitosa pasa por aquí para que el campo de dirección permanezca centralizado.
 func (m *Module) publish(kind string, closed bool, from, to int64) {
 	if m.pub == nil {
 		return
@@ -68,10 +72,10 @@ func (m *Module) businessHoursByDay(day int) (BusinessHours, error) {
 	return bh, nil
 }
 
-// hoursCloseTime reports whether moving from prev to next CLOSES time — the only
-// direction that can invalidate an existing reservation. A weekday that both
-// opens earlier and closes earlier is closing: some previously-bookable time
-// disappeared, so Closed is true.
+// hoursCloseTime reporta si moverse de prev a next CIERRA tiempo — la única
+// dirección que puede invalidar una reserva existente. Un día de la semana que
+// abre más temprano y cierra más temprano está cerrando: cierto tiempo previamente
+// reservable desapareció, por lo que Closed es true.
 func hoursCloseTime(prev, next BusinessHours) bool {
 	if !next.IsOpen {
 		return prev.IsOpen // open → closed closes; closed → closed does not
@@ -88,10 +92,11 @@ func hoursCloseTime(prev, next BusinessHours) bool {
 	return nextOpen > prevOpen || nextClose < prevClose
 }
 
-// UpsertBusinessHours creates or updates the weekly rule for one weekday. A
-// brand-new row can never invalidate existing availability (the day had no
-// hours before, so it was already closed by default), so a create publishes
-// Closed: false; only an update that narrows the window publishes Closed: true.
+// UpsertBusinessHours crea o actualiza la regla semanal para un día de la semana. Una
+// fila nueva nunca puede invalidar la disponibilidad existente (el día no tenía
+// horario antes, por lo que ya estaba cerrado por defecto), por lo que una creación
+// publica Closed: false; solo una actualización que reduce la ventana publica Closed: true.
+// Ejemplo: err := cal.UpsertBusinessHours(bh)
 func (m *Module) UpsertBusinessHours(h BusinessHours) error {
 	if h.DayOfWeek < 0 || h.DayOfWeek > 6 {
 		return ErrInvalidDay
@@ -103,8 +108,8 @@ func (m *Module) UpsertBusinessHours(h BusinessHours) error {
 			return ErrInvalidMinutes
 		}
 	} else {
-		// A closed day carries no meaningful minutes — normalize to a single
-		// encoding so GetDayBounds never has to interpret them.
+		// Un día cerrado no lleva minutos significativos — normalizar a una
+		// codificación única para que GetDayBounds nunca tenga que interpretarlos.
 		h.OpenMin, h.CloseMin = "00:00", "00:00"
 	}
 
@@ -133,8 +138,9 @@ func (m *Module) UpsertBusinessHours(h BusinessHours) error {
 	return nil
 }
 
-// ListBusinessHours returns all seven weekday rules ordered by day_of_week. An
-// empty week is a valid state (closed by default), not an error.
+// ListBusinessHours devuelve las siete reglas de días de la semana ordenadas por day_of_week. Una
+// semana vacía es un estado válido (cerrada por defecto), no un error.
+// Ejemplo: rows, err := cal.ListBusinessHours()
 func (m *Module) ListBusinessHours() ([]BusinessHours, error) {
 	var bh BusinessHours
 	rows, err := ReadAllBusinessHours(m.db.Query(&bh).OrderBy(BusinessHours_.DayOfWeek).Asc())
@@ -150,9 +156,10 @@ func (m *Module) ListBusinessHours() ([]BusinessHours, error) {
 
 // --- Holidays ---------------------------------------------------------------
 
-// AddHoliday registers a dated legal/administrative closure. A second row on
-// the same date is rejected (ErrDuplicateDate) — a duplicated holiday would
-// double-close a day and make RemoveHoliday look broken.
+// AddHoliday registra un cierre fechado legal/administrativo. Una segunda fila en
+// la misma fecha es rechazada (ErrDuplicateDate) — un feriado duplicado
+// cerraría dos veces un día y haría que RemoveHoliday parezca roto.
+// Ejemplo: err := cal.AddHoliday(h)
 func (m *Module) AddHoliday(h Holiday) error {
 	var ex Holiday
 	_, err := ReadOneHoliday(m.db.Query(&ex).Where(Holiday_.SpecificDate).Eq(h.SpecificDate), &ex)
@@ -171,7 +178,8 @@ func (m *Module) AddHoliday(h Holiday) error {
 	return nil
 }
 
-// RemoveHoliday deletes a holiday by id and reopens its day for booking.
+// RemoveHoliday elimina un feriado por id y reabre su día para reservas.
+// Ejemplo: err := cal.RemoveHoliday(id)
 func (m *Module) RemoveHoliday(id string) error {
 	var h Holiday
 	_, err := ReadOneHoliday(m.db.Query(&h).Where(Holiday_.Id).Eq(id), &h)
@@ -188,8 +196,9 @@ func (m *Module) RemoveHoliday(id string) error {
 	return nil
 }
 
-// ListHolidays returns holidays in the range [from, to] (midnight UTC seconds,
-// inclusive). A zero from/to means unbounded in that direction.
+// ListHolidays devuelve feriados en el rango [from, to] (segundos UTC a medianoche,
+// inclusivo). Un from/to en cero significa sin límite en esa dirección.
+// Ejemplo: rows, err := cal.ListHolidays(0, 0)
 func (m *Module) ListHolidays(from, to int64) ([]Holiday, error) {
 	var h Holiday
 	qb := m.db.Query(&h)
@@ -213,9 +222,10 @@ func (m *Module) ListHolidays(from, to int64) ([]Holiday, error) {
 
 // --- Closures ---------------------------------------------------------------
 
-// AddClosure registers a dated closure the establishment itself decided
-// (maintenance, an event). Same-kind dates are unique, so a second closure on
-// an already-closed-by-closure date is rejected with ErrDuplicateDate.
+// AddClosure registra un cierre fechado que el propio establecimiento decidió
+// (mantenimiento, un evento). Las fechas del mismo tipo son únicas, por lo que
+// un segundo cierre en una fecha ya cerrada por cierre es rechazado con ErrDuplicateDate.
+// Ejemplo: err := cal.AddClosure(c)
 func (m *Module) AddClosure(c Closure) error {
 	var ex Closure
 	_, err := ReadOneClosure(m.db.Query(&ex).Where(Closure_.SpecificDate).Eq(c.SpecificDate), &ex)
@@ -234,7 +244,8 @@ func (m *Module) AddClosure(c Closure) error {
 	return nil
 }
 
-// RemoveClosure deletes a closure by id.
+// RemoveClosure elimina un cierre por id.
+// Ejemplo: err := cal.RemoveClosure(id)
 func (m *Module) RemoveClosure(id string) error {
 	var c Closure
 	_, err := ReadOneClosure(m.db.Query(&c).Where(Closure_.Id).Eq(id), &c)
@@ -251,8 +262,9 @@ func (m *Module) RemoveClosure(id string) error {
 	return nil
 }
 
-// ListClosures returns closures in the range [from, to] (midnight UTC seconds,
-// inclusive). A zero from/to means unbounded in that direction.
+// ListClosures devuelve cierres en el rango [from, to] (segundos UTC a medianoche,
+// inclusivo). Un from/to en cero significa sin límite en esa dirección.
+// Ejemplo: rows, err := cal.ListClosures(0, 0)
 func (m *Module) ListClosures(from, to int64) ([]Closure, error) {
 	var c Closure
 	qb := m.db.Query(&c)
