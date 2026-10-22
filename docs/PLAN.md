@@ -3,8 +3,10 @@ PLAN: "feat: BankDayAfter — the bank business day N days after a date (weekend
 TAG: v0.5.0
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 17751961171220088934
+PR: https://github.com/veltylabs/business_calendar/pull/10
+REVIEWED_COMMIT: f3adfe926a2d0e2a3f6b956e6c66083bfba52ace
 ---
 
 > Read AGENTS.md at the repo root before any change.
