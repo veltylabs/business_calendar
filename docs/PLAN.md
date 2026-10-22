@@ -3,6 +3,8 @@ PLAN: "feat: BankDayAfter — the bank business day N days after a date (weekend
 TAG: v0.5.0
 EXECUTOR: jules
 REVIEWER: none
+STATUS: running
+SESSION: 17751961171220088934
 ---
 
 > Read AGENTS.md at the repo root before any change.
