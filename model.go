@@ -19,6 +19,7 @@ import (
 // form-codegen skill): crudview.New called form.New(Presenter.Record(), ...)
 // against a record with zero renderable fields and panicked BuildClient for
 // every module in the registry, not just this one.
+// Ejemplo: var bh BusinessHours
 var BusinessHoursModel = model.Definition{
 	Name: "business_hours",
 	Fields: model.Fields{
@@ -34,6 +35,7 @@ var BusinessHoursModel = model.Definition{
 
 // HolidayModel: a dated closure with a legal/administrative origin. Editable at
 // runtime — a holiday that appears by law must never require a recompile.
+// Ejemplo: var h Holiday
 var HolidayModel = model.Definition{
 	Name: "holiday",
 	Fields: model.Fields{
@@ -49,6 +51,7 @@ var HolidayModel = model.Definition{
 // an event). Separate from Holiday because the ORIGIN is what the UI shows and
 // what an administrator filters by — collapsing both into one table with a
 // "type" column would make the origin a magic string.
+// Ejemplo: var c Closure
 var ClosureModel = model.Definition{
 	Name: "closure",
 	Fields: model.Fields{
@@ -79,6 +82,7 @@ const (
 // a professional's editor reflects widened hours without a recompile (CU-03),
 // a new holiday closes the day for everyone (CU-04), and reservations already
 // booked on a day that just became closed are recomputed into conflict.
+// Ejemplo: topic := businesscalendar.EventCalendarChanged
 const EventCalendarChanged = "business.calendar.changed"
 
 // Payload kinds — the ONLY place these literals live. CalendarChangedPayload.Kind
@@ -94,6 +98,7 @@ const (
 // reservation of every professional; with the range it recomputes a window.
 //
 // Implements model.Encodable, which events.Event.Payload requires.
+// Ejemplo: var p businesscalendar.CalendarChangedPayload
 type CalendarChangedPayload struct {
 	// FromDate/ToDate bound the affected dates (midnight UTC seconds).
 	// For a holiday or closure both equal that single date. For a business
@@ -144,6 +149,7 @@ func (p *CalendarChangedPayload) IsNil() bool { return p == nil }
 // enforced as DOMAIN rules in the service (ErrInvalidDay/ErrInvalidMinutes),
 // the single fail-closed chokepoint every write path crosses; NotNull stays
 // only on the text fields where empty is never legal.
+// Ejemplo: var args UpsertBusinessHoursArgs
 var UpsertBusinessHoursArgsModel = model.Definition{
 	Name: "upsert_business_hours_args",
 	Fields: model.Fields{
@@ -155,6 +161,7 @@ var UpsertBusinessHoursArgsModel = model.Definition{
 	},
 }
 
+// Ejemplo: var args GetDayBoundsArgs
 var GetDayBoundsArgsModel = model.Definition{
 	Name: "get_day_bounds_args",
 	Fields: model.Fields{
@@ -162,6 +169,7 @@ var GetDayBoundsArgsModel = model.Definition{
 	},
 }
 
+// Ejemplo: var args ListHolidaysArgs
 var ListHolidaysArgsModel = model.Definition{
 	Name: "list_holidays_args",
 	Fields: model.Fields{
@@ -170,6 +178,7 @@ var ListHolidaysArgsModel = model.Definition{
 	},
 }
 
+// Ejemplo: var args AddHolidayArgs
 var AddHolidayArgsModel = model.Definition{
 	Name: "add_holiday_args",
 	Fields: model.Fields{
@@ -179,6 +188,7 @@ var AddHolidayArgsModel = model.Definition{
 	},
 }
 
+// Ejemplo: var args RemoveHolidayArgs
 var RemoveHolidayArgsModel = model.Definition{
 	Name: "remove_holiday_args",
 	Fields: model.Fields{
@@ -186,6 +196,7 @@ var RemoveHolidayArgsModel = model.Definition{
 	},
 }
 
+// Ejemplo: var args ListClosuresArgs
 var ListClosuresArgsModel = model.Definition{
 	Name: "list_closures_args",
 	Fields: model.Fields{
@@ -194,6 +205,7 @@ var ListClosuresArgsModel = model.Definition{
 	},
 }
 
+// Ejemplo: var args AddClosureArgs
 var AddClosureArgsModel = model.Definition{
 	Name: "add_closure_args",
 	Fields: model.Fields{
@@ -202,6 +214,7 @@ var AddClosureArgsModel = model.Definition{
 	},
 }
 
+// Ejemplo: var args RemoveClosureArgs
 var RemoveClosureArgsModel = model.Definition{
 	Name: "remove_closure_args",
 	Fields: model.Fields{

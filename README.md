@@ -49,6 +49,8 @@ bounds, err := reader.GetDayBounds(dateMidnightUTC)
 | `add_closure` | `closure` | create | `specific_date`, `reason` |
 | `remove_closure` | `closure` | delete | `id` |
 
+API: `BankDayAfter(desde, días)`: día hábil bancario N días después (lunes a viernes sin feriados; el horario de la clínica no cuenta).
+
 Los tiempos se almacenan como **24h clock string (HH:MM)**; `get_day_bounds` responde "si el establecimiento está abierto esta fecha y entre qué minutos".
 
 Para facilitar la lectura por parte de asistentes de IA, `list_business_hours` incluye campos legibles adicionales en cada fila (`"day":"Tuesday"`, `"opens":"08:00"`, `"closes":"18:00"`). Por ejemplo:

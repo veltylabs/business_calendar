@@ -6,8 +6,9 @@ import (
 	tinytime "webtyp.com/time"
 )
 
-// ClosedReason names the origin of a closure. The string literals live ONLY in
-// these constants — never inline at a call site.
+// ClosedReason nombra el origen de un cierre. Los literales de cadena viven SOLAMENTE en
+// estas constantes — nunca en línea en el lugar de llamada.
+// Ejemplo: var reason businesscalendar.ClosedReason = businesscalendar.ClosedHoliday
 type ClosedReason string
 
 const (
@@ -16,15 +17,16 @@ const (
 	ClosedLocal   ClosedReason = "CLOSURE" // a Closure row falls on that date
 )
 
-// DayDetail is this module's own answer for one date: the neutral bounds PLUS
-// why a closed day is closed. ClosedBy is this module's vocabulary and never
-// crosses to a neighbour — see Reader below.
+// DayDetail es la propia respuesta de este módulo para una fecha: los límites neutrales MÁS
+// el por qué un día cerrado está cerrado. ClosedBy es vocabulario de este módulo y nunca
+// cruza a un vecino — vea Reader a continuación.
 //
-// It is an output-only result model: it implements model.Encodable so the
-// get_day_bounds op can respond with it, and it is never a DB table.
+// Es un modelo de resultado solo de salida: implementa model.Encodable para que la
+// operación get_day_bounds pueda responder con él, y nunca es una tabla de BD.
+// Ejemplo: detail, err := cal.GetDayDetail(date)
 type DayDetail struct {
 	Bounds tinytime.DayBounds
-	// ClosedBy names why the day is closed. "" when Bounds.Open is true.
+	// ClosedBy nombra por qué el día está cerrado. "" cuando Bounds.Open es true.
 	ClosedBy ClosedReason
 }
 
@@ -37,52 +39,53 @@ func (d *DayDetail) EncodeFields(w model.FieldWriter) {
 
 func (d *DayDetail) IsNil() bool { return d == nil }
 
-// Reader is the READ-ONLY port this module's own consumers depend on — a
-// convenience alias, not the contract a sibling domain module names.
+// Reader es el puerto DE SOLO LECTURA del que dependen los propios consumidores de este
+// módulo — un alias de conveniencia, no el contrato que nombra un módulo de dominio hermano.
 //
-// A neighbour that only needs "is this date usable, and between which
-// minutes" (e.g. veltylabs/appointment_booking) declares its OWN interface
-// returning tinytime.DayBounds — a neutral leaf both sides already import —
-// and this Module satisfies it structurally, with no adapter and no import in
-// either direction. See webtyp/docs/AGENDA_DOMAIN_MASTER_PLAN.md §3-bis for
-// why: a generic booking module must not depend on any specific institutional
-// calendar.
+// Un vecino que solo necesita saber "si esta fecha es utilizable y entre qué
+// minutos" (ej. veltylabs/appointment_booking) declara su PROPIA interfaz
+// devolviendo tinytime.DayBounds — una hoja neutral que ambos lados ya importan —
+// y este Module la satisface estructuralmente, sin adaptador y sin importación en
+// ninguna dirección. Vea webtyp/docs/AGENDA_DOMAIN_MASTER_PLAN.md §3-bis para
+// entender por qué: un módulo genérico de reservas no debe depender de ningún calendario
+// institucional específico.
+// Ejemplo: var reader businesscalendar.Reader = cal
 type Reader interface {
-	// GetDayBounds answers "is the establishment open on this date, and
-	// between which minutes". date is midnight UTC in seconds.
+	// GetDayBounds responde "si el establecimiento está abierto en esta fecha, y
+	// entre qué minutos". date es la medianoche UTC en segundos.
 	GetDayBounds(date tinytime.Unix) (tinytime.DayBounds, error)
 
-	// GetWeekdayBounds answers "between which minutes does the establishment
-	// normally work on this weekday" (0 = Sunday … 6 = Saturday) — the weekly
-	// template only: holidays and local closures are date exceptions and are NOT
-	// applied here (GetDayBounds applies them). A consumer validating a weekly
-	// schedule uses this; one validating a concrete date uses GetDayBounds.
+	// GetWeekdayBounds responde "entre qué minutos trabaja normalmente el establecimiento
+	// en este día de la semana" (0 = domingo … 6 = sábado) — solo la plantilla
+	// semanal: los feriados y cierres locales son excepciones de fecha y NO se
+	// aplican aquí (GetDayBounds los aplica). Un consumidor que valida un horario
+	// semanal usa esto; uno que valida una fecha concreta usa GetDayBounds.
 	//
-	// A weekday with no business_hours row, or with is_open == false, is closed
-	// (closed by default, same rule as GetDayDetail step 3).
+	// Un día de la semana sin fila business_hours, o con is_open == false, está cerrado
+	// (cerrado por defecto, misma regla que el paso 3 de GetDayDetail).
 	GetWeekdayBounds(dayOfWeek int) (tinytime.DayBounds, error)
 }
 
-// GetDayDetail resolves the establishment's status for one date, INCLUDING
-// why a closed day is closed. This is the single resolution path — GetBounds
-// wraps it and simply discards ClosedBy for a Go-level consumer that never
-// asked for it.
+// GetDayDetail resuelve el estado del establecimiento para una fecha, INCLUYENDO
+// por qué un día cerrado está cerrado. Esta es la única ruta de resolución — GetDayBounds
+// la envuelve y simplemente descarta ClosedBy para un consumidor a nivel Go que nunca
+// lo pidió.
 //
-// Resolution order, in this exact precedence:
+// Orden de resolución, en esta precedencia exacta:
 //
-//  1. A Closure on that date → {Open: false, ClosedBy: ClosedLocal}.
-//  2. A Holiday on that date → {Open: false, ClosedBy: ClosedHoliday}.
-//  3. BusinessHours for that weekday with is_open == false →
+//  1. Un Closure en esa fecha → {Open: false, ClosedBy: ClosedLocal}.
+//  2. Un Holiday en esa fecha → {Open: false, ClosedBy: ClosedHoliday}.
+//  3. BusinessHours para ese día de la semana con is_open == false →
 //     {Open: false, ClosedBy: ClosedWeekly}.
-//  4. Otherwise {Open: true, OpenMin, CloseMin}.
+//  4. De lo contrario {Open: true, OpenMin, CloseMin}.
 //
-// A local closure outranks a holiday because it is the more specific, more
-// recent decision, and because a holiday the establishment chose to work
-// through must not be reopened by removing the closure. A weekday with no
-// business_hours row at all is closed (closed by default — the absence of a
-// schedule never means open).
-// getWeeklyBounds is steps 3–4 of GetDayDetail: the weekly template alone. The
-// single implementation shared by GetDayDetail and GetWeekdayBounds.
+// Un cierre local supera a un feriado porque es la decisión más específica, más
+// reciente, y porque un feriado en el que el establecimiento eligió trabajar
+// no debe reabrirse al eliminar el cierre. Un día de la semana sin fila
+// business_hours en absoluto está cerrado (cerrado por defecto — la ausencia de un
+// horario nunca significa abierto).
+// getWeeklyBounds representa los pasos 3–4 de GetDayDetail: solo la plantilla semanal. La
+// única implementación compartida por GetDayDetail y GetWeekdayBounds.
 func (m *Module) getWeeklyBounds(dayOfWeek int) (DayDetail, error) {
 	bh, err := m.businessHoursByDay(dayOfWeek)
 	if err != nil {
@@ -119,17 +122,19 @@ func (m *Module) GetDayDetail(date tinytime.Unix) (DayDetail, error) {
 	return m.getWeeklyBounds(tinytime.Weekday(date))
 }
 
-// GetDayBounds is the Reader port: the neutral bounds only, no reason
-// attached. Satisfies any sibling's own BoundsReader-shaped interface
-// structurally.
+// GetDayBounds es el puerto Reader: solo los límites neutrales, sin ninguna razón
+// adjunta. Satisface estructuralmente cualquier interfaz propia con forma de BoundsReader
+// de un hermano.
+// Ejemplo: bounds, err := cal.GetDayBounds(date)
 func (m *Module) GetDayBounds(date tinytime.Unix) (tinytime.DayBounds, error) {
 	d, err := m.GetDayDetail(date)
 	return d.Bounds, err
 }
 
-// GetWeekdayBounds returns the regular hours of a weekday (0 = Sunday … 6 =
-// Saturday) — the weekly template, without holidays or local closures. See
-// Reader for when to use it instead of GetDayBounds.
+// GetWeekdayBounds devuelve las horas regulares de un día de la semana (0 = domingo … 6 =
+// sábado) — la plantilla semanal, sin feriados o cierres locales. Vea
+// Reader para saber cuándo usarlo en lugar de GetDayBounds.
+// Ejemplo: bounds, err := cal.GetWeekdayBounds(1)
 func (m *Module) GetWeekdayBounds(dayOfWeek int) (tinytime.DayBounds, error) {
 	if dayOfWeek < 0 || dayOfWeek > 6 {
 		return tinytime.DayBounds{}, ErrInvalidWeekday
