@@ -2,8 +2,10 @@
 PLAN: "feat!: list rows declared on the model fields (Row/Options); Item() removed"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 10868479643922508655
+PR: https://github.com/veltylabs/business_calendar/pull/12
+REVIEWED_COMMIT: 6a146cbbb5e480256aad18c66ff516d86a9e9f4c
 ---
 
 > Read AGENTS.md at the repo root before any change.
