@@ -20,7 +20,6 @@
     "business_calendar: Deps.IDs is required": ["business_calendar: Deps.IDs es requerido", "", "", "", "", "", "", ""],
     "close min": ["minuto de cierre", "", "", "", "", "", "", ""],
     "date": ["fecha", "", "", "", "", "", "", ""],
-    "day of week": ["día de la semana", "", "", "", "", "", "", ""],
     "from": ["desde", "", "", "", "", "", "", ""],
     "is open": ["está abierto", "", "", "", "", "", "", ""],
     "name": ["nombre", "", "", "", "", "", "", ""],
