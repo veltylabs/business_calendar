@@ -126,6 +126,15 @@ func (m *Module) opUpsertBusinessHours(ctx router.Context) {
 		writeError(ctx, err)
 		return
 	}
+	saved, err := m.businessHoursByDay(int(args.DayOfWeek))
+	if err != nil {
+		ctx.WriteStatus(500)
+		return
+	}
+	if err := ctx.Encode(&saved); err != nil {
+		ctx.WriteStatus(500)
+		return
+	}
 	ctx.WriteStatus(200)
 }
 
@@ -179,6 +188,15 @@ func (m *Module) opAddHoliday(ctx router.Context) {
 	h := Holiday{SpecificDate: int64(args.SpecificDate), Name: args.Name, Notes: args.Notes}
 	if err := m.AddHoliday(h); err != nil {
 		writeError(ctx, err)
+		return
+	}
+	rows, err := m.ListHolidays(h.SpecificDate, h.SpecificDate)
+	if err != nil || len(rows) == 0 {
+		ctx.WriteStatus(500)
+		return
+	}
+	if err := ctx.Encode(&rows[0]); err != nil {
+		ctx.WriteStatus(500)
 		return
 	}
 	ctx.WriteStatus(200)

@@ -9,12 +9,12 @@ import (
 )
 
 type BusinessHours struct {
-	Id        string
+	Id string
 	DayOfWeek int64
-	OpenMin   string
-	CloseMin  string
-	IsOpen    bool
-	Notes     string
+	OpenMin string
+	CloseMin string
+	IsOpen bool
+	Notes string
 	UpdatedAt time.Nano
 }
 
@@ -22,9 +22,7 @@ func (m *BusinessHours) ModelName() string { return "business_hours" }
 
 func (m *BusinessHours) Schema() []model.Field { return BusinessHoursModel.Fields }
 
-func (m *BusinessHours) Pointers() []any {
-	return []any{&m.Id, &m.DayOfWeek, &m.OpenMin, &m.CloseMin, &m.IsOpen, &m.Notes, (*int64)(&m.UpdatedAt)}
-}
+func (m *BusinessHours) Pointers() []any { return []any{&m.Id, &m.DayOfWeek, &m.OpenMin, &m.CloseMin, &m.IsOpen, &m.Notes, (*int64)(&m.UpdatedAt)} }
 
 func (m *BusinessHours) IsNil() bool { return m == nil }
 
@@ -39,39 +37,21 @@ func (m *BusinessHours) EncodeFields(w model.FieldWriter) {
 }
 
 func (m *BusinessHours) DecodeFields(r model.FieldReader) {
-	if v, ok := r.String("id"); ok {
-		m.Id = v
-	}
-	if v, ok := r.Int("day_of_week"); ok {
-		m.DayOfWeek = v
-	}
-	if v, ok := r.String("open_min"); ok {
-		m.OpenMin = v
-	}
-	if v, ok := r.String("close_min"); ok {
-		m.CloseMin = v
-	}
-	if v, ok := r.Bool("is_open"); ok {
-		m.IsOpen = v
-	}
-	if v, ok := r.String("notes"); ok {
-		m.Notes = v
-	}
-	if v, ok := r.Int("updated_at"); ok {
-		m.UpdatedAt = time.Nano(v)
-	}
+	if v, ok := r.String("id"); ok { m.Id = v }
+	if v, ok := r.Int("day_of_week"); ok { m.DayOfWeek = v }
+	if v, ok := r.String("open_min"); ok { m.OpenMin = v }
+	if v, ok := r.String("close_min"); ok { m.CloseMin = v }
+	if v, ok := r.Bool("is_open"); ok { m.IsOpen = v }
+	if v, ok := r.String("notes"); ok { m.Notes = v }
+	if v, ok := r.Int("updated_at"); ok { m.UpdatedAt = time.Nano(v) }
 }
 
 type BusinessHoursList []*BusinessHours
 
-func (s *BusinessHoursList) Len() int               { return len(*s) }
+func (s *BusinessHoursList) Len() int             { return len(*s) }
 func (s *BusinessHoursList) At(i int) model.Fielder { return (*s)[i] }
-func (s *BusinessHoursList) Append() model.Fielder {
-	v := &BusinessHours{}
-	*s = append(*s, v)
-	return v
-}
-func (s *BusinessHoursList) IsNil() bool                      { return s == nil }
+func (s *BusinessHoursList) Append() model.Fielder  { v := &BusinessHours{}; *s = append(*s, v); return v }
+func (s *BusinessHoursList) IsNil() bool          { return s == nil }
 func (s *BusinessHoursList) EncodeFields(_ model.FieldWriter) {}
 func (s *BusinessHoursList) DecodeFields(_ model.FieldReader) {}
 
@@ -80,20 +60,20 @@ func (m *BusinessHours) Validate(action byte) error {
 }
 
 var BusinessHours_ = struct {
-	Id        string
+	Id string
 	DayOfWeek string
-	OpenMin   string
-	CloseMin  string
-	IsOpen    string
-	Notes     string
+	OpenMin string
+	CloseMin string
+	IsOpen string
+	Notes string
 	UpdatedAt string
 }{
-	Id:        "id",
+	Id: "id",
 	DayOfWeek: "day_of_week",
-	OpenMin:   "open_min",
-	CloseMin:  "close_min",
-	IsOpen:    "is_open",
-	Notes:     "notes",
+	OpenMin: "open_min",
+	CloseMin: "close_min",
+	IsOpen: "is_open",
+	Notes: "notes",
 	UpdatedAt: "updated_at",
 }
 
@@ -115,20 +95,18 @@ func ReadAllBusinessHours(qb *orm.QB) (BusinessHoursList, error) {
 }
 
 type Holiday struct {
-	Id           string
+	Id string
 	SpecificDate int64
-	Name         string
-	Notes        string
-	UpdatedAt    time.Nano
+	Name string
+	Notes string
+	UpdatedAt time.Nano
 }
 
 func (m *Holiday) ModelName() string { return "holiday" }
 
 func (m *Holiday) Schema() []model.Field { return HolidayModel.Fields }
 
-func (m *Holiday) Pointers() []any {
-	return []any{&m.Id, &m.SpecificDate, &m.Name, &m.Notes, (*int64)(&m.UpdatedAt)}
-}
+func (m *Holiday) Pointers() []any { return []any{&m.Id, &m.SpecificDate, &m.Name, &m.Notes, (*int64)(&m.UpdatedAt)} }
 
 func (m *Holiday) IsNil() bool { return m == nil }
 
@@ -141,29 +119,19 @@ func (m *Holiday) EncodeFields(w model.FieldWriter) {
 }
 
 func (m *Holiday) DecodeFields(r model.FieldReader) {
-	if v, ok := r.String("id"); ok {
-		m.Id = v
-	}
-	if v, ok := r.Int("specific_date"); ok {
-		m.SpecificDate = v
-	}
-	if v, ok := r.String("name"); ok {
-		m.Name = v
-	}
-	if v, ok := r.String("notes"); ok {
-		m.Notes = v
-	}
-	if v, ok := r.Int("updated_at"); ok {
-		m.UpdatedAt = time.Nano(v)
-	}
+	if v, ok := r.String("id"); ok { m.Id = v }
+	if v, ok := r.Int("specific_date"); ok { m.SpecificDate = v }
+	if v, ok := r.String("name"); ok { m.Name = v }
+	if v, ok := r.String("notes"); ok { m.Notes = v }
+	if v, ok := r.Int("updated_at"); ok { m.UpdatedAt = time.Nano(v) }
 }
 
 type HolidayList []*Holiday
 
-func (s *HolidayList) Len() int                         { return len(*s) }
-func (s *HolidayList) At(i int) model.Fielder           { return (*s)[i] }
-func (s *HolidayList) Append() model.Fielder            { v := &Holiday{}; *s = append(*s, v); return v }
-func (s *HolidayList) IsNil() bool                      { return s == nil }
+func (s *HolidayList) Len() int             { return len(*s) }
+func (s *HolidayList) At(i int) model.Fielder { return (*s)[i] }
+func (s *HolidayList) Append() model.Fielder  { v := &Holiday{}; *s = append(*s, v); return v }
+func (s *HolidayList) IsNil() bool          { return s == nil }
 func (s *HolidayList) EncodeFields(_ model.FieldWriter) {}
 func (s *HolidayList) DecodeFields(_ model.FieldReader) {}
 
@@ -172,17 +140,17 @@ func (m *Holiday) Validate(action byte) error {
 }
 
 var Holiday_ = struct {
-	Id           string
+	Id string
 	SpecificDate string
-	Name         string
-	Notes        string
-	UpdatedAt    string
+	Name string
+	Notes string
+	UpdatedAt string
 }{
-	Id:           "id",
+	Id: "id",
 	SpecificDate: "specific_date",
-	Name:         "name",
-	Notes:        "notes",
-	UpdatedAt:    "updated_at",
+	Name: "name",
+	Notes: "notes",
+	UpdatedAt: "updated_at",
 }
 
 func ReadOneHoliday(qb *orm.QB, model *Holiday) (*Holiday, error) {
@@ -203,19 +171,17 @@ func ReadAllHoliday(qb *orm.QB) (HolidayList, error) {
 }
 
 type Closure struct {
-	Id           string
+	Id string
 	SpecificDate int64
-	Reason       string
-	UpdatedAt    time.Nano
+	Reason string
+	UpdatedAt time.Nano
 }
 
 func (m *Closure) ModelName() string { return "closure" }
 
 func (m *Closure) Schema() []model.Field { return ClosureModel.Fields }
 
-func (m *Closure) Pointers() []any {
-	return []any{&m.Id, &m.SpecificDate, &m.Reason, (*int64)(&m.UpdatedAt)}
-}
+func (m *Closure) Pointers() []any { return []any{&m.Id, &m.SpecificDate, &m.Reason, (*int64)(&m.UpdatedAt)} }
 
 func (m *Closure) IsNil() bool { return m == nil }
 
@@ -227,26 +193,18 @@ func (m *Closure) EncodeFields(w model.FieldWriter) {
 }
 
 func (m *Closure) DecodeFields(r model.FieldReader) {
-	if v, ok := r.String("id"); ok {
-		m.Id = v
-	}
-	if v, ok := r.Int("specific_date"); ok {
-		m.SpecificDate = v
-	}
-	if v, ok := r.String("reason"); ok {
-		m.Reason = v
-	}
-	if v, ok := r.Int("updated_at"); ok {
-		m.UpdatedAt = time.Nano(v)
-	}
+	if v, ok := r.String("id"); ok { m.Id = v }
+	if v, ok := r.Int("specific_date"); ok { m.SpecificDate = v }
+	if v, ok := r.String("reason"); ok { m.Reason = v }
+	if v, ok := r.Int("updated_at"); ok { m.UpdatedAt = time.Nano(v) }
 }
 
 type ClosureList []*Closure
 
-func (s *ClosureList) Len() int                         { return len(*s) }
-func (s *ClosureList) At(i int) model.Fielder           { return (*s)[i] }
-func (s *ClosureList) Append() model.Fielder            { v := &Closure{}; *s = append(*s, v); return v }
-func (s *ClosureList) IsNil() bool                      { return s == nil }
+func (s *ClosureList) Len() int             { return len(*s) }
+func (s *ClosureList) At(i int) model.Fielder { return (*s)[i] }
+func (s *ClosureList) Append() model.Fielder  { v := &Closure{}; *s = append(*s, v); return v }
+func (s *ClosureList) IsNil() bool          { return s == nil }
 func (s *ClosureList) EncodeFields(_ model.FieldWriter) {}
 func (s *ClosureList) DecodeFields(_ model.FieldReader) {}
 
@@ -255,15 +213,15 @@ func (m *Closure) Validate(action byte) error {
 }
 
 var Closure_ = struct {
-	Id           string
+	Id string
 	SpecificDate string
-	Reason       string
-	UpdatedAt    string
+	Reason string
+	UpdatedAt string
 }{
-	Id:           "id",
+	Id: "id",
 	SpecificDate: "specific_date",
-	Reason:       "reason",
-	UpdatedAt:    "updated_at",
+	Reason: "reason",
+	UpdatedAt: "updated_at",
 }
 
 func ReadOneClosure(qb *orm.QB, model *Closure) (*Closure, error) {
@@ -285,19 +243,17 @@ func ReadAllClosure(qb *orm.QB) (ClosureList, error) {
 
 type UpsertBusinessHoursArgs struct {
 	DayOfWeek int64
-	OpenMin   string
-	CloseMin  string
-	IsOpen    bool
-	Notes     string
+	OpenMin string
+	CloseMin string
+	IsOpen bool
+	Notes string
 }
 
 func (m *UpsertBusinessHoursArgs) ModelName() string { return "upsert_business_hours_args" }
 
 func (m *UpsertBusinessHoursArgs) Schema() []model.Field { return UpsertBusinessHoursArgsModel.Fields }
 
-func (m *UpsertBusinessHoursArgs) Pointers() []any {
-	return []any{&m.DayOfWeek, &m.OpenMin, &m.CloseMin, &m.IsOpen, &m.Notes}
-}
+func (m *UpsertBusinessHoursArgs) Pointers() []any { return []any{&m.DayOfWeek, &m.OpenMin, &m.CloseMin, &m.IsOpen, &m.Notes} }
 
 func (m *UpsertBusinessHoursArgs) IsNil() bool { return m == nil }
 
@@ -310,33 +266,19 @@ func (m *UpsertBusinessHoursArgs) EncodeFields(w model.FieldWriter) {
 }
 
 func (m *UpsertBusinessHoursArgs) DecodeFields(r model.FieldReader) {
-	if v, ok := r.Int("day_of_week"); ok {
-		m.DayOfWeek = v
-	}
-	if v, ok := r.String("open_min"); ok {
-		m.OpenMin = v
-	}
-	if v, ok := r.String("close_min"); ok {
-		m.CloseMin = v
-	}
-	if v, ok := r.Bool("is_open"); ok {
-		m.IsOpen = v
-	}
-	if v, ok := r.String("notes"); ok {
-		m.Notes = v
-	}
+	if v, ok := r.Int("day_of_week"); ok { m.DayOfWeek = v }
+	if v, ok := r.String("open_min"); ok { m.OpenMin = v }
+	if v, ok := r.String("close_min"); ok { m.CloseMin = v }
+	if v, ok := r.Bool("is_open"); ok { m.IsOpen = v }
+	if v, ok := r.String("notes"); ok { m.Notes = v }
 }
 
 type UpsertBusinessHoursArgsList []*UpsertBusinessHoursArgs
 
-func (s *UpsertBusinessHoursArgsList) Len() int               { return len(*s) }
+func (s *UpsertBusinessHoursArgsList) Len() int             { return len(*s) }
 func (s *UpsertBusinessHoursArgsList) At(i int) model.Fielder { return (*s)[i] }
-func (s *UpsertBusinessHoursArgsList) Append() model.Fielder {
-	v := &UpsertBusinessHoursArgs{}
-	*s = append(*s, v)
-	return v
-}
-func (s *UpsertBusinessHoursArgsList) IsNil() bool                      { return s == nil }
+func (s *UpsertBusinessHoursArgsList) Append() model.Fielder  { v := &UpsertBusinessHoursArgs{}; *s = append(*s, v); return v }
+func (s *UpsertBusinessHoursArgsList) IsNil() bool          { return s == nil }
 func (s *UpsertBusinessHoursArgsList) EncodeFields(_ model.FieldWriter) {}
 func (s *UpsertBusinessHoursArgsList) DecodeFields(_ model.FieldReader) {}
 
@@ -361,21 +303,15 @@ func (m *GetDayBoundsArgs) EncodeFields(w model.FieldWriter) {
 }
 
 func (m *GetDayBoundsArgs) DecodeFields(r model.FieldReader) {
-	if v, ok := r.Int("date"); ok {
-		m.Date = v
-	}
+	if v, ok := r.Int("date"); ok { m.Date = v }
 }
 
 type GetDayBoundsArgsList []*GetDayBoundsArgs
 
-func (s *GetDayBoundsArgsList) Len() int               { return len(*s) }
+func (s *GetDayBoundsArgsList) Len() int             { return len(*s) }
 func (s *GetDayBoundsArgsList) At(i int) model.Fielder { return (*s)[i] }
-func (s *GetDayBoundsArgsList) Append() model.Fielder {
-	v := &GetDayBoundsArgs{}
-	*s = append(*s, v)
-	return v
-}
-func (s *GetDayBoundsArgsList) IsNil() bool                      { return s == nil }
+func (s *GetDayBoundsArgsList) Append() model.Fielder  { v := &GetDayBoundsArgs{}; *s = append(*s, v); return v }
+func (s *GetDayBoundsArgsList) IsNil() bool          { return s == nil }
 func (s *GetDayBoundsArgsList) EncodeFields(_ model.FieldWriter) {}
 func (s *GetDayBoundsArgsList) DecodeFields(_ model.FieldReader) {}
 
@@ -385,7 +321,7 @@ func (m *GetDayBoundsArgs) Validate(action byte) error {
 
 type ListHolidaysArgs struct {
 	From int64
-	To   int64
+	To int64
 }
 
 func (m *ListHolidaysArgs) ModelName() string { return "list_holidays_args" }
@@ -402,24 +338,16 @@ func (m *ListHolidaysArgs) EncodeFields(w model.FieldWriter) {
 }
 
 func (m *ListHolidaysArgs) DecodeFields(r model.FieldReader) {
-	if v, ok := r.Int("from"); ok {
-		m.From = v
-	}
-	if v, ok := r.Int("to"); ok {
-		m.To = v
-	}
+	if v, ok := r.Int("from"); ok { m.From = v }
+	if v, ok := r.Int("to"); ok { m.To = v }
 }
 
 type ListHolidaysArgsList []*ListHolidaysArgs
 
-func (s *ListHolidaysArgsList) Len() int               { return len(*s) }
+func (s *ListHolidaysArgsList) Len() int             { return len(*s) }
 func (s *ListHolidaysArgsList) At(i int) model.Fielder { return (*s)[i] }
-func (s *ListHolidaysArgsList) Append() model.Fielder {
-	v := &ListHolidaysArgs{}
-	*s = append(*s, v)
-	return v
-}
-func (s *ListHolidaysArgsList) IsNil() bool                      { return s == nil }
+func (s *ListHolidaysArgsList) Append() model.Fielder  { v := &ListHolidaysArgs{}; *s = append(*s, v); return v }
+func (s *ListHolidaysArgsList) IsNil() bool          { return s == nil }
 func (s *ListHolidaysArgsList) EncodeFields(_ model.FieldWriter) {}
 func (s *ListHolidaysArgsList) DecodeFields(_ model.FieldReader) {}
 
@@ -429,8 +357,8 @@ func (m *ListHolidaysArgs) Validate(action byte) error {
 
 type AddHolidayArgs struct {
 	SpecificDate time.Unix
-	Name         string
-	Notes        string
+	Name string
+	Notes string
 }
 
 func (m *AddHolidayArgs) ModelName() string { return "add_holiday_args" }
@@ -448,27 +376,17 @@ func (m *AddHolidayArgs) EncodeFields(w model.FieldWriter) {
 }
 
 func (m *AddHolidayArgs) DecodeFields(r model.FieldReader) {
-	if v, ok := r.Int("specific_date"); ok {
-		m.SpecificDate = time.Unix(v)
-	}
-	if v, ok := r.String("name"); ok {
-		m.Name = v
-	}
-	if v, ok := r.String("notes"); ok {
-		m.Notes = v
-	}
+	if v, ok := r.Int("specific_date"); ok { m.SpecificDate = time.Unix(v) }
+	if v, ok := r.String("name"); ok { m.Name = v }
+	if v, ok := r.String("notes"); ok { m.Notes = v }
 }
 
 type AddHolidayArgsList []*AddHolidayArgs
 
-func (s *AddHolidayArgsList) Len() int               { return len(*s) }
+func (s *AddHolidayArgsList) Len() int             { return len(*s) }
 func (s *AddHolidayArgsList) At(i int) model.Fielder { return (*s)[i] }
-func (s *AddHolidayArgsList) Append() model.Fielder {
-	v := &AddHolidayArgs{}
-	*s = append(*s, v)
-	return v
-}
-func (s *AddHolidayArgsList) IsNil() bool                      { return s == nil }
+func (s *AddHolidayArgsList) Append() model.Fielder  { v := &AddHolidayArgs{}; *s = append(*s, v); return v }
+func (s *AddHolidayArgsList) IsNil() bool          { return s == nil }
 func (s *AddHolidayArgsList) EncodeFields(_ model.FieldWriter) {}
 func (s *AddHolidayArgsList) DecodeFields(_ model.FieldReader) {}
 
@@ -493,21 +411,15 @@ func (m *RemoveHolidayArgs) EncodeFields(w model.FieldWriter) {
 }
 
 func (m *RemoveHolidayArgs) DecodeFields(r model.FieldReader) {
-	if v, ok := r.String("id"); ok {
-		m.Id = v
-	}
+	if v, ok := r.String("id"); ok { m.Id = v }
 }
 
 type RemoveHolidayArgsList []*RemoveHolidayArgs
 
-func (s *RemoveHolidayArgsList) Len() int               { return len(*s) }
+func (s *RemoveHolidayArgsList) Len() int             { return len(*s) }
 func (s *RemoveHolidayArgsList) At(i int) model.Fielder { return (*s)[i] }
-func (s *RemoveHolidayArgsList) Append() model.Fielder {
-	v := &RemoveHolidayArgs{}
-	*s = append(*s, v)
-	return v
-}
-func (s *RemoveHolidayArgsList) IsNil() bool                      { return s == nil }
+func (s *RemoveHolidayArgsList) Append() model.Fielder  { v := &RemoveHolidayArgs{}; *s = append(*s, v); return v }
+func (s *RemoveHolidayArgsList) IsNil() bool          { return s == nil }
 func (s *RemoveHolidayArgsList) EncodeFields(_ model.FieldWriter) {}
 func (s *RemoveHolidayArgsList) DecodeFields(_ model.FieldReader) {}
 
@@ -517,7 +429,7 @@ func (m *RemoveHolidayArgs) Validate(action byte) error {
 
 type ListClosuresArgs struct {
 	From int64
-	To   int64
+	To int64
 }
 
 func (m *ListClosuresArgs) ModelName() string { return "list_closures_args" }
@@ -534,24 +446,16 @@ func (m *ListClosuresArgs) EncodeFields(w model.FieldWriter) {
 }
 
 func (m *ListClosuresArgs) DecodeFields(r model.FieldReader) {
-	if v, ok := r.Int("from"); ok {
-		m.From = v
-	}
-	if v, ok := r.Int("to"); ok {
-		m.To = v
-	}
+	if v, ok := r.Int("from"); ok { m.From = v }
+	if v, ok := r.Int("to"); ok { m.To = v }
 }
 
 type ListClosuresArgsList []*ListClosuresArgs
 
-func (s *ListClosuresArgsList) Len() int               { return len(*s) }
+func (s *ListClosuresArgsList) Len() int             { return len(*s) }
 func (s *ListClosuresArgsList) At(i int) model.Fielder { return (*s)[i] }
-func (s *ListClosuresArgsList) Append() model.Fielder {
-	v := &ListClosuresArgs{}
-	*s = append(*s, v)
-	return v
-}
-func (s *ListClosuresArgsList) IsNil() bool                      { return s == nil }
+func (s *ListClosuresArgsList) Append() model.Fielder  { v := &ListClosuresArgs{}; *s = append(*s, v); return v }
+func (s *ListClosuresArgsList) IsNil() bool          { return s == nil }
 func (s *ListClosuresArgsList) EncodeFields(_ model.FieldWriter) {}
 func (s *ListClosuresArgsList) DecodeFields(_ model.FieldReader) {}
 
@@ -561,7 +465,7 @@ func (m *ListClosuresArgs) Validate(action byte) error {
 
 type AddClosureArgs struct {
 	SpecificDate time.Unix
-	Reason       string
+	Reason string
 }
 
 func (m *AddClosureArgs) ModelName() string { return "add_closure_args" }
@@ -578,24 +482,16 @@ func (m *AddClosureArgs) EncodeFields(w model.FieldWriter) {
 }
 
 func (m *AddClosureArgs) DecodeFields(r model.FieldReader) {
-	if v, ok := r.Int("specific_date"); ok {
-		m.SpecificDate = time.Unix(v)
-	}
-	if v, ok := r.String("reason"); ok {
-		m.Reason = v
-	}
+	if v, ok := r.Int("specific_date"); ok { m.SpecificDate = time.Unix(v) }
+	if v, ok := r.String("reason"); ok { m.Reason = v }
 }
 
 type AddClosureArgsList []*AddClosureArgs
 
-func (s *AddClosureArgsList) Len() int               { return len(*s) }
+func (s *AddClosureArgsList) Len() int             { return len(*s) }
 func (s *AddClosureArgsList) At(i int) model.Fielder { return (*s)[i] }
-func (s *AddClosureArgsList) Append() model.Fielder {
-	v := &AddClosureArgs{}
-	*s = append(*s, v)
-	return v
-}
-func (s *AddClosureArgsList) IsNil() bool                      { return s == nil }
+func (s *AddClosureArgsList) Append() model.Fielder  { v := &AddClosureArgs{}; *s = append(*s, v); return v }
+func (s *AddClosureArgsList) IsNil() bool          { return s == nil }
 func (s *AddClosureArgsList) EncodeFields(_ model.FieldWriter) {}
 func (s *AddClosureArgsList) DecodeFields(_ model.FieldReader) {}
 
@@ -620,21 +516,15 @@ func (m *RemoveClosureArgs) EncodeFields(w model.FieldWriter) {
 }
 
 func (m *RemoveClosureArgs) DecodeFields(r model.FieldReader) {
-	if v, ok := r.String("id"); ok {
-		m.Id = v
-	}
+	if v, ok := r.String("id"); ok { m.Id = v }
 }
 
 type RemoveClosureArgsList []*RemoveClosureArgs
 
-func (s *RemoveClosureArgsList) Len() int               { return len(*s) }
+func (s *RemoveClosureArgsList) Len() int             { return len(*s) }
 func (s *RemoveClosureArgsList) At(i int) model.Fielder { return (*s)[i] }
-func (s *RemoveClosureArgsList) Append() model.Fielder {
-	v := &RemoveClosureArgs{}
-	*s = append(*s, v)
-	return v
-}
-func (s *RemoveClosureArgsList) IsNil() bool                      { return s == nil }
+func (s *RemoveClosureArgsList) Append() model.Fielder  { v := &RemoveClosureArgs{}; *s = append(*s, v); return v }
+func (s *RemoveClosureArgsList) IsNil() bool          { return s == nil }
 func (s *RemoveClosureArgsList) EncodeFields(_ model.FieldWriter) {}
 func (s *RemoveClosureArgsList) DecodeFields(_ model.FieldReader) {}
 

@@ -150,3 +150,10 @@ rewrite what is already Spanish), and add a short usage example to exported-symb
 | 4 | `ops.go` | save answers the record |
 | 5 | `tests/*` | `model.RowOf` |
 | 6 | docs, comments, `lang.json` | Spanish |
+## Executor notes
+- Defined `RowTitle` and `RowDetail` on the model fields exactly as outlined. The generation produced `model_orm.go` correctly.
+- Removed `Item()` methods in `view.go` entirely, fulfilling Stage 2.
+- No `view.Lookup` was present in the codebase.
+- Re-added the missing record fetching logic for `UpsertBusinessHours`, `AddHoliday`, and `AddClosure` in `ops.go` so they echo back the saved record correctly. Ensured `ctx.WriteStatus(200)` propagates properly.
+- Updated `p.Items()` test assertions in `conformance_test.go` and `seed_test.go` to use `model.RowOf(&rec)` effectively. The expectation for `Notes` field generation correctly maps back without trailing separators. Wrapped presenter instantiations in `view.go` with `view.NewRecords().Caller(caller)`.
+- Executed `langc sync .` which completed without missing Spanish keys.

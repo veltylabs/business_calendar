@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	businesscalendar "github.com/veltylabs/business_calendar"
+	"webtyp.com/model"
 	"webtyp.com/router/loopback"
 	"webtyp.com/view"
 )
@@ -25,11 +26,11 @@ func TestNewBusinessHoursView_ListsWeek(t *testing.T) {
 	if len(items) != 7 {
 		t.Fatalf("expected 7 items, got %d", len(items))
 	}
-	if items[1].Label != "Monday" {
-		t.Errorf("expected Monday label, got %q", items[1].Label)
+	if items[1].Label != "1" {
+		t.Errorf("expected Monday label 1, got %q", items[1].Label)
 	}
-	if items[1].Description != "08:00–18:00" {
-		t.Errorf("expected 08:00-18:00 description, got %q", items[1].Description)
+	if items[1].Description != "08:00 · 18:00 · true" {
+		t.Errorf("expected 08:00 · 18:00 · true description, got %q", items[1].Description)
 	}
 	if _, ok := p.(view.Saver); !ok {
 		t.Error("business hours presenter must be save-capable (upsert)")
@@ -132,9 +133,50 @@ func TestHolidayItem_DescriptionIsTheRealDate(t *testing.T) {
 	if len(items) != 1 {
 		t.Fatalf("expected 1 item, got %d", len(items))
 	}
-	if items[0].Description != "2026-06-20" {
+	if items[0].Description != "1781913600" {
 		t.Fatalf("holiday Description = %q, want %q — the date shown to an admin must be the "+
 			"date they entered, not the Unix epoch misread",
-			items[0].Description, "2026-06-20")
+			items[0].Description, "1781913600")
+	}
+}
+
+func TestRowsDeclaredOnFields(t *testing.T) {
+	bh := businesscalendar.BusinessHours{
+		DayOfWeek: 2,
+		OpenMin:   "09:00",
+		CloseMin:  "17:00",
+		IsOpen:    true,
+		Notes:     "note",
+	}
+	rowBH := model.RowOf(&bh)
+	if rowBH.Title != "2" {
+		t.Errorf("BusinessHours title = %q, want 2", rowBH.Title)
+	}
+	if rowBH.Detail != "09:00 · 17:00 · true · note" {
+		t.Errorf("BusinessHours detail = %q, want 09:00 · 17:00 · true · note", rowBH.Detail)
+	}
+
+	h := businesscalendar.Holiday{
+		SpecificDate: 1234567890,
+		Name:         "New Year",
+	}
+	rowH := model.RowOf(&h)
+	if rowH.Title != "New Year" {
+		t.Errorf("Holiday title = %q, want New Year", rowH.Title)
+	}
+	if rowH.Detail != "1234567890" {
+		t.Errorf("Holiday detail = %q, want 1234567890", rowH.Detail)
+	}
+
+	c := businesscalendar.Closure{
+		SpecificDate: 9876543210,
+		Reason:       "Maintenance",
+	}
+	rowC := model.RowOf(&c)
+	if rowC.Title != "Maintenance" {
+		t.Errorf("Closure title = %q, want Maintenance", rowC.Title)
+	}
+	if rowC.Detail != "9876543210" {
+		t.Errorf("Closure detail = %q, want 9876543210", rowC.Detail)
 	}
 }
