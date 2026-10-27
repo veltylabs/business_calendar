@@ -4,11 +4,9 @@ package ui
 
 import (
 	businesscalendar "github.com/veltylabs/business_calendar"
-	"webtyp.com/layout/crudview"
-	"webtyp.com/layout/platformd"
-	"webtyp.com/model"
+	"webtyp.com/lang"
 	"webtyp.com/router"
-	"webtyp.com/svg"
+	"webtyp.com/view"
 )
 
 const (
@@ -20,42 +18,42 @@ const (
 	TabClosuresLabel = "Cierres"
 )
 
-// Browser composes this module's three own screens (business hours, holidays,
-// closures) into one navigation group, because this module has no single Presenter
-// (it has three). Each carries its own ParentID: three crudviews on the same screen,
-// each with its own form mounted, cannot share the id they mount on. tenantID is
-// unused — see server.go's comment on the same parameter.
-func Browser(caller router.Caller, ids model.IDGenerator, tenantID string) (platformd.UIModule, error) {
-	hoursView, err := crudview.New(crudview.Config{
-		ParentID:  ID + "." + TabHoursID,
-		Presenter: businesscalendar.NewBusinessHoursView(caller),
-		IDs:       ids,
-	})
-	if err != nil {
-		return nil, err
-	}
-	holidaysView, err := crudview.New(crudview.Config{
-		ParentID:  ID + "." + TabHolidaysID,
-		Presenter: businesscalendar.NewHolidaysView(caller),
-		IDs:       ids,
-	})
-	if err != nil {
-		return nil, err
-	}
-	closuresView, err := crudview.New(crudview.Config{
-		ParentID:  ID + "." + TabClosuresID,
-		Presenter: businesscalendar.NewClosuresView(caller),
-		IDs:       ids,
-	})
-	if err != nil {
-		return nil, err
-	}
+const (
+	descCalendarGroup lang.Text = "Business calendar: opening hours, official holidays and scheduled closures."
+	descHours         lang.Text = "Regular weekly business hours and schedule by day of week."
+	descHolidays      lang.Text = "Public and official holidays where the business remains closed."
+	descClosures      lang.Text = "Special scheduled closures and extraordinary non-working days."
+)
 
-	hoursMod := platformd.NewUIModule(ID+"."+TabHoursID, TabHoursLabel, svg.Icon(ID), hoursView)
-	holidaysMod := platformd.NewUIModule(ID+"."+TabHolidaysID, TabHolidaysLabel, svg.Icon(ID), holidaysView)
-	closuresMod := platformd.NewUIModule(ID+"."+TabClosuresID, TabClosuresLabel, svg.Icon(ID), closuresView)
-
-	return platformd.NewGroupUIModule(ID, Label, svg.Icon(ID), []platformd.UIModule{
-		hoursMod, holidaysMod, closuresMod,
-	}), nil
+// Screens declara las pantallas que este módulo ofrece al menú de la app.
+func Screens(caller router.Caller) []view.Screen {
+	return []view.Screen{{
+		ID:    ID,
+		Label: Label,
+		Icon:  ID,
+		Help:  descCalendarGroup,
+		Children: []view.Screen{
+			{
+				ID:         ID + "." + TabHoursID,
+				Label:      TabHoursLabel,
+				Icon:       ID,
+				Permission: "business_hours",
+				Presenter:  businesscalendar.NewBusinessHoursView(caller, view.WithDescription(descHours)),
+			},
+			{
+				ID:         ID + "." + TabHolidaysID,
+				Label:      TabHolidaysLabel,
+				Icon:       ID,
+				Permission: "holiday",
+				Presenter:  businesscalendar.NewHolidaysView(caller, view.WithDescription(descHolidays)),
+			},
+			{
+				ID:         ID + "." + TabClosuresID,
+				Label:      TabClosuresLabel,
+				Icon:       ID,
+				Permission: "closure",
+				Presenter:  businesscalendar.NewClosuresView(caller, view.WithDescription(descClosures)),
+			},
+		},
+	}}
 }

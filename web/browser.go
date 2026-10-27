@@ -5,7 +5,7 @@ package main
 import (
 	. "webtyp.com/dom"
 	"webtyp.com/events/mock"
-	"webtyp.com/layout/platformd"
+	"webtyp.com/html"
 	"webtyp.com/orm"
 	"webtyp.com/router/loopback"
 	"webtyp.com/storage/mem"
@@ -48,17 +48,8 @@ func main() {
 
 	caller := loopback.WithTenant(demoTenantID, bc)
 
-	v, err := ui.Browser(caller, ids, demoTenantID)
-	if err != nil {
-		panic(err)
-	}
-
-	p := &platformd.Platform{
-		AppName:   ui.Label + " — demo",
-		User:      demoUser{},
-		Modules:   []platformd.UIModule{v},
-		DefaultID: ui.ID,
-	}
-	Append("body", p)
+	screens := ui.Screens(caller)
+	appNode := html.Div().Child(html.H1().Text(string(screens[0].Label)), html.P().Text("Demo"))
+	Append("body", appNode)
 	select {}
 }

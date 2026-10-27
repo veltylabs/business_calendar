@@ -262,3 +262,6 @@ gotest
 2. `gotest` pasa con 0 fallos de compilación, 0 fallos de tests y cobertura verificada.
 3. `langc sync .` pasa sin errores.
 4. El PR se abre inmediatamente al pasar estas comprobaciones.
+
+## Executor notes
+Since `web/browser.go` relied on `webtyp.com/layout/platformd` which had been dropped, I rewrote `web/browser.go` to use a minimal `html.Div` element wrapping the demo screens content instead of trying to add a new unused viewer dependency or panic.
