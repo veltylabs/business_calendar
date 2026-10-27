@@ -153,7 +153,7 @@ func (p *CalendarChangedPayload) IsNil() bool { return p == nil }
 var UpsertBusinessHoursArgsModel = model.Definition{
 	Name: "upsert_business_hours_args",
 	Fields: model.Fields{
-		{Name: "day_of_week", Type: model.Int()},
+		{Name: "day_of_week", Type: model.Int(), Label: "Day of week"},
 		{Name: "open_min", Type: model.Text()},
 		{Name: "close_min", Type: model.Text()},
 		{Name: "is_open", Type: model.Bool()},

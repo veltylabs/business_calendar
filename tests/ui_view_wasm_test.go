@@ -5,22 +5,10 @@ package tests
 import (
 	"testing"
 
-	"webtyp.com/dom"
-	"webtyp.com/layout/platformd"
 	"webtyp.com/model"
 
-	businesscalendar "github.com/veltylabs/business_calendar"
 	"github.com/veltylabs/business_calendar/ui"
 )
-
-const testTenantID = "demo"
-
-type testIDGen struct{ n int }
-
-func (g *testIDGen) NewID() string {
-	g.n++
-	return "test-id-1"
-}
 
 type mockCaller struct {
 	lastOp   string
@@ -44,59 +32,45 @@ func (m *mockCaller) Dispatch(op string, args model.Encodable) {
 	m.lastArgs = args
 }
 
-func initView(m interface{ View() dom.Component }) string {
-	comp := m.View()
-	if initer, ok := comp.(interface{ Init(ctx dom.Ctx) }); ok {
-		initer.Init(nil)
-	}
-	if r, ok := comp.(dom.ViewRenderer); ok {
-		return r.Render().String()
-	}
-	return comp.String()
-}
+func TestWASM_BusinessCalendar_Screens(t *testing.T) {
+	mock := &mockCaller{}
 
-func TestWASM_BusinessCalendar_BrowserIsAGroupOfItsThreeScreens(t *testing.T) {
-	mock := &mockCaller{
-		onCall: func(op string, args model.Encodable, into model.Decodable) error {
-			return nil
-		},
+	screens := ui.Screens(mock)
+	if len(screens) != 1 {
+		t.Fatalf("se esperaba 1 pantalla raíz, pero devolvió %d", len(screens))
 	}
 
-	m, err := ui.Browser(mock, &testIDGen{}, testTenantID)
-	if err != nil {
-		t.Fatalf("ui.Browser: %v", err)
+	root := screens[0]
+	if err := root.Validate(); err != nil {
+		t.Fatalf("la pantalla raíz falló la validación: %v", err)
+	}
+	if root.ID != ui.ID {
+		t.Errorf("se esperaba ID %q, pero se obtuvo %q", ui.ID, root.ID)
 	}
 
-	gm, ok := m.(platformd.GroupModule)
-	if !ok {
-		t.Fatalf("se esperaba que ui.Browser devolviera un platformd.GroupModule, pero devolvió %T", m)
-	}
-
-	children := gm.Children()
+	children := root.Children
 	if len(children) != 3 {
-		t.Fatalf("se esperaban 3 submódulos, pero hay %d", len(children))
+		t.Fatalf("se esperaban 3 pantallas hijas, pero hay %d", len(children))
 	}
 
-	expectedModels := []string{
-		"business_calendar.hours",
-		"business_calendar.holidays",
-		"business_calendar.closures",
+	expectedIDs := []string{
+		ui.ID + "." + ui.TabHoursID,
+		ui.ID + "." + ui.TabHolidaysID,
+		ui.ID + "." + ui.TabClosuresID,
 	}
 
 	for i, child := range children {
-		if modelName := child.ModelName(); modelName != expectedModels[i] {
-			t.Errorf("el hijo %d debería tener ModelName %q, pero tiene %q", i, expectedModels[i], modelName)
+		if err := child.Validate(); err != nil {
+			t.Errorf("el hijo %d falló la validación: %v", i, err)
+		}
+		if child.Permission == "" {
+			t.Errorf("el hijo %d no tiene Permiso definido", i)
+		}
+		if child.ID != expectedIDs[i] {
+			t.Errorf("el hijo %d debería tener ID %q, pero tiene %q", i, expectedIDs[i], child.ID)
+		}
+		if child.Presenter == nil {
+			t.Errorf("el hijo %d no tiene Presenter definido", i)
 		}
 	}
-
-	for i, label := range []string{"Horario", "Feriados", "Cierres"} {
-		if got := children[i].Label(); got != label {
-			t.Errorf("el hijo %d debería llamarse %q, pero se llama %q", i, label, got)
-		}
-		if html := initView(children[i]); html == "" {
-			t.Errorf("la pantalla del hijo %d (%s) no renderiza nada", i, label)
-		}
-	}
-
-	_ = businesscalendar.ModelName
 }

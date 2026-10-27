@@ -3,8 +3,10 @@ PLAN: "feat: migrate ui to view.Screen and drop layout dependency"
 TAG: v0.5.16
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 1348023359738421188
+PR: https://github.com/veltylabs/business_calendar/pull/11
+REVIEWED_COMMIT: f975d46d5788437f02a1693382a1ec0b9d1f6dfe
 ---
 
 > Read AGENTS.md at the repo root before any change.
@@ -262,3 +264,6 @@ gotest
 2. `gotest` pasa con 0 fallos de compilación, 0 fallos de tests y cobertura verificada.
 3. `langc sync .` pasa sin errores.
 4. El PR se abre inmediatamente al pasar estas comprobaciones.
+
+## Executor notes
+Since `web/browser.go` relied on `webtyp.com/layout/platformd` which had been dropped, I rewrote `web/browser.go` to use a minimal `html.Div` element wrapping the demo screens content instead of trying to add a new unused viewer dependency or panic.

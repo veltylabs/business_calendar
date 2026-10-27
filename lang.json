@@ -1,0 +1,33 @@
+{
+  "languages": ["es", "zh", "hi", "ar", "pt", "fr", "de", "ru"],
+  "keys": {
+    "Business calendar: opening hours, official holidays and scheduled closures.": ["Calendario institucional: horarios de apertura, feriados oficiales y cierres programados.", "", "", "", "", "", "", ""],
+    "Business hours": ["Horarios de atención", "", "", "", "", "", "", ""],
+    "Closed": ["Cerrado", "", "", "", "", "", "", ""],
+    "Closes at": ["Cierra a las", "", "", "", "", "", "", ""],
+    "Closures": ["Cierres", "", "", "", "", "", "", ""],
+    "Date": ["Fecha", "", "", "", "", "", "", ""],
+    "Day of week": ["Día de la semana", "", "", "", "", "", "", ""],
+    "Holidays": ["Feriados", "", "", "", "", "", "", ""],
+    "Name": ["Nombre", "", "", "", "", "", "", ""],
+    "Notes": ["Notas", "", "", "", "", "", "", ""],
+    "Open": ["Abierto", "", "", "", "", "", "", ""],
+    "Opens at": ["Abre a las", "", "", "", "", "", "", ""],
+    "Public and official holidays where the business remains closed.": ["Feriados públicos y oficiales donde el negocio permanece cerrado.", "", "", "", "", "", "", ""],
+    "Reason": ["Motivo", "", "", "", "", "", "", ""],
+    "Regular weekly business hours and schedule by day of week.": ["Horario comercial semanal regular y cronograma por día de la semana.", "", "", "", "", "", "", ""],
+    "Special scheduled closures and extraordinary non-working days.": ["Cierres especiales programados y días no laborables extraordinarios.", "", "", "", "", "", "", ""],
+    "business_calendar: Deps.IDs is required": ["business_calendar: Deps.IDs es requerido", "", "", "", "", "", "", ""],
+    "close min": ["minuto de cierre", "", "", "", "", "", "", ""],
+    "date": ["fecha", "", "", "", "", "", "", ""],
+    "from": ["desde", "", "", "", "", "", "", ""],
+    "is open": ["está abierto", "", "", "", "", "", "", ""],
+    "name": ["nombre", "", "", "", "", "", "", ""],
+    "notes": ["notas", "", "", "", "", "", "", ""],
+    "open min": ["minuto de apertura", "", "", "", "", "", "", ""],
+    "reason": ["motivo", "", "", "", "", "", "", ""],
+    "specific date": ["fecha específica", "", "", "", "", "", "", ""],
+    "to": ["hasta", "", "", "", "", "", "", ""],
+    "updated at": ["actualizado el", "", "", "", "", "", "", ""]
+  }
+}

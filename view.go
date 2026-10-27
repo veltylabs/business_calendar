@@ -67,30 +67,29 @@ func hoursLabel(r *BusinessHours) string {
 	return r.OpenMin + "–" + r.CloseMin
 }
 
-// NewBusinessHoursView construye el Presenter de horas semanales — lectura + guardado
-// (upsert). La aplicación decide qué renderizador lo dibuja.
-// Ejemplo: view := businesscalendar.NewBusinessHoursView(caller)
-func NewBusinessHoursView(caller router.Caller) view.Presenter {
+// NewBusinessHoursView construye el Presenter de horas semanales.
+func NewBusinessHoursView(caller router.Caller, opts ...view.Option) view.Presenter {
 	b := view.NewCallerLister(caller,
 		view.Ops{Module: ModelName, List: OpListBusinessHours, Save: OpUpsertBusinessHours},
 		func() model.ModelSlice { return &BusinessHoursList{} })
-	return view.New(b, &BusinessHours{}, view.WithTitle(lang.Translate("Business hours").String()))
+	allOpts := append([]view.Option{view.WithTitle(lang.Translate("Business hours").String())}, opts...)
+	return view.New(b, &BusinessHours{}, allOpts...)
 }
 
-// NewHolidaysView construye el Presenter de feriados — CRUD completo (listar, agregar, eliminar).
-// Ejemplo: view := businesscalendar.NewHolidaysView(caller)
-func NewHolidaysView(caller router.Caller) view.Presenter {
+// NewHolidaysView construye el Presenter de feriados.
+func NewHolidaysView(caller router.Caller, opts ...view.Option) view.Presenter {
 	b := view.NewCallerLister(caller,
 		view.Ops{Module: ModelName, List: OpListHolidays, Save: OpAddHoliday, Delete: OpRemoveHoliday},
 		func() model.ModelSlice { return &HolidayList{} })
-	return view.New(b, &Holiday{}, view.WithTitle(lang.Translate("Holidays").String()))
+	allOpts := append([]view.Option{view.WithTitle(lang.Translate("Holidays").String())}, opts...)
+	return view.New(b, &Holiday{}, allOpts...)
 }
 
-// NewClosuresView construye el Presenter de cierres — CRUD completo (listar, agregar, eliminar).
-// Ejemplo: view := businesscalendar.NewClosuresView(caller)
-func NewClosuresView(caller router.Caller) view.Presenter {
+// NewClosuresView construye el Presenter de cierres.
+func NewClosuresView(caller router.Caller, opts ...view.Option) view.Presenter {
 	b := view.NewCallerLister(caller,
 		view.Ops{Module: ModelName, List: OpListClosures, Save: OpAddClosure, Delete: OpRemoveClosure},
 		func() model.ModelSlice { return &ClosureList{} })
-	return view.New(b, &Closure{}, view.WithTitle(lang.Translate("Closures").String()))
+	allOpts := append([]view.Option{view.WithTitle(lang.Translate("Closures").String())}, opts...)
+	return view.New(b, &Closure{}, allOpts...)
 }
