@@ -24,11 +24,11 @@ var BusinessHoursModel = model.Definition{
 	Name: "business_hours",
 	Fields: model.Fields{
 		{Name: "id", Type: model.Text(), DB: &model.FieldDB{PK: true}},
-		{Name: "day_of_week", Type: input.Number(), Label: "Day of week", NotNull: true, DB: &model.FieldDB{Unique: true}},
-		{Name: "open_min", Type: input.Hour(), Label: "Opens at", NotNull: true},
-		{Name: "close_min", Type: input.Hour(), Label: "Closes at", NotNull: true},
-		{Name: "is_open", Type: input.Checkbox(), Label: "Open", NotNull: true},
-		{Name: "notes", Type: input.Textarea(), Label: "Notes"},
+		{Name: "day_of_week", Type: input.Number(), Label: "Day of week", NotNull: true, DB: &model.FieldDB{Unique: true}, Row: model.RowTitle},
+		{Name: "open_min", Type: input.Hour(), Label: "Opens at", NotNull: true, Row: model.RowDetail},
+		{Name: "close_min", Type: input.Hour(), Label: "Closes at", NotNull: true, Row: model.RowDetail},
+		{Name: "is_open", Type: input.Checkbox(), Label: "Open", NotNull: true, Row: model.RowDetail},
+		{Name: "notes", Type: input.Textarea(), Label: "Notes", Row: model.RowDetail},
 		{Name: "updated_at", Type: model.NanoTime(), NotNull: true},
 	},
 }
@@ -40,8 +40,8 @@ var HolidayModel = model.Definition{
 	Name: "holiday",
 	Fields: model.Fields{
 		{Name: "id", Type: model.Text(), DB: &model.FieldDB{PK: true}},
-		{Name: "specific_date", Type: input.Number(), Label: "Date", NotNull: true}, // midnight UTC, seconds
-		{Name: "name", Type: input.Text(), Label: "Name", NotNull: true},
+		{Name: "specific_date", Type: input.Number(), Label: "Date", NotNull: true, Row: model.RowDetail}, // midnight UTC, seconds
+		{Name: "name", Type: input.Text(), Label: "Name", NotNull: true, Row: model.RowTitle},
 		{Name: "notes", Type: input.Textarea(), Label: "Notes"},
 		{Name: "updated_at", Type: model.NanoTime(), NotNull: true},
 	},
@@ -56,8 +56,8 @@ var ClosureModel = model.Definition{
 	Name: "closure",
 	Fields: model.Fields{
 		{Name: "id", Type: model.Text(), DB: &model.FieldDB{PK: true}},
-		{Name: "specific_date", Type: input.Number(), Label: "Date", NotNull: true},
-		{Name: "reason", Type: input.Text(), Label: "Reason", NotNull: true},
+		{Name: "specific_date", Type: input.Number(), Label: "Date", NotNull: true, Row: model.RowDetail},
+		{Name: "reason", Type: input.Text(), Label: "Reason", NotNull: true, Row: model.RowTitle},
 		{Name: "updated_at", Type: model.NanoTime(), NotNull: true},
 	},
 }
