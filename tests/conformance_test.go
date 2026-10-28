@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	businesscalendar "github.com/veltylabs/business_calendar"
-	"webtyp.com/model"
 	"webtyp.com/router/loopback"
 	"webtyp.com/view"
 )
@@ -140,7 +139,7 @@ func TestHolidayItem_DescriptionIsTheRealDate(t *testing.T) {
 	}
 }
 
-func TestRowsDeclaredOnFields(t *testing.T) {
+func TestItemsDeclaredOnFields(t *testing.T) {
 	bh := businesscalendar.BusinessHours{
 		DayOfWeek: 2,
 		OpenMin:   "09:00",
@@ -148,35 +147,35 @@ func TestRowsDeclaredOnFields(t *testing.T) {
 		IsOpen:    true,
 		Notes:     "note",
 	}
-	rowBH := model.RowOf(&bh)
-	if rowBH.Title != "2" {
-		t.Errorf("BusinessHours title = %q, want 2", rowBH.Title)
+	rowBH := bh.Item()
+	if rowBH.Label != "2" {
+		t.Errorf("BusinessHours title = %q, want 2", rowBH.Label)
 	}
-	if rowBH.Detail != "09:00 · 17:00 · true · note" {
-		t.Errorf("BusinessHours detail = %q, want 09:00 · 17:00 · true · note", rowBH.Detail)
+	if rowBH.Description != "09:00 · 17:00 · true · note" {
+		t.Errorf("BusinessHours detail = %q, want 09:00 · 17:00 · true · note", rowBH.Description)
 	}
 
 	h := businesscalendar.Holiday{
 		SpecificDate: 1234567890,
 		Name:         "New Year",
 	}
-	rowH := model.RowOf(&h)
-	if rowH.Title != "New Year" {
-		t.Errorf("Holiday title = %q, want New Year", rowH.Title)
+	rowH := h.Item()
+	if rowH.Label != "New Year" {
+		t.Errorf("Holiday title = %q, want New Year", rowH.Label)
 	}
-	if rowH.Detail != "1234567890" {
-		t.Errorf("Holiday detail = %q, want 1234567890", rowH.Detail)
+	if rowH.Description != "1234567890" {
+		t.Errorf("Holiday detail = %q, want 1234567890", rowH.Description)
 	}
 
 	c := businesscalendar.Closure{
 		SpecificDate: 9876543210,
 		Reason:       "Maintenance",
 	}
-	rowC := model.RowOf(&c)
-	if rowC.Title != "Maintenance" {
-		t.Errorf("Closure title = %q, want Maintenance", rowC.Title)
+	rowC := c.Item()
+	if rowC.Label != "Maintenance" {
+		t.Errorf("Closure title = %q, want Maintenance", rowC.Label)
 	}
-	if rowC.Detail != "9876543210" {
-		t.Errorf("Closure detail = %q, want 9876543210", rowC.Detail)
+	if rowC.Description != "9876543210" {
+		t.Errorf("Closure detail = %q, want 9876543210", rowC.Description)
 	}
 }
