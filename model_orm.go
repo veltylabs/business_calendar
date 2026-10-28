@@ -5,6 +5,7 @@ package businesscalendar
 import (
 	"webtyp.com/model"
 	"webtyp.com/orm"
+	"webtyp.com/fmt"
 	"webtyp.com/time"
 )
 
@@ -57,6 +58,10 @@ func (s *BusinessHoursList) DecodeFields(_ model.FieldReader) {}
 
 func (m *BusinessHours) Validate(action byte) error {
 	return model.ValidateFields(action, m)
+}
+
+func (m *BusinessHours) Item() model.Item {
+	return model.Item{ID: m.Id, Label: fmt.Convert(m.DayOfWeek).String(), Description: model.JoinItem(m.OpenMin, m.CloseMin, fmt.Convert(m.IsOpen).String(), m.Notes)}
 }
 
 var BusinessHours_ = struct {
@@ -139,6 +144,10 @@ func (m *Holiday) Validate(action byte) error {
 	return model.ValidateFields(action, m)
 }
 
+func (m *Holiday) Item() model.Item {
+	return model.Item{ID: m.Id, Label: m.Name, Description: fmt.Convert(m.SpecificDate).String()}
+}
+
 var Holiday_ = struct {
 	Id string
 	SpecificDate string
@@ -210,6 +219,10 @@ func (s *ClosureList) DecodeFields(_ model.FieldReader) {}
 
 func (m *Closure) Validate(action byte) error {
 	return model.ValidateFields(action, m)
+}
+
+func (m *Closure) Item() model.Item {
+	return model.Item{ID: m.Id, Label: m.Reason, Description: fmt.Convert(m.SpecificDate).String()}
 }
 
 var Closure_ = struct {

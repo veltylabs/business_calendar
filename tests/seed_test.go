@@ -9,7 +9,6 @@ import (
 
 	businesscalendar "github.com/veltylabs/business_calendar"
 	"github.com/veltylabs/business_calendar/seed"
-	"webtyp.com/model"
 )
 
 func TestSeed_Load(t *testing.T) {
@@ -53,7 +52,7 @@ func TestSeed_Load(t *testing.T) {
 	// What the user sees: the view's own date label (FormatISO8601, UTC) —
 	// never tinytime.FormatDate, which applies the local offset and turns a
 	// UTC-midnight date into the previous day in Chile (UTC-3).
-	formattedDate := model.RowOf(sept18).Detail
+	formattedDate := sept18.Item().Description
 	if formattedDate != "1789689600" {
 		t.Errorf("sept18 view date = %q, want %q", formattedDate, "1789689600")
 	}
