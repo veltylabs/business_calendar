@@ -124,3 +124,5 @@ The module exports its own UI view, seed demo data, and executable WASM demo she
 ---
 
 *Este módulo forma parte de la colección de módulos de Velty Labs.*
+
+errores por `rpc.WriteError`; permisos por tabla (`model.ResourceOf`); guardar/borrar con `view.MountSave`/`MountDelete`; claves foráneas declaradas.

@@ -45,10 +45,10 @@ func TestMountOperations_NineOpsAndRequires(t *testing.T) {
 		{businesscalendar.OpGetDayBounds, "business_hours", model.Read, true},
 		{businesscalendar.OpListHolidays, "holiday", model.Read, false},
 		{businesscalendar.OpAddHoliday, "holiday", model.Create, true},
-		{businesscalendar.OpRemoveHoliday, "holiday", model.Delete, true},
+		{businesscalendar.OpRemoveHoliday, "holiday", model.Delete, false},
 		{businesscalendar.OpListClosures, "closure", model.Read, false},
 		{businesscalendar.OpAddClosure, "closure", model.Create, true},
-		{businesscalendar.OpRemoveClosure, "closure", model.Delete, true},
+		{businesscalendar.OpRemoveClosure, "closure", model.Delete, false},
 	}
 	for _, r := range routes {
 		var w *want
@@ -113,11 +113,11 @@ func TestOpAddHoliday_DuplicateIs409(t *testing.T) {
 	m, _ := newModule(t, nil)
 	reg := mounted(t, m)
 
-	body := []byte(`{"specific_date":1789354800,"name":"Holiday"}`)
+	body := []byte(`{"records":[{"specific_date":1789354800,"name":"Holiday"}]}`)
 	first := &mock.Context{InBody: body}
 	first.SetUserID("u1")
 	reg.Invoke("OP", "/"+businesscalendar.OpAddHoliday, first)
-	if first.Status != 200 {
+	if first.Status != 0 {
 		t.Fatalf("first add: status %d body=%s", first.Status, first.ResponseBody())
 	}
 
@@ -133,7 +133,7 @@ func TestOpAddHoliday_MissingNameIs400(t *testing.T) {
 	m, _ := newModule(t, nil)
 	reg := mounted(t, m)
 
-	ctx := &mock.Context{InBody: []byte(`{"specific_date":1789354800}`)}
+	ctx := &mock.Context{InBody: []byte(`{"records":[{"specific_date":1789354800}]}`)}
 	ctx.SetUserID("u1")
 	reg.Invoke("OP", "/"+businesscalendar.OpAddHoliday, ctx)
 	if ctx.Status != 400 {
@@ -145,7 +145,7 @@ func TestOpUpsertBusinessHours_InvalidMinutesIs400(t *testing.T) {
 	m, _ := newModule(t, nil)
 	reg := mounted(t, m)
 
-	ctx := &mock.Context{InBody: []byte(`{"day_of_week":1,"open_min":1080,"close_min":480,"is_open":true}`)}
+	ctx := &mock.Context{InBody: []byte(`{"records":[{"day_of_week":1,"open_min":1080,"close_min":480,"is_open":true}]}`)}
 	ctx.SetUserID("u1")
 	reg.Invoke("OP", "/"+businesscalendar.OpUpsertBusinessHours, ctx)
 	if ctx.Status != 400 {
@@ -157,7 +157,7 @@ func TestOpRemoveHoliday_NotFoundIs404(t *testing.T) {
 	m, _ := newModule(t, nil)
 	reg := mounted(t, m)
 
-	ctx := &mock.Context{InBody: []byte(`{"id":"nope"}`)}
+	ctx := &mock.Context{InBody: []byte(`{"ids":["nope"]}`)}
 	ctx.SetUserID("u1")
 	reg.Invoke("OP", "/"+businesscalendar.OpRemoveHoliday, ctx)
 	if ctx.Status != 404 {

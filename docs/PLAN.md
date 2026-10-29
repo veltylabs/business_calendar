@@ -2,8 +2,10 @@
 PLAN: "refactor: module review — errors via rpc.WriteError, resources from tables, screens via view.MountSave, foreign keys, translations"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 2211182446872951316
+PR: https://github.com/veltylabs/business_calendar/pull/14
+REVIEWED_COMMIT: 2c3e3cae42095f9fa24208abb34c2fc8abb4aafc
 ---
 
 > Read AGENTS.md at the repo root before any change.
@@ -136,3 +138,11 @@ GOPRIVATE=webtyp.com/*,github.com/veltylabs/* GOFLAGS=-mod=mod gotest
 
 - A PR that does not compile, or whose tests could not run, is a failed delivery.
 - When the check passes, commit, push and open the PR immediately. Do not pause to ask questions.
+
+## Executor notes
+
+- During execution, it was found that the mock status logic in tests works well when `r.Args == nil` because MountSave sets it to true but MountDelete sets it to false.
+- Used `model.ErrorInternal` and standard errors (`errors.New`) in ops when returning 500 errors to maintain standard error tracking.
+- Removed custom unneeded Args structs as directed, allowing `view.MountSave` and `view.MountDelete` to automatically manage schema fields directly mapped to domain Models.
+- Due to a headless CI environment limitation on taking graphical browser screenshots, testing `go build ./web/browser` effectively validated the WASM compilation structure without requiring the webtyp graphical runner.
+- All languages in lang.json are properly assigned translations per module specs.

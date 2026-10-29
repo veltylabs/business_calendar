@@ -66,16 +66,13 @@ var ClosureModel = model.Definition{
 // compares them by asserting this type and comparing the value: == between two
 // error values compiles, under TinyGo, to runtime.interfaceEqual, which pulls
 // internal/reflectlite into the wasm binary.
-type domainError string
-
-func (e domainError) Error() string { return string(e) }
-
 const (
-	ErrNotFound       domainError = "business_calendar: record not found"
-	ErrInvalidDay     domainError = "business_calendar: day_of_week must be 0..6"
-	ErrInvalidWeekday domainError = "business_calendar: day of week must be 0..6"
-	ErrInvalidMinutes domainError = "business_calendar: minutes must be 0..1439 and open_min < close_min"
-	ErrDuplicateDate  domainError = "business_calendar: a record already exists for that date"
+	ErrNotFound       model.NotFound = "business_calendar: record not found"
+	ErrInvalidDay     model.Invalid = "business_calendar: day_of_week must be 0..6"
+	ErrInvalidWeekday model.Invalid = "business_calendar: day of week must be 0..6"
+	ErrInvalidMinutes model.Invalid = "business_calendar: minutes must be 0..1439 and open_min < close_min"
+	ErrDuplicateDate  model.Conflict = "business_calendar: a record already exists for that date"
+	ErrCannotRead     model.Invalid = "business_calendar: cannot read the request"
 )
 
 // EventCalendarChanged fires on every write. appointment_booking subscribes so
@@ -149,18 +146,6 @@ func (p *CalendarChangedPayload) IsNil() bool { return p == nil }
 // enforced as DOMAIN rules in the service (ErrInvalidDay/ErrInvalidMinutes),
 // the single fail-closed chokepoint every write path crosses; NotNull stays
 // only on the text fields where empty is never legal.
-// Ejemplo: var args UpsertBusinessHoursArgs
-var UpsertBusinessHoursArgsModel = model.Definition{
-	Name: "upsert_business_hours_args",
-	Fields: model.Fields{
-		{Name: "day_of_week", Type: model.Int(), Label: "Day of week"},
-		{Name: "open_min", Type: model.Text()},
-		{Name: "close_min", Type: model.Text()},
-		{Name: "is_open", Type: model.Bool()},
-		{Name: "notes", Type: model.Text()},
-	},
-}
-
 // Ejemplo: var args GetDayBoundsArgs
 var GetDayBoundsArgsModel = model.Definition{
 	Name: "get_day_bounds_args",
@@ -178,24 +163,6 @@ var ListHolidaysArgsModel = model.Definition{
 	},
 }
 
-// Ejemplo: var args AddHolidayArgs
-var AddHolidayArgsModel = model.Definition{
-	Name: "add_holiday_args",
-	Fields: model.Fields{
-		{Name: "specific_date", Type: model.UnixTime()},
-		{Name: "name", Type: model.Text(), NotNull: true},
-		{Name: "notes", Type: model.Text()},
-	},
-}
-
-// Ejemplo: var args RemoveHolidayArgs
-var RemoveHolidayArgsModel = model.Definition{
-	Name: "remove_holiday_args",
-	Fields: model.Fields{
-		{Name: "id", Type: model.Text(), NotNull: true},
-	},
-}
-
 // Ejemplo: var args ListClosuresArgs
 var ListClosuresArgsModel = model.Definition{
 	Name: "list_closures_args",
@@ -205,19 +172,3 @@ var ListClosuresArgsModel = model.Definition{
 	},
 }
 
-// Ejemplo: var args AddClosureArgs
-var AddClosureArgsModel = model.Definition{
-	Name: "add_closure_args",
-	Fields: model.Fields{
-		{Name: "specific_date", Type: model.UnixTime()},
-		{Name: "reason", Type: model.Text(), NotNull: true},
-	},
-}
-
-// Ejemplo: var args RemoveClosureArgs
-var RemoveClosureArgsModel = model.Definition{
-	Name: "remove_closure_args",
-	Fields: model.Fields{
-		{Name: "id", Type: model.Text(), NotNull: true},
-	},
-}

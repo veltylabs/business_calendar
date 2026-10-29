@@ -27,11 +27,11 @@ func TestEventCalendarChanged_EveryMutation(t *testing.T) {
 	}
 
 	// A holiday closes its day.
-	if err := m.AddHoliday(businesscalendar.Holiday{SpecificDate: oct01_2026_Thu, Name: "H"}); err != nil {
+	if err := m.AddHoliday(businesscalendar.Holiday{SpecificDate: oct01_2026_Thu, Name: "Holiday"}); err != nil {
 		t.Fatalf("AddHoliday: %v", err)
 	}
 	// A closure closes its day.
-	if err := m.AddClosure(businesscalendar.Closure{SpecificDate: dec25_2026_Fri, Reason: "R"}); err != nil {
+	if err := m.AddClosure(businesscalendar.Closure{SpecificDate: dec25_2026_Fri, Reason: "Reason"}); err != nil {
 		t.Fatalf("AddClosure: %v", err)
 	}
 
@@ -65,7 +65,7 @@ func TestEventCalendarChanged_RemovalOpens(t *testing.T) {
 	pub := newRecording()
 	m, _ := newModule(t, pub)
 
-	if err := m.AddHoliday(businesscalendar.Holiday{SpecificDate: oct01_2026_Thu, Name: "H"}); err != nil {
+	if err := m.AddHoliday(businesscalendar.Holiday{SpecificDate: oct01_2026_Thu, Name: "Holiday"}); err != nil {
 		t.Fatalf("AddHoliday: %v", err)
 	}
 	rows, err := m.ListHolidays(0, 0)
