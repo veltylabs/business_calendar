@@ -99,13 +99,13 @@ func hoursCloseTime(prev, next BusinessHours) bool {
 // Ejemplo: err := cal.UpsertBusinessHours(bh)
 func (m *Module) UpsertBusinessHours(h BusinessHours) error {
 	if h.DayOfWeek < 0 || h.DayOfWeek > 6 {
-		return ErrInvalidDay
+		return &model.FieldError{Field: "day_of_week", Err: ErrInvalidDay}
 	}
 	if h.IsOpen {
 		openMin, err1 := parseClock(h.OpenMin)
 		closeMin, err2 := parseClock(h.CloseMin)
 		if err1 != nil || err2 != nil || openMin >= closeMin {
-			return ErrInvalidMinutes
+			return &model.FieldError{Field: "open_min", Err: ErrInvalidMinutes}
 		}
 	} else {
 		// Un día cerrado no lleva minutos significativos — normalizar a una
@@ -114,11 +114,10 @@ func (m *Module) UpsertBusinessHours(h BusinessHours) error {
 	}
 
 	prev, err := m.businessHoursByDay(int(h.DayOfWeek))
-	e, isDomainErr := err.(domainError)
-	if err != nil && (!isDomainErr || e != ErrNotFound) {
+	if err != nil && model.KindOf(err) != model.ErrorNotFound {
 		return err
 	}
-	if isDomainErr && e == ErrNotFound {
+	if err != nil && model.KindOf(err) == model.ErrorNotFound {
 		h.Id = m.ids.NewID()
 		h.UpdatedAt = tinytime.NowNano()
 		if err := m.db.Create(&h); err != nil {
@@ -171,6 +170,7 @@ func (m *Module) AddHoliday(h Holiday) error {
 	}
 	h.Id = m.ids.NewID()
 	h.UpdatedAt = tinytime.NowNano()
+	if err := h.Validate(model.ActionCreate); err != nil { return err }
 	if err := m.db.Create(&h); err != nil {
 		return err
 	}
@@ -237,6 +237,7 @@ func (m *Module) AddClosure(c Closure) error {
 	}
 	c.Id = m.ids.NewID()
 	c.UpdatedAt = tinytime.NowNano()
+	if err := c.Validate(model.ActionCreate); err != nil { return err }
 	if err := m.db.Create(&c); err != nil {
 		return err
 	}

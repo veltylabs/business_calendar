@@ -89,7 +89,7 @@ type Reader interface {
 func (m *Module) getWeeklyBounds(dayOfWeek int) (DayDetail, error) {
 	bh, err := m.businessHoursByDay(dayOfWeek)
 	if err != nil {
-		if e, ok := err.(domainError); ok && e == ErrNotFound {
+		if model.KindOf(err) == model.ErrorNotFound {
 			return DayDetail{ClosedBy: ClosedWeekly}, nil
 		}
 		return DayDetail{}, err

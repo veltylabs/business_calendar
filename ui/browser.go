@@ -5,6 +5,7 @@ package ui
 import (
 	businesscalendar "github.com/veltylabs/business_calendar"
 	"webtyp.com/lang"
+	"webtyp.com/model"
 	"webtyp.com/router"
 	"webtyp.com/view"
 )
@@ -37,21 +38,21 @@ func Screens(caller router.Caller) []view.Screen {
 				ID:         ID + "." + TabHoursID,
 				Label:      TabHoursLabel,
 				Icon:       ID,
-				Permission: "business_hours",
+				Permission: model.ResourceOf(&businesscalendar.BusinessHoursModel),
 				Presenter:  businesscalendar.NewBusinessHoursView(caller, view.WithDescription(descHours)),
 			},
 			{
 				ID:         ID + "." + TabHolidaysID,
 				Label:      TabHolidaysLabel,
 				Icon:       ID,
-				Permission: "holiday",
+				Permission: model.ResourceOf(&businesscalendar.HolidayModel),
 				Presenter:  businesscalendar.NewHolidaysView(caller, view.WithDescription(descHolidays)),
 			},
 			{
 				ID:         ID + "." + TabClosuresID,
 				Label:      TabClosuresLabel,
 				Icon:       ID,
-				Permission: "closure",
+				Permission: model.ResourceOf(&businesscalendar.ClosureModel),
 				Presenter:  businesscalendar.NewClosuresView(caller, view.WithDescription(descClosures)),
 			},
 		},

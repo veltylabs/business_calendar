@@ -1,9 +1,12 @@
 package businesscalendar
 
-import tinytime "webtyp.com/time"
+import (
+	"webtyp.com/model"
+	tinytime "webtyp.com/time"
+)
 
 // ErrNegativeDays: BankDayAfter con días negativos.
-const ErrNegativeDays = domainError("business_calendar: days must be zero or more")
+const ErrNegativeDays = model.Invalid("business_calendar: days must be zero or more")
 
 // BankDayAfter devuelve la medianoche UTC del día hábil bancario que está days días hábiles después de from.
 // Día hábil bancario: lunes a viernes que no es feriado legal (Holiday). El horario y los cierres propios del
