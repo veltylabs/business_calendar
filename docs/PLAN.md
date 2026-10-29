@@ -2,8 +2,10 @@
 PLAN: "refactor: module review — errors via rpc.WriteError, resources from tables, screens via view.MountSave, foreign keys, translations"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 2211182446872951316
+PR: https://github.com/veltylabs/business_calendar/pull/14
+REVIEWED_COMMIT: e8e158c4e15e56dcab0f44c532fb9f81d11fd2dc
 ---
 
 > Read AGENTS.md at the repo root before any change.
