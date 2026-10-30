@@ -30,6 +30,9 @@ var chileHolidays2026 = []holidaySeed{
 	{"2026-12-25", "Navidad"},
 }
 
+// Load puebla un módulo con datos de demostración (horarios, feriados).
+//
+// Ejemplo: data, err := seed.Load(cal)
 func Load(m *businesscalendar.Module) (Data, error) {
 	var data Data
 

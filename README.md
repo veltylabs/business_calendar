@@ -33,7 +33,7 @@ reader := businesscalendar.Reader(cal) // el puerto que consume un módulo vecin
 bounds, err := reader.GetDayBounds(dateMidnightUTC)
 ```
 
-`New` asume que el esquema de la base de datos (`business_hours`, `holiday`, `closure`) ya existe. La aplicación que despliega llama a `migrate.Migrate(conn, compiler)` una vez, en tiempo de despliegue.
+`New` asume que el esquema de la base de datos (`business_hours`, `holiday`, `closure`) ya existe. La aplicación que despliega llama a `migrate.Migrate(conn, compiler)` una vez, en tiempo de despliegue. Esta migración utiliza `ddl.Sync` para crear las tablas que faltan y agregar nuevas columnas si el modelo fue actualizado, ver flujo: https://github.com/webtyp/ddl/blob/main/docs/diagrams/SYNC_FLOW.md.
 
 ## Operaciones (Ops)
 

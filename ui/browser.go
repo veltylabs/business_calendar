@@ -27,6 +27,8 @@ const (
 )
 
 // Screens declara las pantallas que este módulo ofrece al menú de la app.
+//
+// Ejemplo: screens := ui.Screens(caller)
 func Screens(caller router.Caller) []view.Screen {
 	return []view.Screen{{
 		ID:    ID,

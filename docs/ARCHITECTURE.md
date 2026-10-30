@@ -25,7 +25,7 @@ Debido a que no hay columna de inquilino, las condiciones `UPDATE`/`DELETE` se b
 Acoplado únicamente a los puertos publicados en `webtyp.com/*`, nunca a infraestructura concreta —consulte `AGENTS.md` (raíz del repositorio) para la lista blanca/lista negra:
 
 - **`orm.DB` para almacenamiento** — independiente del backend sobre cualquier `storage.Conn` que inyecte la raíz de composición (`storage/mem` en las pruebas de este módulo).
-- **`ddl`** para la migración de esquema del propio módulo a través de `migrate.Migrate(conn, ddlCompiler)` en tiempo de despliegue —separado deliberadamente de `New()` e aislado en el subpaquete `migrate`.
+- **`ddl`** para la migración de esquema del propio módulo a través de `migrate.Migrate(conn, ddlCompiler)` (usando `ddl.Sync`, flujo: https://github.com/webtyp/ddl/blob/main/docs/diagrams/SYNC_FLOW.md) en tiempo de despliegue —separado deliberadamente de `New()` e aislado en el subpaquete `migrate`.
 - **`router.OperationModule`** (`ModelName()` + `MountOperations`) para transporte —el módulo nunca ve un servidor concreto o `net/http`.
 - **`model.IDGenerator`** para identidad (`Deps.IDs`, requerido —el módulo nunca construye uno).
 - **`events.Publisher`** (`Deps.Publisher`, opcional —nil lo deshabilita silenciosamente) para `EventCalendarChanged` después de cada escritura exitosa.
