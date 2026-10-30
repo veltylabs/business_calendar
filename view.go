@@ -8,6 +8,8 @@ import (
 )
 
 // NewBusinessHoursView construye el Presenter de horas semanales.
+//
+// Ejemplo: pres := NewBusinessHoursView(caller)
 func NewBusinessHoursView(caller router.Caller, opts ...view.Option) view.Presenter {
 	b := view.NewCallerLister(view.NewRecords().Caller(caller),
 		view.Ops{Module: ModelName, List: OpListBusinessHours, Save: OpUpsertBusinessHours},
@@ -17,6 +19,8 @@ func NewBusinessHoursView(caller router.Caller, opts ...view.Option) view.Presen
 }
 
 // NewHolidaysView construye el Presenter de feriados.
+//
+// Ejemplo: pres := NewHolidaysView(caller)
 func NewHolidaysView(caller router.Caller, opts ...view.Option) view.Presenter {
 	b := view.NewCallerLister(view.NewRecords().Caller(caller),
 		view.Ops{Module: ModelName, List: OpListHolidays, Save: OpAddHoliday, Delete: OpRemoveHoliday},
@@ -26,6 +30,8 @@ func NewHolidaysView(caller router.Caller, opts ...view.Option) view.Presenter {
 }
 
 // NewClosuresView construye el Presenter de cierres.
+//
+// Ejemplo: pres := NewClosuresView(caller)
 func NewClosuresView(caller router.Caller, opts ...view.Option) view.Presenter {
 	b := view.NewCallerLister(view.NewRecords().Caller(caller),
 		view.Ops{Module: ModelName, List: OpListClosures, Save: OpAddClosure, Delete: OpRemoveClosure},

@@ -2,8 +2,10 @@
 PLAN: "fix: migrate with ddl.Sync so a new field reaches an existing table"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 5899542139331584806
+PR: https://github.com/veltylabs/business_calendar/pull/15
+REVIEWED_COMMIT: 305d2c2a0709a02bdae96829aac5df5fa2352f63
 ---
 
 > Read AGENTS.md at the repo root before any change.
