@@ -1,0 +1,26 @@
+1. Implement Stage 1: import without alias, rename to DayLimits
+- Rename `tinytime "webtyp.com/time"` to `"webtyp.com/time"` in ops.go, seed/seed.go, convert.go, interfaces.go, module.go, bankdays.go, and tests.
+- Rename `time.DayBounds` -> `time.DayLimits`, `time.Unbounded` -> `time.Unlimited`.
+- Rename `GetDayBounds` -> `DayLimits`, `GetWeekdayBounds` -> `WeekdayLimits`, `DayDetail.Bounds` -> `DayDetail.Limits`, `get_day_bounds` -> `get_day_limits`, `opGetDayBounds` -> `opGetDayLimits`.
+- Delete `Reader` interface.
+- Move `DayDetail`, `ClosedReason` and constants to `model.go`. Move `GetDayDetail`/`DayLimits`/`WeekdayLimits`/`getWeeklyBounds` to `hours.go`. Delete `interfaces.go`.
+
+2. Implement Stage 2: ClosedDates in hours.go
+- Implement `ClosedDates` according to docs/PLAN.md.
+- Implement `dateText`.
+- Ensure sorting ascending in `ListHolidays` and `ListClosures` if necessary.
+
+3. Implement Stage 3: module/
+- Fix the package imports that I copied into `module/module.go`, `module/server.go`, `module/browser.go`
+
+4. Implement Stage 4: tests
+- Rename existing tests to use new names.
+- Create new test cases `TestClosedDates`, `TestClosedDatesEmpty`, `TestModuleBuilds`.
+
+5. Implement Stage 5: docs
+- Update `README.md` and `docs/ARCHITECTURE.md`.
+
+6. Run delivery checks (tests and pre-commit)
+- Verify `gotest` passes.
+- Verify `grep` string searches return empty.
+- Complete pre commit steps to make sure proper testing, verifications, reviews and reflections are done.
