@@ -2,6 +2,8 @@
 PLAN: "feat!: OpeningHours for appointment_booking — DayLimits, WeekdayLimits, ClosedDates; module/ for appkit"
 EXECUTOR: jules
 REVIEWER: none
+STATUS: running
+SESSION: 545858717947657141
 ---
 
 > Read AGENTS.md at the repo root before any change.
