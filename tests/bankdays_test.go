@@ -22,7 +22,7 @@ func TestBankDayAfter(t *testing.T) {
 
 	// Helpers
 	d := func(y, m, day int) tinytime.Unix {
-		return tinytime.Date(y, m, day, 0, 0, 0)
+		return tinytime.DateUTC(y, m, day, 0, 0, 0)
 	}
 
 	setupHoliday := func(date tinytime.Unix, name string) {

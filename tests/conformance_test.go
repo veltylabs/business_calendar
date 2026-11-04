@@ -98,10 +98,10 @@ func TestNewClosuresView_CRUD(t *testing.T) {
 //
 // Root cause: Holiday.SpecificDate is stored in SECONDS (see model.go's own
 // comment "midnight UTC, seconds", and AddHoliday's callers, which use
-// tinytime.ParseDate's result). But
-// view.go's Item() calls tinytime.FormatDate(h.SpecificDate) directly —
-// FormatDate takes time.Unix (webtyp.com/time's own convention: NowUnix() and
-// ParseDate both return time.Unix; FormatDate's own implementation does
+// tinytime.ParseDateUTC's result). But
+// view.go's Item() calls tinytime.DateUTC(h.SpecificDate) directly —
+// DateUTC takes time.Unix (webtyp.com/time's own convention: NowUnix() and
+// ParseDateUTC both return time.Unix; DateUTC.s own implementation does
 // time.Unix(v, 0)). Passing seconds where
 // nanoseconds were expected was off by 1e9: a real 2026 date (~1.7 billion
 // seconds since epoch) is ~1.7 seconds in nanosecond terms — a few seconds
@@ -112,7 +112,7 @@ func TestHolidayItem_DescriptionIsTheRealDate(t *testing.T) {
 	m, _ := newModule(t, nil)
 
 	// 2026-06-20 at midnight UTC, in SECONDS — exactly how AddHoliday's own
-	// real callers compute it (tinytime.ParseDate(...)).
+	// real callers compute it (tinytime.ParseDateUTC(...)).
 	const specificDateSeconds = 1781913600 // 2026-06-20T00:00:00Z
 
 	if err := m.AddHoliday(businesscalendar.Holiday{

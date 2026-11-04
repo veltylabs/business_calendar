@@ -72,3 +72,5 @@ Rename `time.Date(`/`tinytime.Date(` → `DateUTC(` and `Weekday(`/`ParseDate(`/
 
 Commit after every stage. Never edit a generated `*_orm.go`. Never run `git reset`, `git restore`, `git checkout --
 <file>` or `git stash` on your own work. Stuck 30 minutes: open the PR anyway listing what fails.
+## Executor notes
+- Failed to update webtyp.com/appkit as it was not present in the codebase/dependencies.

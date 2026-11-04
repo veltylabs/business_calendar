@@ -23,7 +23,7 @@ func (m *Module) BankDayAfter(from tinytime.Unix, days int) (tinytime.Unix, erro
 		return 0, err
 	}
 	isBankDay := func(d tinytime.Unix) bool {
-		wd := tinytime.Weekday(d)
+		wd := tinytime.WeekdayUTC(d)
 		if wd == 0 || wd == 6 {
 			return false
 		}

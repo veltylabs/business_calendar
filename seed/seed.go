@@ -61,7 +61,7 @@ func Load(m *businesscalendar.Module) (Data, error) {
 
 	// 2. Holidays seed
 	for _, hs := range chileHolidays2026 {
-		sec, err := tinytime.ParseDate(hs.dateStr)
+		sec, err := tinytime.ParseDateUTC(hs.dateStr)
 		if err != nil {
 			return Data{}, err
 		}
