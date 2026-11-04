@@ -2,6 +2,8 @@
 PLAN: "refactor: date keys with the UTC-named time functions (time v0.6.3)"
 EXECUTOR: jules
 REVIEWER: none
+STATUS: running
+SESSION: 1701764488451356850
 ---
 
 > Read AGENTS.md at the repo root before any change.
