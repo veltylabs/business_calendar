@@ -2,8 +2,10 @@
 PLAN: "refactor: date keys with the UTC-named time functions (time v0.6.3)"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 1701764488451356850
+PR: https://github.com/veltylabs/business_calendar/pull/16
+REVIEWED_COMMIT: 9e553c7692b6bf41bb13bfd090f6e5027f10c8d6
 ---
 
 > Read AGENTS.md at the repo root before any change.
@@ -72,3 +74,5 @@ Rename `time.Date(`/`tinytime.Date(` → `DateUTC(` and `Weekday(`/`ParseDate(`/
 
 Commit after every stage. Never edit a generated `*_orm.go`. Never run `git reset`, `git restore`, `git checkout --
 <file>` or `git stash` on your own work. Stuck 30 minutes: open the PR anyway listing what fails.
+## Executor notes
+- Failed to update webtyp.com/appkit as it was not present in the codebase/dependencies.

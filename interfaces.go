@@ -119,7 +119,7 @@ func (m *Module) GetDayDetail(date tinytime.Unix) (DayDetail, error) {
 		return DayDetail{}, err
 	}
 
-	return m.getWeeklyBounds(tinytime.Weekday(date))
+	return m.getWeeklyBounds(tinytime.WeekdayUTC(date))
 }
 
 // GetDayBounds es el puerto Reader: solo los límites neutrales, sin ninguna razón
