@@ -2,8 +2,10 @@
 PLAN: "feat!: OpeningHours for appointment_booking — DayLimits, WeekdayLimits, ClosedDates; module/ for appkit"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 545858717947657141
+PR: https://github.com/veltylabs/business_calendar/pull/17
+REVIEWED_COMMIT: 079a6e511e854daf2b41419d091d9daf12b1da9f
 ---
 
 > Read AGENTS.md at the repo root before any change.
