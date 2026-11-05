@@ -3,6 +3,7 @@ module github.com/veltylabs/business_calendar
 go 1.26.8
 
 require (
+	webtyp.com/appkit v0.2.9
 	webtyp.com/ddl v0.0.39
 	webtyp.com/dom v0.13.29
 	webtyp.com/events v0.1.7
@@ -37,7 +38,6 @@ require (
 	golang.org/x/tools v0.45.0 // indirect
 	howett.net/plist v1.0.0 // indirect
 	webtyp.com/access v0.0.41 // indirect
-	webtyp.com/appkit v0.2.8 // indirect
 	webtyp.com/auth v0.0.102 // indirect
 	webtyp.com/await v0.1.2 // indirect
 	webtyp.com/base64 v0.0.6 // indirect
