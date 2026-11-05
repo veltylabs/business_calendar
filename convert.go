@@ -1,9 +1,9 @@
 package businesscalendar
 
-import tinytime "webtyp.com/time"
+import "webtyp.com/time"
 
 func parseClock(hhmm string) (int, error) {
-	m, err := tinytime.ParseTime(hhmm)
+	m, err := time.ParseTime(hhmm)
 	if err != nil {
 		return 0, ErrInvalidMinutes
 	}
@@ -18,4 +18,4 @@ func mustParseClock(hhmm string) int {
 	return m
 }
 
-func formatClock(minutes int) string { return tinytime.FormatMinutes(minutes) }
+func formatClock(minutes int) string { return time.FormatMinutes(minutes) }

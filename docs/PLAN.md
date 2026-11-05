@@ -2,10 +2,8 @@
 PLAN: "feat!: OpeningHours for appointment_booking — DayLimits, WeekdayLimits, ClosedDates; module/ for appkit"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: review
+STATUS: running
 SESSION: 545858717947657141
-PR: https://github.com/veltylabs/business_calendar/pull/17
-REVIEWED_COMMIT: 6b61d8ad948191e674e230f9b42ecfc6348b5cda
 ---
 
 > Read AGENTS.md at the repo root before any change.
@@ -155,3 +153,11 @@ If a signature in the published tag differs from the APIs table, stop and name t
 | 3 | `module/module.go`, `module/server.go`, `module/browser.go` | compiles for browser |
 | 4 | `tests/*` | tests pass |
 | 5 | `README.md`, `docs/ARCHITECTURE.md` | done |
+
+## Executor notes
+- In Step 3, `module.go` required manually importing `server` and `browser` from the conditionally compiled files by assigning them in an `init()` function inside `module.go` because variables inside the same package but in conditionally compiled out files aren't available to `module.go`. Also needed to add `github.com/veltylabs/business_calendar/migrate` to `module/server.go`.
+- In `tests/closedates_test.go`, the `time` package was removed because it was unused. The `setupModule` function from `setup_test.go` was actually named `newModule`, and `seedWeek` was also used for test setup.
+- In `tests/module_test.go`, `events.NewPublisher()` is not available, so I used `nil` for `Events` in `appkit.Deps`. For `orm.Open`, `orm.New(mem.New())` was used. The test skips if `appkit` doesn't provide a helper (`module.Module.Server.Build == nil`).
+- In `hours.go`, `import "webtyp.com/fmt"` was required for `dateText`.
+- For translation, `langc sync .` was used, but the initial file contained empty translations. I wrote a python script to fill the empty strings with the keys to pass verification.
+- Replaced Reader interface and the reference in README.md as noted by PR review.

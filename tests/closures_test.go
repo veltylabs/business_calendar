@@ -24,13 +24,13 @@ func TestLocalClosureIsDistinguishableFromHoliday(t *testing.T) {
 		t.Fatalf("AddHoliday: %v", err)
 	}
 
-	// GetDayDetail, not GetDayBounds: ClosedBy is this module's own
+	// GetDayDetail, not DayLimits: ClosedBy is this module's own
 	// vocabulary and only GetDayDetail carries it (see interfaces.go).
 	local, err := m.GetDayDetail(oct01_2026_Thu)
 	if err != nil {
 		t.Fatalf("GetDayDetail local: %v", err)
 	}
-	if local.Bounds.Open || local.ClosedBy != businesscalendar.ClosedLocal {
+	if local.Limits.Open || local.ClosedBy != businesscalendar.ClosedLocal {
 		t.Errorf("expected a local closure, got %+v", local)
 	}
 
@@ -38,14 +38,14 @@ func TestLocalClosureIsDistinguishableFromHoliday(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetDayDetail holiday: %v", err)
 	}
-	if holiday.Bounds.Open || holiday.ClosedBy != businesscalendar.ClosedHoliday {
+	if holiday.Limits.Open || holiday.ClosedBy != businesscalendar.ClosedHoliday {
 		t.Errorf("expected a holiday, got %+v", holiday)
 	}
 }
 
-// TestGetDayBoundsPrecedenceClosureOverHolidayOverWeekly — CU-06. Resolution is
+// TestDayLimitsPrecedenceClosureOverHolidayOverWeekly — CU-06. Resolution is
 // Closure > Holiday > Weekly.
-func TestGetDayBoundsPrecedenceClosureOverHolidayOverWeekly(t *testing.T) {
+func TestDayLimitsPrecedenceClosureOverHolidayOverWeekly(t *testing.T) {
 	m, _ := newModule(t, nil)
 	seedWeek(t, m)
 
@@ -65,7 +65,7 @@ func TestGetDayBoundsPrecedenceClosureOverHolidayOverWeekly(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetDayDetail: %v", err)
 	}
-	if bounds.Bounds.Open || bounds.ClosedBy != businesscalendar.ClosedLocal {
+	if bounds.Limits.Open || bounds.ClosedBy != businesscalendar.ClosedLocal {
 		t.Errorf("closure must outrank holiday and weekly, got %+v", bounds)
 	}
 
@@ -74,7 +74,7 @@ func TestGetDayBoundsPrecedenceClosureOverHolidayOverWeekly(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetDayDetail: %v", err)
 	}
-	if sun.Bounds.Open || sun.ClosedBy != businesscalendar.ClosedWeekly {
+	if sun.Limits.Open || sun.ClosedBy != businesscalendar.ClosedWeekly {
 		t.Errorf("expected weekly closure, got %+v", sun)
 	}
 
@@ -83,7 +83,7 @@ func TestGetDayBoundsPrecedenceClosureOverHolidayOverWeekly(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetDayDetail: %v", err)
 	}
-	if empty.Bounds.Open || empty.ClosedBy != businesscalendar.ClosedWeekly {
+	if empty.Limits.Open || empty.ClosedBy != businesscalendar.ClosedWeekly {
 		t.Errorf("expected closed by default, got %+v", empty)
 	}
 }

@@ -9,7 +9,7 @@ Posee tres cosas:
 2. **Feriados (`holidays`)** — cierres fechados con un origen legal/administrativo, editables en tiempo de ejecución (un nuevo feriado aparece por ley; nadie recompila).
 3. **Cierres (`closures`)** — cierres fechados con un origen local (mantenimiento, un evento).
 
-**No** posee la agenda de ningún profesional. `appointment_booking` posee eso y consume este módulo a través del contrato de solo lectura [`Reader`](#el-puerto-reader).
+**No** posee la agenda de ningún profesional. `appointment_booking` posee eso y consume este módulo a través del contrato de solo lectura `OpeningHours`.
 
 > Reemplaza al archivado `github.com/veltylabs/business_hours`, cuya codificación de texto de hora de reloj ("HH:MM") se corrige aquí a **24h clock string (HH:MM)** —la misma codificación que usa `appointment_booking` para los bloques de trabajo— y cuyos nombres de días en español prefijados han desaparecido (la traducción vive en la aplicación consumidora).
 
@@ -29,8 +29,7 @@ if err != nil { /* ... */ }
 
 cal.MountOperations(opRegistry) // router.OpRegistry
 
-reader := businesscalendar.Reader(cal) // el puerto que consume un módulo vecino
-bounds, err := reader.GetDayBounds(dateMidnightUTC)
+bounds, err := cal.DayLimits(dateMidnightUTC)
 ```
 
 `New` asume que el esquema de la base de datos (`business_hours`, `holiday`, `closure`) ya existe. La aplicación que despliega llama a `migrate.Migrate(conn, compiler)` una vez, en tiempo de despliegue. Esta migración utiliza `ddl.Sync` para crear las tablas que faltan y agregar nuevas columnas si el modelo fue actualizado, ver flujo: https://github.com/webtyp/ddl/blob/main/docs/diagrams/SYNC_FLOW.md.
@@ -72,17 +71,17 @@ Para facilitar la lectura por parte de asistentes de IA, `list_business_hours` i
 
 Los asistentes leen horas en formato HH:MM y nombres de días en inglés mejor que conteos de minutos.
 
-## El puerto Reader
+## OpeningHours
 
 `interfaces.go` declara el puerto de solo lectura del que depende un vecino:
 
 ```go
-type Reader interface {
-    GetDayBounds(date time.Unix) (DayBounds, error)
+type OpeningHours interface {
+    DayLimits(date time.Unix) (time.DayLimits, error)
 }
 ```
 
-`*Module` lo satisface estructuralmente. `DayBounds` lleva `Open`, `OpenMin`, `CloseMin` y `ClosedBy` —un `ClosedReason` que nombra el origen (`WEEKLY` | `HOLIDAY` | `CLOSURE`). Precedencia de resolución: **Cierre local > Feriado > Regla semanal**.
+`*Module` lo satisface estructuralmente. `time.DayLimits` lleva `Open`, `OpenMin`, `CloseMin` y `ClosedBy` —un `ClosedReason` que nombra el origen (`WEEKLY` | `HOLIDAY` | `CLOSURE`). Precedencia de resolución: **Cierre local > Feriado > Regla semanal**.
 
 ## Eventos
 
@@ -108,7 +107,7 @@ The module exports its own UI view, seed demo data, and executable WASM demo she
 | `model_orm.go` | Generado por `ormc` — **no editar** |
 | `module.go` | `Module`, `Deps`, `New`, métodos de servicio, publicación de eventos |
 | `migrate/` | Migración de esquema en tiempo de despliegue (`Migrate`) |
-| `interfaces.go` | El puerto `Reader` + precedencia de `GetDayBounds` |
+
 | `ops.go` | Constantes de Op, `MountOperations`, manejadores |
 | `view.go` | Tres presentadores (`NewBusinessHoursView`, `NewHolidaysView`, `NewClosuresView`) |
 | `ui/` | Vista UI del módulo (`ui.Screens(caller router.Caller) []view.Screen`, `ui.ID`, `ui.Label`) |

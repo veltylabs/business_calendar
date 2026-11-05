@@ -2,14 +2,17 @@
 package module
 
 import (
-	"webtyp.com/appkit"
 	"github.com/veltylabs/business_calendar"
+	"github.com/veltylabs/business_calendar/migrate"
+	"webtyp.com/appkit"
 	"webtyp.com/model"
 )
 
-var server = &appkit.ModuleServer{
-	Migrate: businesscalendar.Migrate,
-	Build: func(d appkit.Deps) (model.ModuleNaming, error) {
-		return businesscalendar.New(d.DB, businesscalendar.Deps{IDs: d.IDs, Publisher: d.Events})
-	},
+func init() {
+	server = &appkit.ModuleServer{
+		Migrate: migrate.Migrate,
+		Build: func(d appkit.Deps) (model.ModuleNaming, error) {
+			return businesscalendar.New(d.DB, businesscalendar.Deps{IDs: d.IDs, Publisher: d.Events})
+		},
+	}
 }

@@ -3,6 +3,7 @@ package businesscalendar
 import (
 	"webtyp.com/input"
 	"webtyp.com/model"
+	"webtyp.com/time"
 )
 
 // BusinessHoursModel: one row per day of week. day_of_week is unique — this
@@ -146,8 +147,8 @@ func (p *CalendarChangedPayload) IsNil() bool { return p == nil }
 // enforced as DOMAIN rules in the service (ErrInvalidDay/ErrInvalidMinutes),
 // the single fail-closed chokepoint every write path crosses; NotNull stays
 // only on the text fields where empty is never legal.
-// Ejemplo: var args GetDayBoundsArgs
-var GetDayBoundsArgsModel = model.Definition{
+// Ejemplo: var args GetDayLimitsArgs
+var GetDayLimitsArgsModel = model.Definition{
 	Name: "get_day_bounds_args",
 	Fields: model.Fields{
 		{Name: "date", Type: model.Int()},
@@ -172,3 +173,36 @@ var ListClosuresArgsModel = model.Definition{
 	},
 }
 
+
+// ClosedReason nombra el origen de un cierre. Los literales de cadena viven SOLAMENTE en
+// estas constantes — nunca en línea en el lugar de llamada.
+// Ejemplo: var reason businesscalendar.ClosedReason = businesscalendar.ClosedHoliday
+type ClosedReason string
+
+const (
+	ClosedWeekly  ClosedReason = "WEEKLY"  // business_hours says closed that weekday
+	ClosedHoliday ClosedReason = "HOLIDAY" // a Holiday row falls on that date
+	ClosedLocal   ClosedReason = "CLOSURE" // a Closure row falls on that date
+)
+
+// DayDetail es la propia respuesta de este módulo para una fecha: los límites neutrales MÁS
+// el por qué un día cerrado está cerrado. ClosedBy es vocabulario de este módulo y nunca
+// cruza a un vecino.
+//
+// Es un modelo de resultado solo de salida: implementa model.Encodable para que la
+// operación get_day_limits pueda responder con él, y nunca es una tabla de BD.
+// Ejemplo: detail, err := cal.GetDayDetail(date)
+type DayDetail struct {
+	Limits time.DayLimits
+	// ClosedBy nombra por qué el día está cerrado. "" cuando Limits.Open es true.
+	ClosedBy ClosedReason
+}
+
+func (d *DayDetail) EncodeFields(w model.FieldWriter) {
+	w.Bool("open", d.Limits.Open)
+	w.Int("open_min", int64(d.Limits.OpenMin))
+	w.Int("close_min", int64(d.Limits.CloseMin))
+	w.String("closed_by", string(d.ClosedBy))
+}
+
+func (d *DayDetail) IsNil() bool { return d == nil }

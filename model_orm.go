@@ -254,36 +254,36 @@ func ReadAllClosure(qb *orm.QB) (ClosureList, error) {
 	return results, err
 }
 
-type GetDayBoundsArgs struct {
+type DayLimitsArgs struct {
 	Date int64
 }
 
-func (m *GetDayBoundsArgs) ModelName() string { return "get_day_bounds_args" }
+func (m *DayLimitsArgs) ModelName() string { return "get_day_limits_args" }
 
-func (m *GetDayBoundsArgs) Schema() []model.Field { return GetDayBoundsArgsModel.Fields }
+func (m *DayLimitsArgs) Schema() []model.Field { return GetDayLimitsArgsModel.Fields }
 
-func (m *GetDayBoundsArgs) Pointers() []any { return []any{&m.Date} }
+func (m *DayLimitsArgs) Pointers() []any { return []any{&m.Date} }
 
-func (m *GetDayBoundsArgs) IsNil() bool { return m == nil }
+func (m *DayLimitsArgs) IsNil() bool { return m == nil }
 
-func (m *GetDayBoundsArgs) EncodeFields(w model.FieldWriter) {
+func (m *DayLimitsArgs) EncodeFields(w model.FieldWriter) {
 	w.Int("date", m.Date)
 }
 
-func (m *GetDayBoundsArgs) DecodeFields(r model.FieldReader) {
+func (m *DayLimitsArgs) DecodeFields(r model.FieldReader) {
 	if v, ok := r.Int("date"); ok { m.Date = v }
 }
 
-type GetDayBoundsArgsList []*GetDayBoundsArgs
+type DayLimitsArgsList []*DayLimitsArgs
 
-func (s *GetDayBoundsArgsList) Len() int             { return len(*s) }
-func (s *GetDayBoundsArgsList) At(i int) model.Fielder { return (*s)[i] }
-func (s *GetDayBoundsArgsList) Append() model.Fielder  { v := &GetDayBoundsArgs{}; *s = append(*s, v); return v }
-func (s *GetDayBoundsArgsList) IsNil() bool          { return s == nil }
-func (s *GetDayBoundsArgsList) EncodeFields(_ model.FieldWriter) {}
-func (s *GetDayBoundsArgsList) DecodeFields(_ model.FieldReader) {}
+func (s *DayLimitsArgsList) Len() int             { return len(*s) }
+func (s *DayLimitsArgsList) At(i int) model.Fielder { return (*s)[i] }
+func (s *DayLimitsArgsList) Append() model.Fielder  { v := &DayLimitsArgs{}; *s = append(*s, v); return v }
+func (s *DayLimitsArgsList) IsNil() bool          { return s == nil }
+func (s *DayLimitsArgsList) EncodeFields(_ model.FieldWriter) {}
+func (s *DayLimitsArgsList) DecodeFields(_ model.FieldReader) {}
 
-func (m *GetDayBoundsArgs) Validate(action byte) error {
+func (m *DayLimitsArgs) Validate(action byte) error {
 	return model.ValidateFields(action, m)
 }
 

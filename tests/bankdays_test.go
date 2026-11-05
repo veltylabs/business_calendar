@@ -4,7 +4,7 @@ import (
 	"testing"
 	"webtyp.com/orm"
 	"webtyp.com/storage/mem"
-	tinytime "webtyp.com/time"
+	"webtyp.com/time"
 	"webtyp.com/unixid"
 
 	"github.com/veltylabs/business_calendar"
@@ -21,11 +21,11 @@ func TestBankDayAfter(t *testing.T) {
 	}
 
 	// Helpers
-	d := func(y, m, day int) tinytime.Unix {
-		return tinytime.DateUTC(y, m, day, 0, 0, 0)
+	d := func(y, m, day int) time.Unix {
+		return time.DateUTC(y, m, day, 0, 0, 0)
 	}
 
-	setupHoliday := func(date tinytime.Unix, name string) {
+	setupHoliday := func(date time.Unix, name string) {
 		err := cal.AddHoliday(businesscalendar.Holiday{
 			SpecificDate: int64(date),
 			Name:         name,
@@ -34,7 +34,7 @@ func TestBankDayAfter(t *testing.T) {
 			t.Fatalf("setup holiday failed: %v", err)
 		}
 	}
-	setupClosure := func(date tinytime.Unix, reason string) {
+	setupClosure := func(date time.Unix, reason string) {
 		err := cal.AddClosure(businesscalendar.Closure{
 			SpecificDate: int64(date),
 			Reason:       reason,
@@ -47,9 +47,9 @@ func TestBankDayAfter(t *testing.T) {
 	tests := []struct {
 		name     string
 		setup    func()
-		from     tinytime.Unix
+		from     time.Unix
 		days     int
-		expected tinytime.Unix
+		expected time.Unix
 		err      error
 	}{
 		{
@@ -151,8 +151,8 @@ func TestBankDayAfter(t *testing.T) {
 			}
 			if got != tt.expected {
 				t.Errorf("expected %v (%s), got %v (%s)",
-					tt.expected, tinytime.FormatISO8601(tt.expected),
-					got, tinytime.FormatISO8601(got))
+					tt.expected, time.FormatISO8601(tt.expected),
+					got, time.FormatISO8601(got))
 			}
 		})
 	}

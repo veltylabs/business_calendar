@@ -6,7 +6,7 @@ import (
 
 	"webtyp.com/rpc"
 	"webtyp.com/router"
-	tinytime "webtyp.com/time"
+	"webtyp.com/time"
 	"webtyp.com/view"
 )
 
@@ -19,11 +19,11 @@ const (
 	OpListClosures        = "list_closures"
 	OpAddClosure          = "add_closure"
 	OpRemoveClosure       = "remove_closure"
-	OpGetDayBounds        = "get_day_bounds"
+	OpDayLimits        = "get_day_limits"
 
 	DescListBusinessHours   = "Horario de atención del consultorio para cada día de la semana: día (Monday … Sunday), si abre, y la hora de apertura y de cierre (HH:MM)."
 	DescUpsertBusinessHours = "Crea o cambia el horario de atención de un día de la semana."
-	DescGetDayBounds        = "Si el consultorio abre en una fecha y en qué minutos del día, considerando feriados y cierres."
+	DescDayLimits        = "Si el consultorio abre en una fecha y en qué minutos del día, considerando feriados y cierres."
 	DescListHolidays        = "Feriados registrados del consultorio."
 	DescAddHoliday          = "Registra un feriado: el consultorio no atiende esa fecha."
 	DescRemoveHoliday       = "Elimina un feriado registrado."
@@ -50,10 +50,10 @@ func (m *Module) MountOperations(reg router.OperationRegistry) {
 		}
 		return err
 	}).Describe(DescUpsertBusinessHours).Requires(model.ResourceOf(&BusinessHoursModel), model.Create|model.Update)
-	reg.Operation(OpGetDayBounds, m.opGetDayBounds).
-		Describe(DescGetDayBounds).
+	reg.Operation(OpDayLimits, m.opDayLimits).
+		Describe(DescDayLimits).
 		Requires(model.ResourceOf(&BusinessHoursModel), model.Read).
-		Accepts(&GetDayBoundsArgs{})
+		Accepts(&DayLimitsArgs{})
 
 	reg.Operation(OpListHolidays, m.opListHolidays).
 		Describe(DescListHolidays).
@@ -123,17 +123,17 @@ func (m *Module) opListBusinessHours(ctx router.Context) {
 	}
 }
 
-func (m *Module) opGetDayBounds(ctx router.Context) {
-	var args GetDayBoundsArgs
+func (m *Module) opDayLimits(ctx router.Context) {
+	var args DayLimitsArgs
 	if err := ctx.Decode(&args); err != nil {
 		rpc.WriteError(ctx, ErrCannotRead)
 		return
 	}
-	// GetDayDetail, not GetDayBounds: an over-the-wire caller (this module's
+	// GetDayDetail, not DayLimits: an over-the-wire caller (this module's
 	// own UI, an admin tool) gets ClosedBy too. A Go-level sibling that only
-	// wants the neutral bounds calls GetDayBounds directly through Reader —
+	// wants the neutral bounds calls DayLimits directly through Reader —
 	// it never goes through this op.
-	detail, err := m.GetDayDetail(tinytime.Unix(args.Date))
+	detail, err := m.GetDayDetail(time.Unix(args.Date))
 	if err != nil {
 		rpc.WriteError(ctx, errors.New("internal error"))
 		return

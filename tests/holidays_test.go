@@ -13,9 +13,9 @@ func TestNewHolidayClosesTheDayWithoutRecompile(t *testing.T) {
 	seedWeek(t, m)
 
 	// Wednesday is normally open.
-	before, err := m.GetDayBounds(sep09_2026_Wed)
+	before, err := m.DayLimits(sep09_2026_Wed)
 	if err != nil {
-		t.Fatalf("GetDayBounds: %v", err)
+		t.Fatalf("DayLimits: %v", err)
 	}
 	if !before.Open {
 		t.Fatalf("expected Wednesday open before the holiday, got %+v", before)
@@ -28,13 +28,13 @@ func TestNewHolidayClosesTheDayWithoutRecompile(t *testing.T) {
 		t.Fatalf("AddHoliday: %v", err)
 	}
 
-	// GetDayDetail, not GetDayBounds: ClosedBy is this module's own vocabulary
+	// GetDayDetail, not DayLimits: ClosedBy is this module's own vocabulary
 	// and only GetDayDetail carries it (see interfaces.go).
 	after, err := m.GetDayDetail(sep09_2026_Wed)
 	if err != nil {
 		t.Fatalf("GetDayDetail after: %v", err)
 	}
-	if after.Bounds.Open || after.ClosedBy != businesscalendar.ClosedHoliday {
+	if after.Limits.Open || after.ClosedBy != businesscalendar.ClosedHoliday {
 		t.Errorf("expected the day closed by holiday, got %+v", after)
 	}
 }
@@ -59,9 +59,9 @@ func TestRemovingHolidayReopensTheDay(t *testing.T) {
 	if err := m.RemoveHoliday(holidayID); err != nil {
 		t.Fatalf("RemoveHoliday: %v", err)
 	}
-	after, err := m.GetDayBounds(oct01_2026_Thu)
+	after, err := m.DayLimits(oct01_2026_Thu)
 	if err != nil {
-		t.Fatalf("GetDayBounds: %v", err)
+		t.Fatalf("DayLimits: %v", err)
 	}
 	if !after.Open {
 		t.Errorf("expected Thursday open again, got %+v", after)
@@ -92,9 +92,9 @@ func TestMovingHolidayFlipsBothDays(t *testing.T) {
 		t.Fatalf("AddHoliday moved: %v", err)
 	}
 
-	old, err := m.GetDayBounds(sep15_2026_Tue)
+	old, err := m.DayLimits(sep15_2026_Tue)
 	if err != nil {
-		t.Fatalf("GetDayBounds old: %v", err)
+		t.Fatalf("DayLimits old: %v", err)
 	}
 	if !old.Open {
 		t.Errorf("old date should be open after moving, got %+v", old)
@@ -103,7 +103,7 @@ func TestMovingHolidayFlipsBothDays(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetDayDetail new: %v", err)
 	}
-	if nw.Bounds.Open || nw.ClosedBy != businesscalendar.ClosedHoliday {
+	if nw.Limits.Open || nw.ClosedBy != businesscalendar.ClosedHoliday {
 		t.Errorf("new date should be closed by holiday, got %+v", nw)
 	}
 }

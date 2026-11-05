@@ -280,7 +280,7 @@ never runs `codejob` or `gopush` itself — dispatch and close are the human's c
 - **Time encoding on `open_min`/`close_min` is `"HH:MM"` (`input.Hour()`), decided 2026-10-20**,
   reversing an earlier minutes-from-midnight (`0..1439`) encoding: a plain number input made the
   admin type raw minutes ("480") instead of picking a time — bad UX, flagged by the user. The
-  **consumer-facing port** (`Reader.GetDayBounds`/`GetWeekdayBounds`, `tinytime.DayBounds.OpenMin/
+  **consumer-facing port** (`DayLimits`/`WeekdayLimits`, `time.DayLimits.OpenMin/
   CloseMin`) still returns **minutes-from-midnight `int`** unchanged — `appointment_booking`/
   `room_layout` see no change. The "HH:MM" encoding is local to this module's own stored column and
   edit form; every read of it as an int converts through `time.ParseTime`/`time.FormatMinutes` at
@@ -289,7 +289,7 @@ never runs `codejob` or `gopush` itself — dispatch and close are the human's c
   domain records carry it only to drive `NOT NULL` DDL; the semantic invariants
   (`ErrInvalidDay`, `ErrInvalidMinutes`, `ErrDuplicateDate`) are enforced in the
   **service** methods, the single fail-closed chokepoint every write crosses.
-- **The consumer-facing contract is the `Reader` port** (`GetDayBounds`), declared
+- **The consumer-facing contract is the port** (`DayLimits`), declared
   in `interfaces.go` and satisfied structurally by `*Module`. `appointment_booking`
   imports this module only through that typed port. Resolution precedence:
   Closure > Holiday > weekly rule; a weekday with no row at all is closed by
