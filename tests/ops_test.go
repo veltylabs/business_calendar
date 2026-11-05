@@ -42,7 +42,7 @@ func TestMountOperations_NineOpsAndRequires(t *testing.T) {
 	wants := []want{
 		{businesscalendar.OpListBusinessHours, "business_hours", model.Read, false},
 		{businesscalendar.OpUpsertBusinessHours, "business_hours", model.Create | model.Update, true},
-		{businesscalendar.OpGetDayBounds, "business_hours", model.Read, true},
+		{businesscalendar.OpDayLimits, "business_hours", model.Read, true},
 		{businesscalendar.OpListHolidays, "holiday", model.Read, false},
 		{businesscalendar.OpAddHoliday, "holiday", model.Create, true},
 		{businesscalendar.OpRemoveHoliday, "holiday", model.Delete, false},
@@ -77,14 +77,14 @@ func TestMountOperations_NineOpsAndRequires(t *testing.T) {
 	}
 }
 
-func TestOpGetDayBounds_Success(t *testing.T) {
+func TestOpDayLimits_Success(t *testing.T) {
 	m, _ := newModule(t, nil)
 	seedWeek(t, m)
 	reg := mounted(t, m)
 
 	ctx := &mock.Context{InBody: []byte(`{"date":1789354800}`)} // Monday
 	ctx.SetUserID("u1")
-	reg.Invoke("OP", "/"+businesscalendar.OpGetDayBounds, ctx)
+	reg.Invoke("OP", "/"+businesscalendar.OpDayLimits, ctx)
 	if ctx.Status != 0 {
 		t.Fatalf("expected success, got status %d body=%s", ctx.Status, ctx.ResponseBody())
 	}

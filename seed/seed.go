@@ -2,7 +2,7 @@ package seed
 
 import (
 	businesscalendar "github.com/veltylabs/business_calendar"
-	tinytime "webtyp.com/time"
+	"webtyp.com/time"
 )
 
 type Data struct {
@@ -61,7 +61,7 @@ func Load(m *businesscalendar.Module) (Data, error) {
 
 	// 2. Holidays seed
 	for _, hs := range chileHolidays2026 {
-		sec, err := tinytime.ParseDateUTC(hs.dateStr)
+		sec, err := time.ParseDateUTC(hs.dateStr)
 		if err != nil {
 			return Data{}, err
 		}

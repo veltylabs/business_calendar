@@ -5,7 +5,7 @@ import (
 	"webtyp.com/fmt"
 	"webtyp.com/model"
 	"webtyp.com/orm"
-	tinytime "webtyp.com/time"
+	"webtyp.com/time"
 )
 
 // Deps lleva los colaboradores inyectados que un módulo nunca debe construir por sí mismo.
@@ -37,7 +37,7 @@ func New(db *orm.DB, deps Deps) (*Module, error) {
 
 // ModelName es la identidad de este módulo: mcp.HarvestOps califica cada operación como
 // "business_calendar.<name>" en la red — la calificación que hace que su
-// propio "get_day_bounds" sea distinto de la operación de appointment_booking con el mismo
+// propio "get_day_limits" sea distinto de la operación de appointment_booking con el mismo
 // nombre base (la colisión que este mecanismo hace
 // irrepresentable). Los tres constructores NewXView de view.go pasan esta misma
 // constante como view.Ops.Module.
@@ -109,7 +109,7 @@ func (m *Module) UpsertBusinessHours(h BusinessHours) error {
 		}
 	} else {
 		// Un día cerrado no lleva minutos significativos — normalizar a una
-		// codificación única para que GetDayBounds nunca tenga que interpretarlos.
+		// codificación única para que DayLimits nunca tenga que interpretarlos.
 		h.OpenMin, h.CloseMin = "00:00", "00:00"
 	}
 
@@ -119,7 +119,7 @@ func (m *Module) UpsertBusinessHours(h BusinessHours) error {
 	}
 	if err != nil && model.KindOf(err) == model.ErrorNotFound {
 		h.Id = m.ids.NewID()
-		h.UpdatedAt = tinytime.NowNano()
+		h.UpdatedAt = time.NowNano()
 		if err := m.db.Create(&h); err != nil {
 			return err
 		}
@@ -129,7 +129,7 @@ func (m *Module) UpsertBusinessHours(h BusinessHours) error {
 
 	closed := hoursCloseTime(prev, h)
 	h.Id = prev.Id
-	h.UpdatedAt = tinytime.NowNano()
+	h.UpdatedAt = time.NowNano()
 	if err := m.db.Update(&h, orm.Eq(BusinessHours_.Id, prev.Id)); err != nil {
 		return err
 	}
@@ -169,7 +169,7 @@ func (m *Module) AddHoliday(h Holiday) error {
 		return err
 	}
 	h.Id = m.ids.NewID()
-	h.UpdatedAt = tinytime.NowNano()
+	h.UpdatedAt = time.NowNano()
 	if err := h.Validate(model.ActionCreate); err != nil { return err }
 	if err := m.db.Create(&h); err != nil {
 		return err
@@ -236,7 +236,7 @@ func (m *Module) AddClosure(c Closure) error {
 		return err
 	}
 	c.Id = m.ids.NewID()
-	c.UpdatedAt = tinytime.NowNano()
+	c.UpdatedAt = time.NowNano()
 	if err := c.Validate(model.ActionCreate); err != nil { return err }
 	if err := m.db.Create(&c); err != nil {
 		return err

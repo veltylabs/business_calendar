@@ -44,41 +44,32 @@ En un tipo base `model.Int()`/`model.Bool()`, `NotNull` rechaza el **valor cero*
 
 Los argumentos de transporte repiten los campos de **texto** requeridos con `NotNull` (nombre de feriado `name`, razón de cierre `reason`, `id` de eliminación) para que el límite de la operación rechace la entrada vacía con un 400 antes de llegar al servicio; cada operación que muta se canaliza a través de las verificaciones de dominio del servicio.
 
-## 4. `GetDayBounds`/`GetDayDetail` y precedencia de resolución
+## 4. `DayLimits`/`GetDayDetail` y precedencia de resolución
 
-> **Enmendado el 2026-09-08.** El puerto originalmente devolvía un `DayBounds` local del módulo que llevaba `ClosedBy`. Eso forzaba a cualquier consumidor a importar este módulo solo para nombrar el tipo —exactamente el acoplamiento que `veltylabs/appointment_booking` no debe tener. Consulte `webtyp/docs/AGENDA_DOMAIN_MASTER_PLAN.md` §3-bis para ver la justificación completa.
+> **Enmendado el 2026-09-08.** El puerto originalmente devolvía un `DayLimits` local del módulo que llevaba `ClosedBy`. Eso forzaba a cualquier consumidor a importar este módulo solo para nombrar el tipo —exactamente el acoplamiento que `veltylabs/appointment_booking` no debe tener. Consulte `webtyp/docs/AGENDA_DOMAIN_MASTER_PLAN.md` §3-bis para ver la justificación completa.
 
-`interfaces.go` divide la respuesta en dos, según la audiencia:
+Este módulo divide la respuesta en dos, según la audiencia:
 
 ```go
 // El valor que consume un módulo de dominio vecino (por ejemplo, appointment_booking).
-// Declara su PROPIA interfaz devolviendo tinytime.DayBounds —un tipo neutral en
+// Declara su PROPIA interfaz devolviendo time.DayLimits —un tipo neutral en
 // webtyp/time que ambas partes ya importan— y este Module la satisface
 // estructuralmente. Sin importación en ninguna dirección, sin adaptador.
-func (m *Module) GetDayBounds(date time.Unix) (tinytime.DayBounds, error)
+func (m *Module) DayLimits(date time.Unix) (time.DayLimits, error)
 
 // La respuesta más rica de este módulo: los mismos límites MÁS por qué un día cerrado
 // está cerrado. Utilizado por la operación get_day_bounds y la propia interfaz de usuario de este módulo.
 func (m *Module) GetDayDetail(date time.Unix) (DayDetail, error)
 
 type DayDetail struct {
-    Bounds   tinytime.DayBounds
+    Bounds   time.DayLimits
     ClosedBy ClosedReason // "" cuando Bounds.Open es true
 }
 ```
 
-`Reader` (declarado aquí) es un **alias de conveniencia para los consumidores de este propio módulo**, no el contrato que nombra un módulo vecino; un vecino declara su propia interfaz con una forma idéntica a la firma de `GetDayBounds` y este `Module` la satisface estructuralmente:
+`DayLimits` es un envoltorio ligero: `GetDayDetail` es la única ruta de resolución; `DayLimits` lo llama y descarta `ClosedBy`. Hay exactamente un lugar donde se decide la precedencia.
 
-```go
-type Reader interface {
-    GetDayBounds(date time.Unix) (tinytime.DayBounds, error)
-    GetWeekdayBounds(dayOfWeek int) (tinytime.DayBounds, error)
-}
-```
-
-`GetDayBounds` es un envoltorio ligero: `GetDayDetail` es la única ruta de resolución; `GetDayBounds` lo llama y descarta `ClosedBy`. Hay exactamente un lugar donde se decide la precedencia.
-
-`GetWeekdayBounds` responde con los horarios regulares de un día de la semana (plantilla semanal), excluyendo las excepciones por fecha (feriados o cierres locales). Un consumidor debe usar `GetWeekdayBounds` al validar una plantilla semanal y `GetDayBounds` al validar la disponibilidad para una fecha concreta.
+`WeekdayLimits` responde con los horarios regulares de un día de la semana (plantilla semanal), excluyendo las excepciones por fecha (feriados o cierres locales). Un consumidor debe usar `WeekdayLimits` al validar una plantilla semanal y `DayLimits` al validar la disponibilidad para una fecha concreta.
 
 Resolución, en este orden exacto (sin cambios por la enmienda):
 
@@ -135,10 +126,8 @@ if err != nil { /* ... */ }
 cal.MountOperations(opRegistry) // router.OperationRegistry
 
 // appointment_booking nunca importa este paquete —declara su propia
-// interfaz con la forma de la firma de GetDayBounds, y *cal la satisface
-// estructuralmente. El alias Reader de este módulo es para los usuarios de ESTE módulo:
-var reader businesscalendar.Reader = cal
-bounds, err := reader.GetDayBounds(midnightUTC) // tinytime.DayBounds —sin ClosedBy
+// interfaz con la forma de la firma de DayLimits, y *cal la satisface
+bounds, err := cal.DayLimits(midnightUTC) // time.DayLimits —sin ClosedBy
 
 detail, err := cal.GetDayDetail(midnightUTC) // DayDetail —CON ClosedBy, interfaz propia del módulo
 

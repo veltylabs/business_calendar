@@ -33,7 +33,7 @@ func TestAdminDefinesWeeklyBusinessHours(t *testing.T) {
 	}
 }
 
-// TestWideningHoursIsVisibleToReaderImmediately — CU-03. A Reader.GetDayBounds
+// TestWideningHoursIsVisibleToReaderImmediately — CU-03. A Reader.DayLimits
 // call made AFTER an upsert sees the new bounds with no restart and no cache
 // invalidation step.
 func TestWideningHoursIsVisibleToReaderImmediately(t *testing.T) {
@@ -45,9 +45,9 @@ func TestWideningHoursIsVisibleToReaderImmediately(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("upsert narrow: %v", err)
 	}
-	before, err := m.GetDayBounds(sep14_2026_Mon)
+	before, err := m.DayLimits(sep14_2026_Mon)
 	if err != nil {
-		t.Fatalf("GetDayBounds: %v", err)
+		t.Fatalf("DayLimits: %v", err)
 	}
 	if !before.Open || before.OpenMin != 480 || before.CloseMin != 1080 {
 		t.Fatalf("expected 480..1080, got %+v", before)
@@ -59,9 +59,9 @@ func TestWideningHoursIsVisibleToReaderImmediately(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("upsert widen: %v", err)
 	}
-	after, err := m.GetDayBounds(sep14_2026_Mon)
+	after, err := m.DayLimits(sep14_2026_Mon)
 	if err != nil {
-		t.Fatalf("GetDayBounds after: %v", err)
+		t.Fatalf("DayLimits after: %v", err)
 	}
 	if !after.Open || after.OpenMin != 420 || after.CloseMin != 1200 {
 		t.Errorf("expected widened 420..1200, got %+v", after)

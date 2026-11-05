@@ -18,7 +18,7 @@ func TestMountOperations_Descriptions(t *testing.T) {
 	wants := map[string]string{
 		businesscalendar.OpListBusinessHours:   businesscalendar.DescListBusinessHours,
 		businesscalendar.OpUpsertBusinessHours: businesscalendar.DescUpsertBusinessHours,
-		businesscalendar.OpGetDayBounds:        businesscalendar.DescGetDayBounds,
+		businesscalendar.OpDayLimits:        businesscalendar.DescDayLimits,
 		businesscalendar.OpListHolidays:        businesscalendar.DescListHolidays,
 		businesscalendar.OpAddHoliday:          businesscalendar.DescAddHoliday,
 		businesscalendar.OpRemoveHoliday:       businesscalendar.DescRemoveHoliday,

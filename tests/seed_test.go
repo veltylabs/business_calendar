@@ -50,7 +50,7 @@ func TestSeed_Load(t *testing.T) {
 	}
 
 	// What the user sees: the view's own date label (FormatISO8601, UTC) —
-	// never tinytime.FormatDate, which applies the local offset and turns a
+	// never time.FormatDate, which applies the local offset and turns a
 	// UTC-midnight date into the previous day in Chile (UTC-3).
 	formattedDate := sept18.Item().Description
 	if formattedDate != "1789689600" {
