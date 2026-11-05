@@ -48,7 +48,7 @@ Los argumentos de transporte repiten los campos de **texto** requeridos con `Not
 
 > **Enmendado el 2026-09-08.** El puerto originalmente devolvía un `DayLimits` local del módulo que llevaba `ClosedBy`. Eso forzaba a cualquier consumidor a importar este módulo solo para nombrar el tipo —exactamente el acoplamiento que `veltylabs/appointment_booking` no debe tener. Consulte `webtyp/docs/AGENDA_DOMAIN_MASTER_PLAN.md` §3-bis para ver la justificación completa.
 
-`interfaces.go` divide la respuesta en dos, según la audiencia:
+Este módulo divide la respuesta en dos, según la audiencia:
 
 ```go
 // El valor que consume un módulo de dominio vecino (por ejemplo, appointment_booking).

@@ -73,15 +73,17 @@ Los asistentes leen horas en formato HH:MM y nombres de días en inglés mejor q
 
 ## OpeningHours
 
-`interfaces.go` declara el puerto de solo lectura del que depende un vecino:
+Un módulo vecino (como `appointment_booking` o `room_layout`) declara en su propio `interfaces.go` el contrato que necesita:
 
 ```go
 type OpeningHours interface {
     DayLimits(date time.Unix) (time.DayLimits, error)
+    WeekdayLimits(dayOfWeek int) (time.DayLimits, error)
+    ClosedDates(from, to time.Unix) (holidays, closures []string, err error)
 }
 ```
 
-`*Module` lo satisface estructuralmente. `time.DayLimits` lleva `Open`, `OpenMin`, `CloseMin` y `ClosedBy` —un `ClosedReason` que nombra el origen (`WEEKLY` | `HOLIDAY` | `CLOSURE`). Precedencia de resolución: **Cierre local > Feriado > Regla semanal**.
+`*Module` lo satisface estructuralmente. `time.DayLimits` lleva `Open`, `OpenMin` y `CloseMin`. Precedencia de resolución: **Cierre local > Feriado > Regla semanal**.
 
 ## Eventos
 
