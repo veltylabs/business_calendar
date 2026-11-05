@@ -5,17 +5,7 @@ import (
 )
 
 var Module = appkit.Module{
-	Name: "business_calendar",
+	Name:    "business_calendar",
+	Server:  server,
+	Browser: browser,
 }
-
-func init() {
-	if server != nil {
-		Module.Server = *server
-	}
-	if browser != nil {
-		Module.Browser = *browser
-	}
-}
-
-var server *appkit.ModuleServer
-var browser *appkit.ModuleBrowser
