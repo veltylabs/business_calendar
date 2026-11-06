@@ -20,7 +20,15 @@ func (m *Module) getWeeklyBounds(dayOfWeek int) (DayDetail, error) {
 	if !bh.IsOpen {
 		return DayDetail{ClosedBy: ClosedWeekly}, nil
 	}
-	return DayDetail{Limits: time.DayLimits{Open: true, OpenMin: mustParseClock(bh.OpenMin), CloseMin: mustParseClock(bh.CloseMin)}}, nil
+	open, err := storedClock("open_min", bh.OpenMin)
+	if err != nil {
+		return DayDetail{}, err
+	}
+	closeAt, err := storedClock("close_min", bh.CloseMin)
+	if err != nil {
+		return DayDetail{}, err
+	}
+	return DayDetail{Limits: time.DayLimits{Open: true, OpenMin: open, CloseMin: closeAt}}, nil
 }
 
 // GetDayDetail resuelve el estado del establecimiento para una fecha, INCLUYENDO

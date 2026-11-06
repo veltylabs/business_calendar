@@ -1,9 +1,12 @@
 package tests
 
 import (
+	"strings"
 	"testing"
 
 	businesscalendar "github.com/veltylabs/business_calendar"
+	"webtyp.com/orm"
+	"webtyp.com/storage/mem"
 )
 
 // TestWeekdayLimits_RegularHours checks that a regular open day
@@ -118,5 +121,26 @@ func TestWeekdayLimits_IsolatedFromHolidaysAndClosures(t *testing.T) {
 	}
 	if tueDayLimits.Open {
 		t.Errorf("expected DayLimits for Tuesday to be closed by closure, got %+v", tueDayLimits)
+	}
+}
+
+// A stored hour that is not a 24h clock (a row written before open_min/close_min became "HH:MM": "540") answers an
+// error naming the value. It never panics: a panic here takes the whole server down when someone books an hour.
+func TestWeekdayLimits_StoredHourNotAClock(t *testing.T) {
+	db := orm.New(mem.New())
+	m, err := businesscalendar.New(db, businesscalendar.Deps{IDs: &fakeIDs{}})
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	if err := db.Create(&businesscalendar.BusinessHours{Id: "h1", DayOfWeek: 1, OpenMin: "540", CloseMin: "1080", IsOpen: true}); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			t.Fatalf("WeekdayLimits panicked: %v", r)
+		}
+	}()
+	if _, err := m.WeekdayLimits(1); err == nil || !strings.Contains(err.Error(), "540") {
+		t.Errorf("WeekdayLimits with a stored \"540\": want an error naming the value, got %v", err)
 	}
 }
