@@ -139,10 +139,18 @@ func (m *Module) UpsertBusinessHours(h BusinessHours) error {
 
 // ListBusinessHours devuelve las siete reglas de días de la semana ordenadas por day_of_week. Una
 // semana vacía es un estado válido (cerrada por defecto), no un error.
-// Ejemplo: rows, err := cal.ListBusinessHours()
-func (m *Module) ListBusinessHours() ([]BusinessHours, error) {
+// Ejemplo: rows, err := cal.ListBusinessHours("", 0)
+func (m *Module) ListBusinessHours(after string, limit int64) ([]BusinessHours, error) {
 	var bh BusinessHours
-	rows, err := ReadAllBusinessHours(m.db.Query(&bh).OrderBy(BusinessHours_.DayOfWeek).Asc())
+	qb := m.db.Query(&bh)
+	if after != "" {
+		qb = qb.Where(BusinessHours_.Id).Gt(after)
+	}
+	qb = qb.OrderBy(BusinessHours_.Id).Asc()
+	if limit > 0 {
+		qb = qb.Limit(int(limit))
+	}
+	rows, err := ReadAllBusinessHours(qb)
 	if err != nil {
 		return nil, err
 	}
@@ -198,8 +206,8 @@ func (m *Module) RemoveHoliday(id string) error {
 
 // ListHolidays devuelve feriados en el rango [from, to] (segundos UTC a medianoche,
 // inclusivo). Un from/to en cero significa sin límite en esa dirección.
-// Ejemplo: rows, err := cal.ListHolidays(0, 0)
-func (m *Module) ListHolidays(from, to int64) ([]Holiday, error) {
+// Ejemplo: rows, err := cal.ListHolidays(0, 0, "", "", 0)
+func (m *Module) ListHolidays(from, to int64, search, after string, limit int64) ([]Holiday, error) {
 	var h Holiday
 	qb := m.db.Query(&h)
 	if from != 0 {
@@ -208,7 +216,16 @@ func (m *Module) ListHolidays(from, to int64) ([]Holiday, error) {
 	if to != 0 {
 		qb = qb.Where(Holiday_.SpecificDate).Lte(to)
 	}
-	qb = qb.OrderBy(Holiday_.SpecificDate).Asc()
+	if search != "" {
+		qb = qb.Where(Holiday_.Name).Like("%" + search + "%")
+	}
+	if after != "" {
+		qb = qb.Where(Holiday_.Id).Gt(after)
+	}
+	qb = qb.OrderBy(Holiday_.Id).Asc()
+	if limit > 0 {
+		qb = qb.Limit(int(limit))
+	}
 	rows, err := ReadAllHoliday(qb)
 	if err != nil {
 		return nil, err
@@ -265,8 +282,8 @@ func (m *Module) RemoveClosure(id string) error {
 
 // ListClosures devuelve cierres en el rango [from, to] (segundos UTC a medianoche,
 // inclusivo). Un from/to en cero significa sin límite en esa dirección.
-// Ejemplo: rows, err := cal.ListClosures(0, 0)
-func (m *Module) ListClosures(from, to int64) ([]Closure, error) {
+// Ejemplo: rows, err := cal.ListClosures(0, 0, "", "", 0)
+func (m *Module) ListClosures(from, to int64, search, after string, limit int64) ([]Closure, error) {
 	var c Closure
 	qb := m.db.Query(&c)
 	if from != 0 {
@@ -275,7 +292,16 @@ func (m *Module) ListClosures(from, to int64) ([]Closure, error) {
 	if to != 0 {
 		qb = qb.Where(Closure_.SpecificDate).Lte(to)
 	}
-	qb = qb.OrderBy(Closure_.SpecificDate).Asc()
+	if search != "" {
+		qb = qb.Where(Closure_.Reason).Like("%" + search + "%")
+	}
+	if after != "" {
+		qb = qb.Where(Closure_.Id).Gt(after)
+	}
+	qb = qb.OrderBy(Closure_.Id).Asc()
+	if limit > 0 {
+		qb = qb.Limit(int(limit))
+	}
 	rows, err := ReadAllClosure(qb)
 	if err != nil {
 		return nil, err

@@ -68,7 +68,7 @@ func TestEventCalendarChanged_RemovalOpens(t *testing.T) {
 	if err := m.AddHoliday(businesscalendar.Holiday{SpecificDate: oct01_2026_Thu, Name: "Holiday"}); err != nil {
 		t.Fatalf("AddHoliday: %v", err)
 	}
-	rows, err := m.ListHolidays(0, 0)
+	rows, err := m.ListHolidays(0, 0, "", "", 0)
 	if err != nil || len(rows) != 1 {
 		t.Fatalf("ListHolidays: n=%d err=%v", len(rows), err)
 	}

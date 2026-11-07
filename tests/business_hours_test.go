@@ -12,7 +12,7 @@ func TestAdminDefinesWeeklyBusinessHours(t *testing.T) {
 	m, _ := newModule(t, nil)
 	seedWeek(t, m)
 
-	rows, err := m.ListBusinessHours()
+	rows, err := m.ListBusinessHours("", 0)
 	if err != nil {
 		t.Fatalf("ListBusinessHours: %v", err)
 	}
@@ -127,7 +127,7 @@ func TestInvalidDayRejected(t *testing.T) {
 // state, not an error.
 func TestListBusinessHours_EmptyIsNotError(t *testing.T) {
 	m, _ := newModule(t, nil)
-	rows, err := m.ListBusinessHours()
+	rows, err := m.ListBusinessHours("", 0)
 	if err != nil {
 		t.Fatalf("ListBusinessHours on empty week: %v", err)
 	}

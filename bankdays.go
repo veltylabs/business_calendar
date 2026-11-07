@@ -18,7 +18,7 @@ func (m *Module) BankDayAfter(from time.Unix, days int) (time.Unix, error) {
 	}
 	day := time.MidnightUTC(from)
 	// Feriados de un margen amplio: days hábiles nunca ocupan más de days*2+14 días corridos.
-	holidays, err := m.ListHolidays(int64(day), int64(day+time.Unix(days*2+14)*time.Day))
+	holidays, err := m.ListHolidays(int64(day), int64(day+time.Unix(days*2+14)*time.Day), "", "", 0)
 	if err != nil {
 		return 0, err
 	}

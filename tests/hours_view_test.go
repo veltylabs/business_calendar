@@ -87,9 +87,8 @@ func TestOpListBusinessHours_ReadableFieldsAndHHMM(t *testing.T) {
 	if err != nil {
 		t.Fatalf("upsert Sunday: %v", err)
 	}
-
 	reg := mounted(t, m)
-	ctx := &mock.Context{}
+	ctx := &mock.Context{InBody: []byte(`{}`)}
 	ctx.SetUserID("u1")
 	reg.Invoke("OP", "/"+businesscalendar.OpListBusinessHours, ctx)
 	if ctx.Status != 0 {
@@ -180,7 +179,7 @@ func TestHHMM_Boundaries(t *testing.T) {
 	}
 
 	reg := mounted(t, m)
-	ctx := &mock.Context{}
+	ctx := &mock.Context{InBody: []byte(`{}`)}
 	ctx.SetUserID("u1")
 	reg.Invoke("OP", "/"+businesscalendar.OpListBusinessHours, ctx)
 	if ctx.Status != 0 {

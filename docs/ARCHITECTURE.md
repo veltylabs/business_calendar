@@ -112,7 +112,7 @@ Mapeo de estados: `400` decodificación/validación (`ErrInvalidDay`/`ErrInvalid
 
 La operación de upsert declara `model.Create|model.Update` (una máscara de bits) porque realmente puede hacer ambas cosas; declarar solo `Update` permitiría que un principal con permisos solo de actualización cree filas. Tres recursos (`business_hours`, `holiday`, `closure`) porque un administrador que puede agregar un feriado no es necesariamente el que puede reescribir los horarios de apertura.
 
-El filtrado por rango (`ListHolidays(from, to)`, `ListClosures(from, to)`) vive en los métodos de **servicio** para consumidores dentro del proceso; las **operaciones** de lista no toman argumentos y devuelven todo el horizonte (una vista lista todo).
+El filtrado por rango (`ListHolidays(from, to)`, `ListClosures(from, to)`) vive en los métodos de **servicio** para consumidores dentro del proceso. Las **operaciones** de lista aceptan `view.ListArgs` y los listados cargan según declara su `view.Page` y buscan en el servidor (search on the server).
 
 ## 7. Ejemplo de raíz de composición
 

@@ -96,11 +96,11 @@ func (m *Module) WeekdayLimits(dayOfWeek int) (time.DayLimits, error) {
 // "YYYY-MM-DD", en orden ascendente. Satisface OpeningHours de appointment_booking.
 // Ejemplo: holidays, closures, err := m.ClosedDates(from, to)
 func (m *Module) ClosedDates(from, to time.Unix) (holidays, closures []string, err error) {
-	hs, err := m.ListHolidays(int64(from), int64(to))
+	hs, err := m.ListHolidays(int64(from), int64(to), "", "", 0)
 	if err != nil {
 		return nil, nil, err
 	}
-	cs, err := m.ListClosures(int64(from), int64(to))
+	cs, err := m.ListClosures(int64(from), int64(to), "", "", 0)
 	if err != nil {
 		return nil, nil, err
 	}

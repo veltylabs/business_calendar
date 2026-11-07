@@ -53,7 +53,7 @@ func Load(m *businesscalendar.Module) (Data, error) {
 		}
 	}
 
-	loadedHours, err := m.ListBusinessHours()
+	loadedHours, err := m.ListBusinessHours("", 0)
 	if err != nil {
 		return Data{}, err
 	}
@@ -74,7 +74,7 @@ func Load(m *businesscalendar.Module) (Data, error) {
 		}
 	}
 
-	loadedHolidays, err := m.ListHolidays(0, 0)
+	loadedHolidays, err := m.ListHolidays(0, 0, "", "", 0)
 	if err != nil {
 		return Data{}, err
 	}
