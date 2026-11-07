@@ -116,7 +116,7 @@ func TestListClosures_RangeFilters(t *testing.T) {
 			t.Fatalf("AddClosure %d: %v", d, err)
 		}
 	}
-	rows, err := m.ListClosures(sep13_2026_Sun, sep14_2026_Mon)
+	rows, err := m.ListClosures(sep13_2026_Sun, sep14_2026_Mon, "", "", 0)
 	if err != nil {
 		t.Fatalf("ListClosures: %v", err)
 	}

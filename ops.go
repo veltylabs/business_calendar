@@ -36,7 +36,7 @@ func (m *Module) MountOperations(reg router.OperationRegistry) {
 	reg.Operation(OpListBusinessHours, m.opListBusinessHours).
 		Describe(DescListBusinessHours).
 		Requires(model.ResourceOf(&BusinessHoursModel), model.Read).
-		Accepts(nil)
+		Accepts(&view.ListArgs{})
 	// Upsert creates on the not-found branch AND updates otherwise — it must
 	// declare BOTH actions (model.Action is a bitmask). Declaring only Update
 	// would let an update-only principal create rows.
@@ -58,12 +58,12 @@ func (m *Module) MountOperations(reg router.OperationRegistry) {
 	reg.Operation(OpListHolidays, m.opListHolidays).
 		Describe(DescListHolidays).
 		Requires(model.ResourceOf(&HolidayModel), model.Read).
-		Accepts(nil)
+		Accepts(&view.ListArgs{})
 	view.MountSave(reg, OpAddHoliday, func(h *Holiday) error {
 		if err := m.AddHoliday(*h); err != nil {
 			return err
 		}
-		rows, err := m.ListHolidays(h.SpecificDate, h.SpecificDate)
+		rows, err := m.ListHolidays(h.SpecificDate, h.SpecificDate, "", "", 0)
 		if err == nil && len(rows) > 0 {
 			*h = rows[0]
 		}
@@ -81,12 +81,12 @@ func (m *Module) MountOperations(reg router.OperationRegistry) {
 	reg.Operation(OpListClosures, m.opListClosures).
 		Describe(DescListClosures).
 		Requires(model.ResourceOf(&ClosureModel), model.Read).
-		Accepts(nil)
+		Accepts(&view.ListArgs{})
 	view.MountSave(reg, OpAddClosure, func(c *Closure) error {
 		if err := m.AddClosure(*c); err != nil {
 			return err
 		}
-		rows, err := m.ListClosures(c.SpecificDate, c.SpecificDate)
+		rows, err := m.ListClosures(c.SpecificDate, c.SpecificDate, "", "", 0)
 		if err == nil && len(rows) > 0 {
 			*c = rows[len(rows)-1]
 		}
@@ -109,7 +109,12 @@ var _ router.OperationModule = (*Module)(nil)
 
 
 func (m *Module) opListBusinessHours(ctx router.Context) {
-	rows, err := m.ListBusinessHours()
+	var args view.ListArgs
+	if err := ctx.Decode(&args); err != nil {
+		rpc.WriteError(ctx, ErrCannotRead)
+		return
+	}
+	rows, err := m.ListBusinessHours(args.After, view.Cap(args.Limit))
 	if err != nil {
 		rpc.WriteError(ctx, errors.New("internal error"))
 		return
@@ -144,9 +149,14 @@ func (m *Module) opDayLimits(ctx router.Context) {
 }
 
 func (m *Module) opListHolidays(ctx router.Context) {
-	// No args — lists the whole horizon. Range filtering lives on the service
-	// method (ListHolidays(from, to)) for in-process consumers; a view lists all.
-	rows, err := m.ListHolidays(0, 0)
+	var args view.ListArgs
+	if err := ctx.Decode(&args); err != nil {
+		rpc.WriteError(ctx, ErrCannotRead)
+		return
+	}
+	// Range filtering lives on the service method (ListHolidays(from, to)) for
+	// in-process consumers; a view lists all via search/after/limit paging.
+	rows, err := m.ListHolidays(0, 0, args.Search, args.After, view.Cap(args.Limit))
 	if err != nil {
 		rpc.WriteError(ctx, errors.New("internal error"))
 		return
@@ -161,9 +171,14 @@ func (m *Module) opListHolidays(ctx router.Context) {
 }
 
 func (m *Module) opListClosures(ctx router.Context) {
-	// No args — lists the whole horizon. Range filtering lives on the service
-	// method (ListClosures(from, to)) for in-process consumers; a view lists all.
-	rows, err := m.ListClosures(0, 0)
+	var args view.ListArgs
+	if err := ctx.Decode(&args); err != nil {
+		rpc.WriteError(ctx, ErrCannotRead)
+		return
+	}
+	// Range filtering lives on the service method (ListClosures(from, to)) for
+	// in-process consumers; a view lists all via search/after/limit paging.
+	rows, err := m.ListClosures(0, 0, args.Search, args.After, view.Cap(args.Limit))
 	if err != nil {
 		rpc.WriteError(ctx, errors.New("internal error"))
 		return

@@ -40,13 +40,13 @@ func TestMountOperations_NineOpsAndRequires(t *testing.T) {
 		args     bool
 	}
 	wants := []want{
-		{businesscalendar.OpListBusinessHours, "business_hours", model.Read, false},
+		{businesscalendar.OpListBusinessHours, "business_hours", model.Read, true},
 		{businesscalendar.OpUpsertBusinessHours, "business_hours", model.Create | model.Update, true},
 		{businesscalendar.OpDayLimits, "business_hours", model.Read, true},
-		{businesscalendar.OpListHolidays, "holiday", model.Read, false},
+		{businesscalendar.OpListHolidays, "holiday", model.Read, true},
 		{businesscalendar.OpAddHoliday, "holiday", model.Create, true},
 		{businesscalendar.OpRemoveHoliday, "holiday", model.Delete, false},
-		{businesscalendar.OpListClosures, "closure", model.Read, false},
+		{businesscalendar.OpListClosures, "closure", model.Read, true},
 		{businesscalendar.OpAddClosure, "closure", model.Create, true},
 		{businesscalendar.OpRemoveClosure, "closure", model.Delete, false},
 	}
@@ -98,7 +98,7 @@ func TestOpListBusinessHours_Success(t *testing.T) {
 	seedWeek(t, m)
 	reg := mounted(t, m)
 
-	ctx := &mock.Context{}
+	ctx := &mock.Context{InBody: []byte(`{}`)}
 	ctx.SetUserID("u1")
 	reg.Invoke("OP", "/"+businesscalendar.OpListBusinessHours, ctx)
 	if ctx.Status != 0 {
@@ -162,5 +162,52 @@ func TestOpRemoveHoliday_NotFoundIs404(t *testing.T) {
 	reg.Invoke("OP", "/"+businesscalendar.OpRemoveHoliday, ctx)
 	if ctx.Status != 404 {
 		t.Errorf("remove unknown must be 404, got %d", ctx.Status)
+	}
+}
+
+func TestBusinessHours_ListAcceptsListArgs(t *testing.T) {
+	m, _ := newModule(t, nil)
+	// Create two rows
+	_ = m.UpsertBusinessHours(businesscalendar.BusinessHours{DayOfWeek: 1, OpenMin: "08:00", CloseMin: "18:00", IsOpen: true})
+	_ = m.UpsertBusinessHours(businesscalendar.BusinessHours{DayOfWeek: 2, OpenMin: "08:00", CloseMin: "18:00", IsOpen: true})
+
+	reg := mounted(t, m)
+
+	// Test limit
+	ctx := &mock.Context{InBody: []byte(`{"limit": 1}`)}
+	ctx.SetUserID("u1")
+	reg.Invoke("OP", "/"+businesscalendar.OpListBusinessHours, ctx)
+	if ctx.Status != 0 {
+		t.Fatalf("status %d", ctx.Status)
+	}
+}
+
+func TestHolidays_ListAcceptsListArgs(t *testing.T) {
+	m, _ := newModule(t, nil)
+	_ = m.AddHoliday(businesscalendar.Holiday{SpecificDate: 1000, Name: "Fiestas Patrias"})
+	_ = m.AddHoliday(businesscalendar.Holiday{SpecificDate: 2000, Name: "Navidad"})
+
+	reg := mounted(t, m)
+
+	ctx := &mock.Context{InBody: []byte(`{"search": "Navidad"}`)}
+	ctx.SetUserID("u1")
+	reg.Invoke("OP", "/"+businesscalendar.OpListHolidays, ctx)
+	if ctx.Status != 0 {
+		t.Fatalf("status %d", ctx.Status)
+	}
+}
+
+func TestClosures_ListAcceptsListArgs(t *testing.T) {
+	m, _ := newModule(t, nil)
+	_ = m.AddClosure(businesscalendar.Closure{SpecificDate: 1000, Reason: "Mantenimiento"})
+	_ = m.AddClosure(businesscalendar.Closure{SpecificDate: 2000, Reason: "Inventario"})
+
+	reg := mounted(t, m)
+
+	ctx := &mock.Context{InBody: []byte(`{"search": "Mantenimiento"}`)}
+	ctx.SetUserID("u1")
+	reg.Invoke("OP", "/"+businesscalendar.OpListClosures, ctx)
+	if ctx.Status != 0 {
+		t.Fatalf("status %d", ctx.Status)
 	}
 }

@@ -49,7 +49,7 @@ func TestRemovingHolidayReopensTheDay(t *testing.T) {
 	if err := m.AddHoliday(h); err != nil {
 		t.Fatalf("AddHoliday: %v", err)
 	}
-	rows, err := m.ListHolidays(0, 0)
+	rows, err := m.ListHolidays(0, 0, "", "", 0)
 	if err != nil || len(rows) != 1 {
 		t.Fatalf("ListHolidays: n=%d err=%v", len(rows), err)
 	}
@@ -79,7 +79,7 @@ func TestMovingHolidayFlipsBothDays(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("AddHoliday: %v", err)
 	}
-	rows, err := m.ListHolidays(0, 0)
+	rows, err := m.ListHolidays(0, 0, "", "", 0)
 	if err != nil || len(rows) != 1 {
 		t.Fatalf("ListHolidays: n=%d err=%v", len(rows), err)
 	}
