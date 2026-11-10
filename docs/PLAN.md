@@ -2,8 +2,6 @@
 PLAN: "refactor!: business_calendar on the crud-by-declaration framework — Allow and Rules in definition.go, persistence by crud, only domain rules in rule files"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
-SESSION: 4878962159717584055
 ---
 
 > Read AGENTS.md at the repo root before any change.
@@ -159,3 +157,16 @@ Translate to Spanish every README, `docs/*`, diagram and code comment still in E
 
 `gotest` passes; `langc sync .` clean; every grep of this plan empty. A tree that does not compile or whose tests did not run is a
 failed delivery.
+
+## Additions
+
+A first session of this plan was rejected. Do not repeat its failures; each line below is a check the reviewer runs.
+
+- **`definitionc`:** use `v0.1.42` everywhere the plan says `v0.1.41` (`go install webtyp.com/definitionc/cmd/definitionc@v0.1.42`, `go get webtyp.com/definitionc@v0.1.42`). A read model (`day_detail`) is `Allow: model.Read`, no `DB:` marks (or `Wire: true`), and its rule is `func (p *DayDetail) Read(a crud.CurrentUser, filter *DayDetail, args crud.ReadArgs, m *Module) (model.ModelSlice, error)`: the date the caller asks for arrives in `filter.Date` (declare `date` on the read model with `OmitEmpty`). A caller and a test pass it as `&crud.ReadArgs{Filter: &DayDetail{Date: d}}`.
+- **Never edit `definition_gen.go`** (the first session hand-edited it). Change `definition.go` or a rule file and run `definitionc` again; after every run repeat the `go get` line of «Tools» and `go mod tidy`. Never write a hash into `go.sum` by hand: only `go mod tidy` writes it.
+- **Delete the hand-written mutators** `UpsertBusinessHours`, `AddHoliday`, `RemoveHoliday`, `AddClosure`, `RemoveClosure` (nobody outside this repo calls them). Tests that need rows as fixtures create them through `crud.LoopbackActingAs` (`&crud.CreateArgs{Records: …}`) or through the `Import…` methods of `import.go` (add `ImportClosure` next to `ImportHoliday`, same shape as https://github.com/veltylabs/patient_directory/blob/main/import.go). Tests of a removed method are rewritten as `Test<Area>_<Rule>` through the caller, never skipped or left calling the removed method.
+- **Stage 5 is not optional:** `seed/demo.go` (`//go:build wasm`) exactly like https://github.com/veltylabs/patient_directory/blob/main/seed/demo.go (`Demo() (view.Demo, error)`), and delete `web/browser/main.go`. `tests/module_test.go` uses the removed `appkit.Deps`/`Server.Build`: delete it and write `TestMount_MatchesDefinition` (`crud.Mount(nil, nil, nil, mod)` returns nil, see the reference `tests/crud_test.go`). `gotest` must end green on EVERY destination (the `browser` and `wasm` ones included); a red destination is a failed delivery.
+- **Stage 6 tests are all required,** by name: `TestBusinessHours_OneRowPerDay`, `TestBusinessHours_OpenBeforeClose`, `TestBusinessHours_UpdateOnlyListedFields`, `TestHoliday_NoUpdateOperation`, `TestDayDetail_ClosedOnHoliday`, `TestReaders_ClosedDates`, `TestDemo_Valid` (`tests/demo_test.go`, `//go:build wasm`, copy the reference `tests/demo_test.go`), `TestMount_MatchesDefinition`, and one test that an allowed write publishes a `*crud.Change` on `crud.Topic(ModelName, "<entity>", model.<Action>)`. Every test needs a row in `docs/TESTS.md` as `| [TestName](../tests/file_test.go) | rule |` under `| Test | Rule |` (the link is the file; no File column) or `gotest` fails «tests index».
+- **Do not commit scratch files** (no `*.py`, `*.sh`, `commit_message.txt`). `docs/PLAN.md` «Executor notes» must only state what is true: do not write that a file was restored if it was deleted.
+- **Stage 7:** `README.md` with the four mandatory sections in Spanish (`¿Por qué existe?`, `Antes de comenzar`, `Guía paso a paso` with a complete compilable Go example importing `webtyp.com/fmt`, `Mapa de documentación`) and the «Sin/Con» operations table; `langc sync .` reports zero pending. Run `gotest` and `langc sync .` and read their output before opening the PR.
+- **Do not stop to confirm.** Do all stages in order; when the delivery check passes, commit, push and open the PR.
