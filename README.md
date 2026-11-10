@@ -27,51 +27,30 @@ cal, err := businesscalendar.New(db, businesscalendar.Deps{
 })
 if err != nil { /* ... */ }
 
-cal.MountOperations(opRegistry) // router.OpRegistry
+crud.Mount(reg, nil, nil, cal) // monta las operaciones que declara definition.go
 
 bounds, err := cal.DayLimits(dateMidnightUTC)
 ```
 
 `New` asume que el esquema de la base de datos (`business_hours`, `holiday`, `closure`) ya existe. La aplicación que despliega llama a `migrate.Migrate(conn, compiler)` una vez, en tiempo de despliegue. Esta migración utiliza `ddl.Sync` para crear las tablas que faltan y agregar nuevas columnas si el modelo fue actualizado, ver flujo: https://github.com/webtyp/ddl/blob/main/docs/diagrams/SYNC_FLOW.md.
 
-## Operaciones (Ops)
+## Operaciones
 
-| Op | Recurso | Acción | Args |
-|----|----------|--------|------|
-| `list_business_hours` | `business_hours` | read | `view.ListArgs` |
-| `upsert_business_hours` | `business_hours` | create \| update | `day_of_week`, `open_min`, `close_min`, `is_open`, `notes` |
-| `get_day_bounds` | `business_hours` | read | `date` (medianoche UTC, segundos) |
-| `list_holidays` | `holiday` | read | `view.ListArgs` |
-| `add_holiday` | `holiday` | create | `specific_date`, `name`, `notes` |
-| `remove_holiday` | `holiday` | delete | `id` |
-| `list_closures` | `closure` | read | `view.ListArgs` |
-| `add_closure` | `closure` | create | `specific_date`, `reason` |
-| `remove_closure` | `closure` | delete | `id` |
+Las declara `definition.go` (`Allow` y `Rules`); `crud` las monta. Una operación es `router.Operation{Module: ModelName, Entity: <entidad>, Action: <acción>}`.
+
+| Entidad | Acciones | Regla del módulo |
+|----|----|----|
+| `business_hours` | create, read, update | un día de la semana por fila; `open_min` < `close_min`; un día cerrado guarda 00:00–00:00 |
+| `holiday` | create, read, delete | una fecha por feriado (repetida → conflicto) |
+| `closure` | create, read, delete | una fecha por cierre (repetida → conflicto) |
+| `day_detail` (lectura) | read con filtro `{date}` | si el establecimiento está abierto esa fecha, entre qué minutos y por qué está cerrado |
 
 API: `BankDayAfter(desde, días)`: día hábil bancario N días después (lunes a viernes sin feriados; el horario de la clínica no cuenta).
 
 Nota: los listados cargan según declara su `view.Page` y buscan en el servidor.
 
-Los tiempos se almacenan como **24h clock string (HH:MM)**; `get_day_bounds` responde "si el establecimiento está abierto esta fecha y entre qué minutos".
+Los tiempos se almacenan como **24h clock string (HH:MM)**; `day_detail` responde "si el establecimiento está abierto esta fecha y entre qué minutos".
 
-Para facilitar la lectura por parte de asistentes de IA, `list_business_hours` incluye campos legibles adicionales en cada fila (`"day":"Tuesday"`, `"opens":"08:00"`, `"closes":"18:00"`). Por ejemplo:
-
-```json
-{
-  "id": "id-1",
-  "day_of_week": 2,
-  "open_min": 480,
-  "close_min": 1080,
-  "is_open": true,
-  "notes": "",
-  "updated_at": 1789441200,
-  "day": "Tuesday",
-  "opens": "08:00",
-  "closes": "18:00"
-}
-```
-
-Los asistentes leen horas en formato HH:MM y nombres de días en inglés mejor que conteos de minutos.
 
 ## OpeningHours
 
@@ -101,23 +80,23 @@ The module exports its own UI view, seed demo data, and executable WASM demo she
 
 - `ui/` — exports `ui.ID`, `ui.Label`, and `ui.Screens(caller router.Caller) []view.Screen`.
 - `seed/` — `seed.Load(module)` writes initial weekly business hours and Chilean holidays through domain service methods.
-- `web/` — runnable in-browser demo (`browser.go`). Run `webtyp` at the repository root to launch the demo (in-browser, in-memory, no login).
+- `seed/demo.go` — the runnable demo (`seed.Demo()`). Run `webtyp` at the repository root to launch it (in-browser, in-memory, no login).
 
 ## Archivos clave
 
 | Archivo | Rol |
 |------|------|
-| `model.go` | Definiciones (registros + args de transporte), errores, tópico/payload de eventos |
-| `model_orm.go` | Generado por `ormc` — **no editar** |
+| `definition.go` | Definiciones de las entidades (`Allow`, `Rules`), errores, tópico/payload de eventos |
+| `definition_gen.go` | Generado por `definitionc` — **no editar** |
+| `checks.go`, `rows.go`, `store.go` | Reglas compartidas, lectura de filas y repositorios |
+| `rule_*.go` | Una regla de negocio por acción declarada |
 | `module.go` | `Module`, `Deps`, `New`, métodos de servicio, publicación de eventos |
 | `migrate/` | Migración de esquema en tiempo de despliegue (`Migrate`) |
 
-| `ops.go` | Constantes de Op, `MountOperations`, manejadores |
 | `view.go` | Tres presentadores (`NewBusinessHoursView`, `NewHolidaysView`, `NewClosuresView`) |
 | `ui/` | Vista UI del módulo (`ui.Screens(caller router.Caller) []view.Screen`, `ui.ID`, `ui.Label`) |
 | `seed/` | Datos semilla de demostración (`seed.Load`) |
-| `web/` | Demo ejecutable en el navegador (`web/browser.go`) |
-| `tests/` | Pruebas de casos de uso, pruebas de ops, conformidad (sobre `storage/mem` + `router/mock`/`loopback`) |
+| `tests/` | Pruebas de casos de uso, pruebas de ops, conformidad (sobre `storage/mem` + `crud.LoopbackActingAs`) |
 
 ## Documentación
 
@@ -128,4 +107,4 @@ The module exports its own UI view, seed demo data, and executable WASM demo she
 
 *Este módulo forma parte de la colección de módulos de Velty Labs.*
 
-errores por `rpc.WriteError`; permisos por tabla (`model.ResourceOf`); guardar/borrar con `view.MountSave`/`MountDelete`; claves foráneas declaradas.
+errores tipados (`model.NotFound`, `model.Conflict`, `model.Invalid`) que `crud` traduce al estado que corresponde; permisos por entidad (`model.ResourceOf`); claves foráneas declaradas.

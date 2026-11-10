@@ -6,111 +6,88 @@ import (
 	"webtyp.com/time"
 )
 
-// BusinessHoursModel: one row per day of week. day_of_week is unique — this
-// module never writes more than seven rows.
-//
-// Times are MINUTES FROM MIDNIGHT (0..1439), the same encoding
-// appointment_booking uses for work blocks. The archived business_hours module
-// stored clock-time text and forced a conversion at the one boundary that has
-// to compare the two; the encoding is fixed here instead.
-//
-// Renderable fields use input.* widgets (Storage() unchanged: input.Number()
-// is still FieldInt, input.Checkbox() still FieldBool, input.Textarea() still
-// FieldText) — a plain model.Kind is not a form.Field.Type (see
-// form-codegen skill): crudview.New called form.New(Presenter.Record(), ...)
-// against a record with zero renderable fields and panicked BuildClient for
-// every module in the registry, not just this one.
-// Ejemplo: var bh BusinessHours
 var BusinessHoursModel = model.Definition{
 	Name: "business_hours",
+	Allow: model.Create | model.Read | model.Update,
+	Rules: model.Rules{Create: model.AddMyBusinessRule, Read: model.HaveNoBusinessRule, Update: model.AddMyBusinessRule},
 	Fields: model.Fields{
-		{Name: "id", Type: model.Text(), DB: &model.FieldDB{PK: true}},
-		{Name: "day_of_week", Type: input.Number(), Label: "Day of week", NotNull: true, DB: &model.FieldDB{Unique: true}, Item: model.ItemLabel},
-		{Name: "open_min", Type: input.Hour(), Label: "Opens at", NotNull: true, Item: model.ItemDescription},
-		{Name: "close_min", Type: input.Hour(), Label: "Closes at", NotNull: true, Item: model.ItemDescription},
-		{Name: "is_open", Type: input.Checkbox(), Label: "Open", NotNull: true, Item: model.ItemDescription},
+		{Name: "id", Type: model.Text(), OmitEmpty: true, ServerOnly: true, DB: &model.FieldDB{PK: true}},
+		{Name: "day_of_week", Type: input.Number(), Label: "Day of week", DB: &model.FieldDB{Unique: true}, Item: model.ItemLabel},
+		{Name: "open_min", Type: input.Hour(), Label: "Opens at", OmitEmpty: true, Item: model.ItemDescription},
+		{Name: "close_min", Type: input.Hour(), Label: "Closes at", OmitEmpty: true, Item: model.ItemDescription},
+		{Name: "is_open", Type: input.Checkbox(), Label: "Open", Item: model.ItemDescription},
 		{Name: "notes", Type: input.Textarea(), Label: "Notes", Item: model.ItemDescription},
-		{Name: "updated_at", Type: model.NanoTime(), NotNull: true},
+		{Name: "updated_at", Type: model.NanoTime(), NotNull: true, ServerOnly: true},
 	},
 }
 
-// HolidayModel: a dated closure with a legal/administrative origin. Editable at
-// runtime — a holiday that appears by law must never require a recompile.
-// Ejemplo: var h Holiday
 var HolidayModel = model.Definition{
 	Name: "holiday",
+	Allow: model.Create | model.Read | model.Delete,
+	Rules: model.Rules{Create: model.AddMyBusinessRule, Read: model.HaveNoBusinessRule, Delete: model.AddMyBusinessRule},
 	Fields: model.Fields{
-		{Name: "id", Type: model.Text(), DB: &model.FieldDB{PK: true}},
+		{Name: "id", Type: model.Text(), OmitEmpty: true, ServerOnly: true, DB: &model.FieldDB{PK: true}},
 		{Name: "specific_date", Type: input.Number(), Label: "Date", NotNull: true, Item: model.ItemDescription}, // midnight UTC, seconds
 		{Name: "name", Type: input.Text(), Label: "Name", NotNull: true, Item: model.ItemLabel},
 		{Name: "notes", Type: input.Textarea(), Label: "Notes"},
-		{Name: "updated_at", Type: model.NanoTime(), NotNull: true},
+		{Name: "updated_at", Type: model.NanoTime(), NotNull: true, ServerOnly: true},
 	},
 }
 
-// ClosureModel: a dated closure the establishment itself decided (maintenance,
-// an event). Separate from Holiday because the ORIGIN is what the UI shows and
-// what an administrator filters by — collapsing both into one table with a
-// "type" column would make the origin a magic string.
-// Ejemplo: var c Closure
 var ClosureModel = model.Definition{
 	Name: "closure",
+	Allow: model.Create | model.Read | model.Delete,
+	Rules: model.Rules{Create: model.AddMyBusinessRule, Read: model.HaveNoBusinessRule, Delete: model.AddMyBusinessRule},
 	Fields: model.Fields{
-		{Name: "id", Type: model.Text(), DB: &model.FieldDB{PK: true}},
+		{Name: "id", Type: model.Text(), OmitEmpty: true, ServerOnly: true, DB: &model.FieldDB{PK: true}},
 		{Name: "specific_date", Type: input.Number(), Label: "Date", NotNull: true, Item: model.ItemDescription},
 		{Name: "reason", Type: input.Text(), Label: "Reason", NotNull: true, Item: model.ItemLabel},
-		{Name: "updated_at", Type: model.NanoTime(), NotNull: true},
+		{Name: "updated_at", Type: model.NanoTime(), NotNull: true, ServerOnly: true},
 	},
 }
 
-// domainError is the concrete type of this package's sentinel errors. Code
-// compares them by asserting this type and comparing the value: == between two
-// error values compiles, under TinyGo, to runtime.interfaceEqual, which pulls
-// internal/reflectlite into the wasm binary.
+var DayStatusModel = model.Definition{
+	Name:  "day_detail",
+	Wire:  true,
+	Allow: model.Read,
+	Rules: model.Rules{Read: model.AddMyBusinessRule},
+	Fields: model.Fields{
+		{Name: "date", Type: model.Int(), OmitEmpty: true},
+		{Name: "open", Type: model.Bool(), OmitEmpty: true},
+		{Name: "open_min", Type: model.Int(), OmitEmpty: true},
+		{Name: "close_min", Type: model.Int(), OmitEmpty: true},
+		{Name: "closed_by", Type: model.Text(), OmitEmpty: true},
+	},
+}
+
+var Definition = model.ModuleDefinition{
+	Name: "business_calendar",
+	Entities: []model.Definition{BusinessHoursModel, HolidayModel, ClosureModel, DayStatusModel},
+}
+
 const (
 	ErrNotFound       model.NotFound = "business_calendar: record not found"
 	ErrInvalidDay     model.Invalid = "business_calendar: day_of_week must be 0..6"
-	ErrInvalidWeekday model.Invalid = "business_calendar: day of week must be 0..6"
+	ErrInvalidWeekday model.Invalid = "business_calendar: day_of_week must be 0..6"
 	ErrInvalidMinutes model.Invalid = "business_calendar: minutes must be 0..1439 and open_min < close_min"
 	ErrDuplicateDate  model.Conflict = "business_calendar: a record already exists for that date"
 	ErrCannotRead     model.Invalid = "business_calendar: cannot read the request"
+	ErrFieldNotEditable model.Invalid = "business_calendar: that field cannot be changed"
+	ErrDateRequired     model.Invalid = "business_calendar: date is required"
 )
 
-// EventCalendarChanged fires on every write. appointment_booking subscribes so
-// a professional's editor reflects widened hours without a recompile (CU-03),
-// a new holiday closes the day for everyone (CU-04), and reservations already
-// booked on a day that just became closed are recomputed into conflict.
-// Ejemplo: topic := businesscalendar.EventCalendarChanged
 const EventCalendarChanged = "business.calendar.changed"
 
-// Payload kinds — the ONLY place these literals live. CalendarChangedPayload.Kind
-// carries one of them.
 const (
 	CalendarKindBusinessHours = "BUSINESS_HOURS"
 	CalendarKindHoliday       = "HOLIDAY"
 	CalendarKindClosure       = "CLOSURE"
 )
 
-// CalendarChangedPayload says WHAT changed, not merely that something did.
-// A subscriber that only learns "the calendar changed" has to recompute every
-// reservation of every professional; with the range it recomputes a window.
-//
-// Implements model.Encodable, which events.Event.Payload requires.
-// Ejemplo: var p businesscalendar.CalendarChangedPayload
 type CalendarChangedPayload struct {
-	// FromDate/ToDate bound the affected dates (midnight UTC seconds).
-	// For a holiday or closure both equal that single date. For a business
-	// hours change they are 0/0 — a weekly rule has no bounded range, and the
-	// subscriber must recompute its whole horizon.
 	FromDate int64
 	ToDate   int64
-	// Kind names what moved, so a subscriber can skip work it does not care
-	// about. One of CalendarKindBusinessHours | CalendarKindHoliday |
-	// CalendarKindClosure.
 	Kind string
-	// Closed reports the direction. true when the change CLOSES time (a
-	// holiday added, hours narrowed) — the only direction that can invalidate
-	// an existing reservation. false when it opens time, which never does.
 	Closed bool
 }
 
@@ -122,79 +99,24 @@ func (p *CalendarChangedPayload) EncodeFields(w model.FieldWriter) {
 }
 
 func (p *CalendarChangedPayload) DecodeFields(r model.FieldReader) {
-	if v, ok := r.Int("from_date"); ok {
-		p.FromDate = v
-	}
-	if v, ok := r.Int("to_date"); ok {
-		p.ToDate = v
-	}
-	if v, ok := r.String("kind"); ok {
-		p.Kind = v
-	}
-	if v, ok := r.Bool("closed"); ok {
-		p.Closed = v
-	}
+	if v, ok := r.Int("from_date"); ok { p.FromDate = v }
+	if v, ok := r.Int("to_date"); ok { p.ToDate = v }
+	if v, ok := r.String("kind"); ok { p.Kind = v }
+	if v, ok := r.Bool("closed"); ok { p.Closed = v }
 }
 
 func (p *CalendarChangedPayload) IsNil() bool { return p == nil }
 
-// Transport-only Args Definitions.
-//
-// Constraints follow the harness's NotNull semantics: on a base int/bool kind,
-// NotNull rejects the ZERO value (ValidateFields: NotNull && IsZeroPtr), so
-// day_of_week 0 (Sunday), is_open false, or midnight (0 minutes) would be
-// unrepresentable if NotNull were set here. Required ints are therefore
-// enforced as DOMAIN rules in the service (ErrInvalidDay/ErrInvalidMinutes),
-// the single fail-closed chokepoint every write path crosses; NotNull stays
-// only on the text fields where empty is never legal.
-// Ejemplo: var args GetDayLimitsArgs
-var GetDayLimitsArgsModel = model.Definition{
-	Name: "get_day_bounds_args",
-	Fields: model.Fields{
-		{Name: "date", Type: model.Int()},
-	},
-}
-
-// Ejemplo: var args ListHolidaysArgs
-var ListHolidaysArgsModel = model.Definition{
-	Name: "list_holidays_args",
-	Fields: model.Fields{
-		{Name: "from", Type: model.Int()},
-		{Name: "to", Type: model.Int()},
-	},
-}
-
-// Ejemplo: var args ListClosuresArgs
-var ListClosuresArgsModel = model.Definition{
-	Name: "list_closures_args",
-	Fields: model.Fields{
-		{Name: "from", Type: model.Int()},
-		{Name: "to", Type: model.Int()},
-	},
-}
-
-
-// ClosedReason nombra el origen de un cierre. Los literales de cadena viven SOLAMENTE en
-// estas constantes — nunca en línea en el lugar de llamada.
-// Ejemplo: var reason businesscalendar.ClosedReason = businesscalendar.ClosedHoliday
 type ClosedReason string
 
 const (
-	ClosedWeekly  ClosedReason = "WEEKLY"  // business_hours says closed that weekday
-	ClosedHoliday ClosedReason = "HOLIDAY" // a Holiday row falls on that date
-	ClosedLocal   ClosedReason = "CLOSURE" // a Closure row falls on that date
+	ClosedWeekly  ClosedReason = "WEEKLY"
+	ClosedHoliday ClosedReason = "HOLIDAY"
+	ClosedLocal   ClosedReason = "CLOSURE"
 )
 
-// DayDetail es la propia respuesta de este módulo para una fecha: los límites neutrales MÁS
-// el por qué un día cerrado está cerrado. ClosedBy es vocabulario de este módulo y nunca
-// cruza a un vecino.
-//
-// Es un modelo de resultado solo de salida: implementa model.Encodable para que la
-// operación get_day_limits pueda responder con él, y nunca es una tabla de BD.
-// Ejemplo: detail, err := cal.GetDayDetail(date)
 type DayDetail struct {
 	Limits time.DayLimits
-	// ClosedBy nombra por qué el día está cerrado. "" cuando Limits.Open es true.
 	ClosedBy ClosedReason
 }
 

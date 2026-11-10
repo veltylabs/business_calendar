@@ -3,6 +3,7 @@
 package module
 
 import (
+	"webtyp.com/view"
 	businesscalendar "github.com/veltylabs/business_calendar"
 	"webtyp.com/appkit"
 	"webtyp.com/model"
@@ -14,4 +15,4 @@ var server = appkit.ModuleServer{
 	},
 }
 
-var browser appkit.ModuleBrowser
+var browser view.ModuleBrowser
