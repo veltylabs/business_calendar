@@ -5,6 +5,7 @@ package businesscalendar
 import (
 	"webtyp.com/model"
 	"webtyp.com/orm"
+	"webtyp.com/crud"
 	"webtyp.com/fmt"
 	"webtyp.com/time"
 )
@@ -28,7 +29,7 @@ func (m *BusinessHours) Pointers() []any { return []any{&m.Id, &m.DayOfWeek, &m.
 func (m *BusinessHours) IsNil() bool { return m == nil }
 
 func (m *BusinessHours) EncodeFields(w model.FieldWriter) {
-	w.String("id", m.Id)
+	if m.Id != "" { w.String("id", m.Id) }
 	w.Int("day_of_week", m.DayOfWeek)
 	w.String("open_min", m.OpenMin)
 	w.String("close_min", m.CloseMin)
@@ -59,6 +60,9 @@ func (s *BusinessHoursList) DecodeFields(_ model.FieldReader) {}
 func (m *BusinessHours) Validate(action byte) error {
 	return model.ValidateFields(action, m)
 }
+
+func (*BusinessHours) Allow() model.Action     { return BusinessHoursModel.Allow }
+func (*BusinessHoursList) Allow() model.Action { return BusinessHoursModel.Allow }
 
 func (m *BusinessHours) Item() model.Item {
 	return model.Item{ID: m.Id, Label: fmt.Convert(m.DayOfWeek).String(), Description: model.JoinItem(m.OpenMin, m.CloseMin, fmt.Convert(m.IsOpen).String(), m.Notes)}
@@ -116,7 +120,7 @@ func (m *Holiday) Pointers() []any { return []any{&m.Id, &m.SpecificDate, &m.Nam
 func (m *Holiday) IsNil() bool { return m == nil }
 
 func (m *Holiday) EncodeFields(w model.FieldWriter) {
-	w.String("id", m.Id)
+	if m.Id != "" { w.String("id", m.Id) }
 	w.Int("specific_date", m.SpecificDate)
 	w.String("name", m.Name)
 	w.String("notes", m.Notes)
@@ -143,6 +147,9 @@ func (s *HolidayList) DecodeFields(_ model.FieldReader) {}
 func (m *Holiday) Validate(action byte) error {
 	return model.ValidateFields(action, m)
 }
+
+func (*Holiday) Allow() model.Action     { return HolidayModel.Allow }
+func (*HolidayList) Allow() model.Action { return HolidayModel.Allow }
 
 func (m *Holiday) Item() model.Item {
 	return model.Item{ID: m.Id, Label: m.Name, Description: fmt.Convert(m.SpecificDate).String()}
@@ -195,7 +202,7 @@ func (m *Closure) Pointers() []any { return []any{&m.Id, &m.SpecificDate, &m.Rea
 func (m *Closure) IsNil() bool { return m == nil }
 
 func (m *Closure) EncodeFields(w model.FieldWriter) {
-	w.String("id", m.Id)
+	if m.Id != "" { w.String("id", m.Id) }
 	w.Int("specific_date", m.SpecificDate)
 	w.String("reason", m.Reason)
 	w.Int("updated_at", int64(m.UpdatedAt))
@@ -220,6 +227,9 @@ func (s *ClosureList) DecodeFields(_ model.FieldReader) {}
 func (m *Closure) Validate(action byte) error {
 	return model.ValidateFields(action, m)
 }
+
+func (*Closure) Allow() model.Action     { return ClosureModel.Allow }
+func (*ClosureList) Allow() model.Action { return ClosureModel.Allow }
 
 func (m *Closure) Item() model.Item {
 	return model.Item{ID: m.Id, Label: m.Reason, Description: fmt.Convert(m.SpecificDate).String()}
@@ -254,108 +264,103 @@ func ReadAllClosure(qb *orm.QB) (ClosureList, error) {
 	return results, err
 }
 
-type DayLimitsArgs struct {
+type DayStatus struct {
 	Date int64
+	Open bool
+	OpenMin int64
+	CloseMin int64
+	ClosedBy string
 }
 
-func (m *DayLimitsArgs) ModelName() string { return "get_day_limits_args" }
+func (m *DayStatus) ModelName() string { return "day_detail" }
 
-func (m *DayLimitsArgs) Schema() []model.Field { return GetDayLimitsArgsModel.Fields }
+func (m *DayStatus) Wire() bool { return true }
 
-func (m *DayLimitsArgs) Pointers() []any { return []any{&m.Date} }
+func (m *DayStatus) Schema() []model.Field { return DayStatusModel.Fields }
 
-func (m *DayLimitsArgs) IsNil() bool { return m == nil }
+func (m *DayStatus) Pointers() []any { return []any{&m.Date, &m.Open, &m.OpenMin, &m.CloseMin, &m.ClosedBy} }
 
-func (m *DayLimitsArgs) EncodeFields(w model.FieldWriter) {
-	w.Int("date", m.Date)
+func (m *DayStatus) IsNil() bool { return m == nil }
+
+func (m *DayStatus) EncodeFields(w model.FieldWriter) {
+	if m.Date != 0 { w.Int("date", m.Date) }
+	if m.Open { w.Bool("open", m.Open) }
+	if m.OpenMin != 0 { w.Int("open_min", m.OpenMin) }
+	if m.CloseMin != 0 { w.Int("close_min", m.CloseMin) }
+	if m.ClosedBy != "" { w.String("closed_by", m.ClosedBy) }
 }
 
-func (m *DayLimitsArgs) DecodeFields(r model.FieldReader) {
+func (m *DayStatus) DecodeFields(r model.FieldReader) {
 	if v, ok := r.Int("date"); ok { m.Date = v }
+	if v, ok := r.Bool("open"); ok { m.Open = v }
+	if v, ok := r.Int("open_min"); ok { m.OpenMin = v }
+	if v, ok := r.Int("close_min"); ok { m.CloseMin = v }
+	if v, ok := r.String("closed_by"); ok { m.ClosedBy = v }
 }
 
-type DayLimitsArgsList []*DayLimitsArgs
+type DayStatusList []*DayStatus
 
-func (s *DayLimitsArgsList) Len() int             { return len(*s) }
-func (s *DayLimitsArgsList) At(i int) model.Fielder { return (*s)[i] }
-func (s *DayLimitsArgsList) Append() model.Fielder  { v := &DayLimitsArgs{}; *s = append(*s, v); return v }
-func (s *DayLimitsArgsList) IsNil() bool          { return s == nil }
-func (s *DayLimitsArgsList) EncodeFields(_ model.FieldWriter) {}
-func (s *DayLimitsArgsList) DecodeFields(_ model.FieldReader) {}
+func (s *DayStatusList) Len() int             { return len(*s) }
+func (s *DayStatusList) At(i int) model.Fielder { return (*s)[i] }
+func (s *DayStatusList) Append() model.Fielder  { v := &DayStatus{}; *s = append(*s, v); return v }
+func (s *DayStatusList) IsNil() bool          { return s == nil }
+func (s *DayStatusList) EncodeFields(_ model.FieldWriter) {}
+func (s *DayStatusList) DecodeFields(_ model.FieldReader) {}
 
-func (m *DayLimitsArgs) Validate(action byte) error {
+func (m *DayStatus) Validate(action byte) error {
 	return model.ValidateFields(action, m)
 }
 
-type ListHolidaysArgs struct {
-	From int64
-	To int64
+// ModelName is the module identity: Definition.Name.
+const ModelName = "business_calendar"
+
+func (m *Module) ModelName() string { return ModelName }
+
+// Definition is the module's declaration (definition.go); crud.Mount compares it with what MountOperations mounted.
+func (m *Module) Definition() model.ModuleDefinition { return Definition }
+
+// MountOperations offers every entity of the module: the actions its model allows, with crud's validation and the rules written in rule_*.go.
+func (m *Module) MountOperations(reg crud.Registry) {
+	reg.AddStoredEntity(crud.StoredEntity{
+		Model: &BusinessHours{},
+		NewList: func() model.ModelSlice { return &BusinessHoursList{} },
+		Store: m.StoreBusinessHours(),
+		Rules: BusinessHoursModel.Rules,
+		MFA: BusinessHoursModel.MFA,
+		Create: func(a crud.CurrentUser, tx crud.Tx, rec model.Model) (crud.RuleAnswer, error) {
+			return rec.(*BusinessHours).Create(a, tx, m)
+		},
+		Update: func(a crud.CurrentUser, tx crud.Tx, old, next model.Model, fields []string) (crud.RuleAnswer, error) {
+			return next.(*BusinessHours).Update(a, tx, old.(*BusinessHours), fields, m)
+		},
+	})
+	reg.AddStoredEntity(crud.StoredEntity{
+		Model: &Holiday{},
+		NewList: func() model.ModelSlice { return &HolidayList{} },
+		Store: m.StoreHoliday(),
+		Rules: HolidayModel.Rules,
+		MFA: HolidayModel.MFA,
+		Create: func(a crud.CurrentUser, tx crud.Tx, rec model.Model) (crud.RuleAnswer, error) {
+			return rec.(*Holiday).Create(a, tx, m)
+		},
+		Delete: func(a crud.CurrentUser, tx crud.Tx, rec model.Model) (crud.RuleAnswer, error) {
+			return rec.(*Holiday).Delete(a, tx, m)
+		},
+	})
+	reg.AddStoredEntity(crud.StoredEntity{
+		Model: &Closure{},
+		NewList: func() model.ModelSlice { return &ClosureList{} },
+		Store: m.StoreClosure(),
+		Rules: ClosureModel.Rules,
+		MFA: ClosureModel.MFA,
+		Create: func(a crud.CurrentUser, tx crud.Tx, rec model.Model) (crud.RuleAnswer, error) {
+			return rec.(*Closure).Create(a, tx, m)
+		},
+		Delete: func(a crud.CurrentUser, tx crud.Tx, rec model.Model) (crud.RuleAnswer, error) {
+			return rec.(*Closure).Delete(a, tx, m)
+		},
+	})
+	reg.AddReadOnlyEntity(&DayStatus{}, func() model.Model { return &DayStatus{} }, func(a crud.CurrentUser, args crud.ReadArgs, filter model.Model) (model.ModelSlice, error) {
+		return (&DayStatus{}).Read(a, filter.(*DayStatus), args, m)
+	})
 }
-
-func (m *ListHolidaysArgs) ModelName() string { return "list_holidays_args" }
-
-func (m *ListHolidaysArgs) Schema() []model.Field { return ListHolidaysArgsModel.Fields }
-
-func (m *ListHolidaysArgs) Pointers() []any { return []any{&m.From, &m.To} }
-
-func (m *ListHolidaysArgs) IsNil() bool { return m == nil }
-
-func (m *ListHolidaysArgs) EncodeFields(w model.FieldWriter) {
-	w.Int("from", m.From)
-	w.Int("to", m.To)
-}
-
-func (m *ListHolidaysArgs) DecodeFields(r model.FieldReader) {
-	if v, ok := r.Int("from"); ok { m.From = v }
-	if v, ok := r.Int("to"); ok { m.To = v }
-}
-
-type ListHolidaysArgsList []*ListHolidaysArgs
-
-func (s *ListHolidaysArgsList) Len() int             { return len(*s) }
-func (s *ListHolidaysArgsList) At(i int) model.Fielder { return (*s)[i] }
-func (s *ListHolidaysArgsList) Append() model.Fielder  { v := &ListHolidaysArgs{}; *s = append(*s, v); return v }
-func (s *ListHolidaysArgsList) IsNil() bool          { return s == nil }
-func (s *ListHolidaysArgsList) EncodeFields(_ model.FieldWriter) {}
-func (s *ListHolidaysArgsList) DecodeFields(_ model.FieldReader) {}
-
-func (m *ListHolidaysArgs) Validate(action byte) error {
-	return model.ValidateFields(action, m)
-}
-
-type ListClosuresArgs struct {
-	From int64
-	To int64
-}
-
-func (m *ListClosuresArgs) ModelName() string { return "list_closures_args" }
-
-func (m *ListClosuresArgs) Schema() []model.Field { return ListClosuresArgsModel.Fields }
-
-func (m *ListClosuresArgs) Pointers() []any { return []any{&m.From, &m.To} }
-
-func (m *ListClosuresArgs) IsNil() bool { return m == nil }
-
-func (m *ListClosuresArgs) EncodeFields(w model.FieldWriter) {
-	w.Int("from", m.From)
-	w.Int("to", m.To)
-}
-
-func (m *ListClosuresArgs) DecodeFields(r model.FieldReader) {
-	if v, ok := r.Int("from"); ok { m.From = v }
-	if v, ok := r.Int("to"); ok { m.To = v }
-}
-
-type ListClosuresArgsList []*ListClosuresArgs
-
-func (s *ListClosuresArgsList) Len() int             { return len(*s) }
-func (s *ListClosuresArgsList) At(i int) model.Fielder { return (*s)[i] }
-func (s *ListClosuresArgsList) Append() model.Fielder  { v := &ListClosuresArgs{}; *s = append(*s, v); return v }
-func (s *ListClosuresArgsList) IsNil() bool          { return s == nil }
-func (s *ListClosuresArgsList) EncodeFields(_ model.FieldWriter) {}
-func (s *ListClosuresArgsList) DecodeFields(_ model.FieldReader) {}
-
-func (m *ListClosuresArgs) Validate(action byte) error {
-	return model.ValidateFields(action, m)
-}
-

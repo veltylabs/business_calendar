@@ -1,3 +1,4 @@
+## 1. Visión general en un minuto
 # Arquitectura de business_calendar
 
 ## 1. Alcance del dominio
