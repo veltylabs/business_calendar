@@ -2,8 +2,6 @@
 PLAN: "refactor!: business_calendar on the crud-by-declaration framework — Allow and Rules in definition.go, persistence by crud, only domain rules in rule files"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
-SESSION: 10013465454345993021
 ---
 
 > Read AGENTS.md at the repo root before any change.
@@ -172,3 +170,10 @@ A first session of this plan was rejected. Do not repeat its failures; each line
 - **Do not commit scratch files** (no `*.py`, `*.sh`, `commit_message.txt`). `docs/PLAN.md` «Executor notes» must only state what is true: do not write that a file was restored if it was deleted.
 - **Stage 7:** `README.md` with the four mandatory sections in Spanish (`¿Por qué existe?`, `Antes de comenzar`, `Guía paso a paso` with a complete compilable Go example importing `webtyp.com/fmt`, `Mapa de documentación`) and the «Sin/Con» operations table; `langc sync .` reports zero pending. Run `gotest` and `langc sync .` and read their output before opening the PR.
 - **Do not stop to confirm.** Do all stages in order; when the delivery check passes, commit, push and open the PR.
+
+## Additions (third attempt)
+
+The second session stopped answering after Stage 5 and never pushed a branch, so its work was lost. Two rules for this one:
+
+- **Push early.** After EVERY stage run `git push origin HEAD` (the branch your session created) so the work exists outside your machine. After Stage 3 open the pull request; keep pushing to it.
+- **Never ask a question that is a yes/no on progress** («am I on the right track?», «shall I proceed?», «shall I push?»): the answer is always yes, proceed. Ask only when a compile error or a signature in this plan is wrong, and name the symbol.
