@@ -2,8 +2,10 @@
 PLAN: "refactor!: business_calendar on the crud-by-declaration framework — Allow and Rules in definition.go, persistence by crud, only domain rules in rule files"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 4878962159717584055
+PR: https://github.com/veltylabs/business_calendar/pull/19
+REVIEWED_COMMIT: bf38bcf47c5dd4a207dc7e56f5dc932372a751fe
 ---
 
 > Read AGENTS.md at the repo root before any change.
