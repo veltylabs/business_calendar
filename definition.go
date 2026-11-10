@@ -3,7 +3,6 @@ package businesscalendar
 import (
 	"webtyp.com/input"
 	"webtyp.com/model"
-	"webtyp.com/time"
 )
 
 // BusinessHoursModel: one row per day of week. day_of_week is unique — this
@@ -22,15 +21,17 @@ import (
 // every module in the registry, not just this one.
 // Ejemplo: var bh BusinessHours
 var BusinessHoursModel = model.Definition{
+	Allow: model.Create | model.Read | model.Update,
+	Rules: model.Rules{Create: model.AddMyBusinessRule, Update: model.AddMyBusinessRule, Read: model.HaveNoBusinessRule},
 	Name: "business_hours",
 	Fields: model.Fields{
 		{Name: "id", Type: model.Text(), DB: &model.FieldDB{PK: true}},
-		{Name: "day_of_week", Type: input.Number(), Label: "Day of week", NotNull: true, DB: &model.FieldDB{Unique: true}, Item: model.ItemLabel},
+		{Name: "day_of_week", Type: input.Number(), Label: "Day of week", DB: &model.FieldDB{Unique: true}, Item: model.ItemLabel},
 		{Name: "open_min", Type: input.Hour(), Label: "Opens at", NotNull: true, Item: model.ItemDescription},
 		{Name: "close_min", Type: input.Hour(), Label: "Closes at", NotNull: true, Item: model.ItemDescription},
-		{Name: "is_open", Type: input.Checkbox(), Label: "Open", NotNull: true, Item: model.ItemDescription},
+		{Name: "is_open", Type: input.Checkbox(), Label: "Open", Item: model.ItemDescription},
 		{Name: "notes", Type: input.Textarea(), Label: "Notes", Item: model.ItemDescription},
-		{Name: "updated_at", Type: model.NanoTime(), NotNull: true},
+		{Name: "updated_at", Type: model.NanoTime(), NotNull: true, ServerOnly: true},
 	},
 }
 
@@ -38,13 +39,15 @@ var BusinessHoursModel = model.Definition{
 // runtime — a holiday that appears by law must never require a recompile.
 // Ejemplo: var h Holiday
 var HolidayModel = model.Definition{
+	Allow: model.Create | model.Read | model.Delete,
+	Rules: model.Rules{Create: model.AddMyBusinessRule, Read: model.HaveNoBusinessRule, Delete: model.HaveNoBusinessRule},
 	Name: "holiday",
 	Fields: model.Fields{
 		{Name: "id", Type: model.Text(), DB: &model.FieldDB{PK: true}},
 		{Name: "specific_date", Type: input.Number(), Label: "Date", NotNull: true, Item: model.ItemDescription}, // midnight UTC, seconds
 		{Name: "name", Type: input.Text(), Label: "Name", NotNull: true, Item: model.ItemLabel},
 		{Name: "notes", Type: input.Textarea(), Label: "Notes"},
-		{Name: "updated_at", Type: model.NanoTime(), NotNull: true},
+		{Name: "updated_at", Type: model.NanoTime(), NotNull: true, ServerOnly: true},
 	},
 }
 
@@ -54,12 +57,14 @@ var HolidayModel = model.Definition{
 // "type" column would make the origin a magic string.
 // Ejemplo: var c Closure
 var ClosureModel = model.Definition{
+	Allow: model.Create | model.Read | model.Delete,
+	Rules: model.Rules{Create: model.AddMyBusinessRule, Read: model.HaveNoBusinessRule, Delete: model.HaveNoBusinessRule},
 	Name: "closure",
 	Fields: model.Fields{
 		{Name: "id", Type: model.Text(), DB: &model.FieldDB{PK: true}},
 		{Name: "specific_date", Type: input.Number(), Label: "Date", NotNull: true, Item: model.ItemDescription},
 		{Name: "reason", Type: input.Text(), Label: "Reason", NotNull: true, Item: model.ItemLabel},
-		{Name: "updated_at", Type: model.NanoTime(), NotNull: true},
+		{Name: "updated_at", Type: model.NanoTime(), NotNull: true, ServerOnly: true},
 	},
 }
 
@@ -70,7 +75,7 @@ var ClosureModel = model.Definition{
 const (
 	ErrNotFound       model.NotFound = "business_calendar: record not found"
 	ErrInvalidDay     model.Invalid = "business_calendar: day_of_week must be 0..6"
-	ErrInvalidWeekday model.Invalid = "business_calendar: day of week must be 0..6"
+	ErrInvalidWeekday model.Invalid = "business_calendar: day_of_week must be 0..6"
 	ErrInvalidMinutes model.Invalid = "business_calendar: minutes must be 0..1439 and open_min < close_min"
 	ErrDuplicateDate  model.Conflict = "business_calendar: a record already exists for that date"
 	ErrCannotRead     model.Invalid = "business_calendar: cannot read the request"
@@ -147,31 +152,14 @@ func (p *CalendarChangedPayload) IsNil() bool { return p == nil }
 // enforced as DOMAIN rules in the service (ErrInvalidDay/ErrInvalidMinutes),
 // the single fail-closed chokepoint every write path crosses; NotNull stays
 // only on the text fields where empty is never legal.
-// Ejemplo: var args GetDayLimitsArgs
-var GetDayLimitsArgsModel = model.Definition{
-	Name: "get_day_bounds_args",
-	Fields: model.Fields{
-		{Name: "date", Type: model.Int()},
-	},
-}
+// Ejemplo: var filter DayLimitsFilter
+var DayLimitsFilterModel = model.Definition{Name: "day_limits_filter", Wire: true, Fields: model.Fields{{Name: "date", Type: model.Int()}}}
+// removed GetDayLimitsArgsModel
 
-// Ejemplo: var args ListHolidaysArgs
-var ListHolidaysArgsModel = model.Definition{
-	Name: "list_holidays_args",
-	Fields: model.Fields{
-		{Name: "from", Type: model.Int()},
-		{Name: "to", Type: model.Int()},
-	},
-}
 
-// Ejemplo: var args ListClosuresArgs
-var ListClosuresArgsModel = model.Definition{
-	Name: "list_closures_args",
-	Fields: model.Fields{
-		{Name: "from", Type: model.Int()},
-		{Name: "to", Type: model.Int()},
-	},
-}
+
+
+
 
 
 // ClosedReason nombra el origen de un cierre. Los literales de cadena viven SOLAMENTE en
@@ -191,18 +179,28 @@ const (
 //
 // Es un modelo de resultado solo de salida: implementa model.Encodable para que la
 // operación get_day_limits pueda responder con él, y nunca es una tabla de BD.
-// Ejemplo: detail, err := cal.GetDayDetail(date)
-type DayDetail struct {
-	Limits time.DayLimits
-	// ClosedBy nombra por qué el día está cerrado. "" cuando Limits.Open es true.
-	ClosedBy ClosedReason
+
+// Ejemplo: var dd DayDetail
+var DayDetailModel = model.Definition{
+	Name:  "day_detail",
+	Allow: model.Read,
+	Rules: model.Rules{Read: model.AddMyBusinessRule},
+	Fields: model.Fields{
+		{Name: "date", Type: model.Int(), OmitEmpty: true},
+		{Name: "open", Type: model.Bool()},
+		{Name: "open_min", Type: model.Int()},
+		{Name: "close_min", Type: model.Int()},
+		{Name: "closed_by", Type: model.Text()},
+	},
 }
 
-func (d *DayDetail) EncodeFields(w model.FieldWriter) {
-	w.Bool("open", d.Limits.Open)
-	w.Int("open_min", int64(d.Limits.OpenMin))
-	w.Int("close_min", int64(d.Limits.CloseMin))
-	w.String("closed_by", string(d.ClosedBy))
+// Ejemplo: var def Definition
+var Definition = model.ModuleDefinition{
+	Name: "business_calendar",
+	Entities: []model.Definition{
+		BusinessHoursModel,
+		HolidayModel,
+		ClosureModel,
+		DayDetailModel,
+	},
 }
-
-func (d *DayDetail) IsNil() bool { return d == nil }

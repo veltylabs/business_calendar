@@ -5,7 +5,7 @@ import (
 
 	businesscalendar "github.com/veltylabs/business_calendar"
 	"webtyp.com/model"
-	"webtyp.com/router/loopback"
+	"webtyp.com/crud"
 	"webtyp.com/view"
 )
 
@@ -14,11 +14,12 @@ func TestScreenSaveAndDelete(t *testing.T) {
 	seedWeek(t, m)
 
 	recs := view.NewRecords()
-	caller := recs.Caller(loopback.ActingAs("", "user-1", m))
+	caller := recs.Caller(crud.LoopbackActingAs(nil, "user-1", m))
 	pres := businesscalendar.NewHolidaysView(caller)
 
 	var saveErr error
 	pres.(view.Saver).Save([]model.Model{&businesscalendar.Holiday{
+		Id:           "123",
 		Name:         "New Year",
 		SpecificDate: sep14_2026_Mon,
 	}}, func(err error) { saveErr = err })

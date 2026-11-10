@@ -12,8 +12,8 @@ import (
 // Ejemplo: pres := NewBusinessHoursView(caller)
 func NewBusinessHoursView(caller router.Caller, opts ...view.Option) view.Presenter {
 	b := view.NewCallerLister(view.NewRecords().Caller(caller),
-		view.Ops{Module: ModelName, List: OpListBusinessHours, Save: OpUpsertBusinessHours, Page: view.Page{First: view.All}},
-		func() model.ModelSlice { return &BusinessHoursList{} })
+		view.Ops{Module: ModelName, Page: view.Page{First: view.All}},
+		func() model.TableSlice { return &BusinessHoursList{} })
 	allOpts := append([]view.Option{view.WithTitle(lang.Translate("Business hours").String())}, opts...)
 	return view.New(b, &BusinessHours{}, allOpts...)
 }
@@ -23,8 +23,8 @@ func NewBusinessHoursView(caller router.Caller, opts ...view.Option) view.Presen
 // Ejemplo: pres := NewHolidaysView(caller)
 func NewHolidaysView(caller router.Caller, opts ...view.Option) view.Presenter {
 	b := view.NewCallerLister(view.NewRecords().Caller(caller),
-		view.Ops{Module: ModelName, List: OpListHolidays, Save: OpAddHoliday, Delete: OpRemoveHoliday, Page: view.Page{First: view.All}},
-		func() model.ModelSlice { return &HolidayList{} })
+		view.Ops{Module: ModelName, Page: view.Page{First: view.All}},
+		func() model.TableSlice { return &HolidayList{} })
 	allOpts := append([]view.Option{view.WithTitle(lang.Translate("Holidays").String())}, opts...)
 	return view.New(b, &Holiday{}, allOpts...)
 }
@@ -34,8 +34,8 @@ func NewHolidaysView(caller router.Caller, opts ...view.Option) view.Presenter {
 // Ejemplo: pres := NewClosuresView(caller)
 func NewClosuresView(caller router.Caller, opts ...view.Option) view.Presenter {
 	b := view.NewCallerLister(view.NewRecords().Caller(caller),
-		view.Ops{Module: ModelName, List: OpListClosures, Save: OpAddClosure, Delete: OpRemoveClosure, Page: view.Page{First: view.All}},
-		func() model.ModelSlice { return &ClosureList{} })
+		view.Ops{Module: ModelName, Page: view.Page{First: view.All}},
+		func() model.TableSlice { return &ClosureList{} })
 	allOpts := append([]view.Option{view.WithTitle(lang.Translate("Closures").String())}, opts...)
 	return view.New(b, &Closure{}, allOpts...)
 }

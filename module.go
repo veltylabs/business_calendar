@@ -21,6 +21,7 @@ type Deps struct {
 // Ejemplo: var m *businesscalendar.Module = cal
 type Module struct {
 	db  *orm.DB
+	store *orm.Store
 	ids model.IDGenerator
 	pub events.Publisher
 }
@@ -32,19 +33,10 @@ func New(db *orm.DB, deps Deps) (*Module, error) {
 	if deps.IDs == nil {
 		return nil, fmt.Err("business_calendar: Deps.IDs is required")
 	}
-	return &Module{db: db, ids: deps.IDs, pub: deps.Publisher}, nil
+	return &Module{db: db, store: orm.GlobalStore(db, deps.IDs), ids: deps.IDs, pub: deps.Publisher}, nil
 }
 
-// ModelName es la identidad de este módulo: mcp.HarvestOps califica cada operación como
-// "business_calendar.<name>" en la red — la calificación que hace que su
-// propio "get_day_limits" sea distinto de la operación de appointment_booking con el mismo
-// nombre base (la colisión que este mecanismo hace
-// irrepresentable). Los tres constructores NewXView de view.go pasan esta misma
-// constante como view.Ops.Module.
-// Ejemplo: name := cal.ModelName()
-const ModelName = "business_calendar"
 
-func (m *Module) ModelName() string { return ModelName }
 
 // publish dispara EventCalendarChanged solo cuando hay un publisher conectado. Cada
 // mutación exitosa pasa por aquí para que el campo de dirección permanezca centralizado.

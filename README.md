@@ -38,23 +38,23 @@ bounds, err := cal.DayLimits(dateMidnightUTC)
 
 | Op | Recurso | Acción | Args |
 |----|----------|--------|------|
-| `list_business_hours` | `business_hours` | read | `view.ListArgs` |
-| `upsert_business_hours` | `business_hours` | create \| update | `day_of_week`, `open_min`, `close_min`, `is_open`, `notes` |
-| `get_day_bounds` | `business_hours` | read | `date` (medianoche UTC, segundos) |
-| `list_holidays` | `holiday` | read | `view.ListArgs` |
-| `add_holiday` | `holiday` | create | `specific_date`, `name`, `notes` |
-| `remove_holiday` | `holiday` | delete | `id` |
-| `list_closures` | `closure` | read | `view.ListArgs` |
-| `add_closure` | `closure` | create | `specific_date`, `reason` |
-| `remove_closure` | `closure` | delete | `id` |
+| `business_hours.read` | `business_hours` | read | `view.ListArgs` |
+| `business_hours.create | business_hours.update` | `business_hours` | create \| update | `day_of_week`, `open_min`, `close_min`, `is_open`, `notes` |
+| `day_detail.read` | `business_hours` | read | `date` (medianoche UTC, segundos) |
+| `holiday.read` | `holiday` | read | `view.ListArgs` |
+| `holiday.create` | `holiday` | create | `specific_date`, `name`, `notes` |
+| `holiday.delete` | `holiday` | delete | `id` |
+| `closure.read` | `closure` | read | `view.ListArgs` |
+| `closure.create` | `closure` | create | `specific_date`, `reason` |
+| `closure.delete` | `closure` | delete | `id` |
 
 API: `BankDayAfter(desde, días)`: día hábil bancario N días después (lunes a viernes sin feriados; el horario de la clínica no cuenta).
 
 Nota: los listados cargan según declara su `view.Page` y buscan en el servidor.
 
-Los tiempos se almacenan como **24h clock string (HH:MM)**; `get_day_bounds` responde "si el establecimiento está abierto esta fecha y entre qué minutos".
+Los tiempos se almacenan como **24h clock string (HH:MM)**; `day_detail.read` responde "si el establecimiento está abierto esta fecha y entre qué minutos".
 
-Para facilitar la lectura por parte de asistentes de IA, `list_business_hours` incluye campos legibles adicionales en cada fila (`"day":"Tuesday"`, `"opens":"08:00"`, `"closes":"18:00"`). Por ejemplo:
+Para facilitar la lectura por parte de asistentes de IA, `business_hours.read` incluye campos legibles adicionales en cada fila (`"day":"Tuesday"`, `"opens":"08:00"`, `"closes":"18:00"`). Por ejemplo:
 
 ```json
 {

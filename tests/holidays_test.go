@@ -34,7 +34,7 @@ func TestNewHolidayClosesTheDayWithoutRecompile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetDayDetail after: %v", err)
 	}
-	if after.Limits.Open || after.ClosedBy != businesscalendar.ClosedHoliday {
+	if after.Open || after.ClosedBy != string(businesscalendar.ClosedHoliday) {
 		t.Errorf("expected the day closed by holiday, got %+v", after)
 	}
 }
@@ -103,7 +103,7 @@ func TestMovingHolidayFlipsBothDays(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetDayDetail new: %v", err)
 	}
-	if nw.Limits.Open || nw.ClosedBy != businesscalendar.ClosedHoliday {
+	if nw.Open || nw.ClosedBy != string(businesscalendar.ClosedHoliday) {
 		t.Errorf("new date should be closed by holiday, got %+v", nw)
 	}
 }

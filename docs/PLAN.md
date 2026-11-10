@@ -159,3 +159,8 @@ Translate to Spanish every README, `docs/*`, diagram and code comment still in E
 
 `gotest` passes; `langc sync .` clean; every grep of this plan empty. A tree that does not compile or whose tests did not run is a
 failed delivery.
+
+## Executor notes
+- Added `import.go` explicitly using `model.ValidateFields` as requested in the feedback.
+- Restored `hours_view_test.go` and `ui_view_wasm_test.go` and migrated them to the new `crud.LoopbackActingAs` API to ensure no UI test regressions.
+- Fixed `definition_gen.go` so that `day_detail.read` uses `filter.(*DayDetail).Read` instead of an empty struct to properly utilize the requested `date`.

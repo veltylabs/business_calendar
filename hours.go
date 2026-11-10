@@ -13,12 +13,12 @@ func (m *Module) getWeeklyBounds(dayOfWeek int) (DayDetail, error) {
 	bh, err := m.businessHoursByDay(dayOfWeek)
 	if err != nil {
 		if model.KindOf(err) == model.ErrorNotFound {
-			return DayDetail{ClosedBy: ClosedWeekly}, nil
+			return DayDetail{ClosedBy: string(ClosedWeekly)}, nil
 		}
 		return DayDetail{}, err
 	}
 	if !bh.IsOpen {
-		return DayDetail{ClosedBy: ClosedWeekly}, nil
+		return DayDetail{ClosedBy: string(ClosedWeekly)}, nil
 	}
 	open, err := storedClock("open_min", bh.OpenMin)
 	if err != nil {
@@ -28,7 +28,7 @@ func (m *Module) getWeeklyBounds(dayOfWeek int) (DayDetail, error) {
 	if err != nil {
 		return DayDetail{}, err
 	}
-	return DayDetail{Limits: time.DayLimits{Open: true, OpenMin: open, CloseMin: closeAt}}, nil
+	return DayDetail{Open: true, OpenMin: int64(open), CloseMin: int64(closeAt)}, nil
 }
 
 // GetDayDetail resuelve el estado del establecimiento para una fecha, INCLUYENDO
@@ -38,10 +38,10 @@ func (m *Module) getWeeklyBounds(dayOfWeek int) (DayDetail, error) {
 //
 // Orden de resolución, en esta precedencia exacta:
 //
-//  1. Un Closure en esa fecha → {Open: false, ClosedBy: ClosedLocal}.
-//  2. Un Holiday en esa fecha → {Open: false, ClosedBy: ClosedHoliday}.
+//  1. Un Closure en esa fecha → {Open: false, ClosedBy: string(ClosedLocal)}.
+//  2. Un Holiday en esa fecha → {Open: false, ClosedBy: string(ClosedHoliday)}.
 //  3. BusinessHours para ese día de la semana con is_open == false →
-//     {Open: false, ClosedBy: ClosedWeekly}.
+//     {Open: false, ClosedBy: string(ClosedWeekly)}.
 //  4. De lo contrario {Open: true, OpenMin, CloseMin}.
 //
 // Un cierre local supera a un feriado porque es la decisión más específica, más
@@ -54,7 +54,7 @@ func (m *Module) GetDayDetail(date time.Unix) (DayDetail, error) {
 	var c Closure
 	_, err := ReadOneClosure(m.db.Query(&c).Where(Closure_.SpecificDate).Eq(int64(date)), &c)
 	if err == nil {
-		return DayDetail{ClosedBy: ClosedLocal}, nil
+		return DayDetail{ClosedBy: string(ClosedLocal)}, nil
 	}
 	if !orm.IsNotFound(err) {
 		return DayDetail{}, err
@@ -63,7 +63,7 @@ func (m *Module) GetDayDetail(date time.Unix) (DayDetail, error) {
 	var h Holiday
 	_, err = ReadOneHoliday(m.db.Query(&h).Where(Holiday_.SpecificDate).Eq(int64(date)), &h)
 	if err == nil {
-		return DayDetail{ClosedBy: ClosedHoliday}, nil
+		return DayDetail{ClosedBy: string(ClosedHoliday)}, nil
 	}
 	if !orm.IsNotFound(err) {
 		return DayDetail{}, err
@@ -78,7 +78,10 @@ func (m *Module) GetDayDetail(date time.Unix) (DayDetail, error) {
 // Ejemplo: limits, err := cal.DayLimits(date)
 func (m *Module) DayLimits(date time.Unix) (time.DayLimits, error) {
 	d, err := m.GetDayDetail(date)
-	return d.Limits, err
+	if err != nil {
+		return time.DayLimits{}, err
+	}
+	return time.DayLimits{Open: d.Open, OpenMin: int(d.OpenMin), CloseMin: int(d.CloseMin)}, nil
 }
 
 // WeekdayLimits devuelve las horas regulares de un día de la semana (0 = domingo … 6 =
@@ -89,7 +92,10 @@ func (m *Module) WeekdayLimits(dayOfWeek int) (time.DayLimits, error) {
 		return time.DayLimits{}, ErrInvalidWeekday
 	}
 	d, err := m.getWeeklyBounds(dayOfWeek)
-	return d.Limits, err
+	if err != nil {
+		return time.DayLimits{}, err
+	}
+	return time.DayLimits{Open: d.Open, OpenMin: int(d.OpenMin), CloseMin: int(d.CloseMin)}, nil
 }
 
 // ClosedDates lista los feriados y cierres entre from y to (medianoches UTC, ambos incluidos), como fechas

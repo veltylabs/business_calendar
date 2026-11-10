@@ -58,7 +58,7 @@ Este módulo divide la respuesta en dos, según la audiencia:
 func (m *Module) DayLimits(date time.Unix) (time.DayLimits, error)
 
 // La respuesta más rica de este módulo: los mismos límites MÁS por qué un día cerrado
-// está cerrado. Utilizado por la operación get_day_bounds y la propia interfaz de usuario de este módulo.
+// está cerrado. Utilizado por la operación day_detail.read y la propia interfaz de usuario de este módulo.
 func (m *Module) GetDayDetail(date time.Unix) (DayDetail, error)
 
 type DayDetail struct {
@@ -98,15 +98,15 @@ Cada mutación exitosa publica `EventCalendarChanged` con un `CalendarChangedPay
 
 | Op | Acción | Recurso | Descripción |
 |----|--------|----------|--------------|
-| `list_business_hours` | `r` | `business_hours` | Las 7 filas de días de la semana, por `day_of_week` |
-| `upsert_business_hours` | `cr` | `business_hours` | Crear o actualizar una ventana de día de la semana |
-| `get_day_bounds` | `r` | `business_hours` | `DayDetail` para una fecha (límites + `ClosedBy`) |
-| `list_holidays` | `r` | `holiday` | Todos los feriados |
-| `add_holiday` | `c` | `holiday` | Registrar un feriado (fecha duplicada → 409) |
-| `remove_holiday` | `d` | `holiday` | Eliminar por id (faltante → 404) |
-| `list_closures` | `r` | `closure` | Todos los cierres |
-| `add_closure` | `c` | `closure` | Registrar un cierre (fecha duplicada → 409) |
-| `remove_closure` | `d` | `closure` | Eliminar por id (faltante → 404) |
+| `business_hours.read` | `r` | `business_hours` | Las 7 filas de días de la semana, por `day_of_week` |
+| `business_hours.create / business_hours.update` | `cr` | `business_hours` | Crear o actualizar una ventana de día de la semana |
+| `day_detail.read` | `r` | `business_hours` | `DayDetail` para una fecha (límites + `ClosedBy`) |
+| `holiday.read` | `r` | `holiday` | Todos los feriados |
+| `holiday.create` | `c` | `holiday` | Registrar un feriado (fecha duplicada → 409) |
+| `holiday.delete` | `d` | `holiday` | Eliminar por id (faltante → 404) |
+| `closure.read` | `r` | `closure` | Todos los cierres |
+| `closure.create` | `c` | `closure` | Registrar un cierre (fecha duplicada → 409) |
+| `closure.delete` | `d` | `closure` | Eliminar por id (faltante → 404) |
 
 Mapeo de estados: `400` decodificación/validación (`ErrInvalidDay`/`ErrInvalidMinutes`) · `404` no encontrado (`ErrNotFound`) · `409` conflicto (`ErrDuplicateDate`) · solo errores internos reales `500`.
 

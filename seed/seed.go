@@ -48,7 +48,7 @@ func Load(m *businesscalendar.Module) (Data, error) {
 	}
 
 	for _, h := range hoursToSeed {
-		if err := m.UpsertBusinessHours(h); err != nil {
+		if err := m.ImportBusinessHours(h); err != nil {
 			return Data{}, err
 		}
 	}
@@ -69,7 +69,7 @@ func Load(m *businesscalendar.Module) (Data, error) {
 			SpecificDate: int64(sec),
 			Name:         hs.name,
 		}
-		if err := m.AddHoliday(h); err != nil {
+		if err := m.ImportHoliday(h); err != nil {
 			return Data{}, err
 		}
 	}

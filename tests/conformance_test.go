@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	businesscalendar "github.com/veltylabs/business_calendar"
-	"webtyp.com/router/loopback"
+	"webtyp.com/crud"
 	"webtyp.com/view"
 )
 
@@ -15,7 +15,7 @@ func TestNewBusinessHoursView_ListsWeek(t *testing.T) {
 	m, _ := newModule(t, nil)
 	seedWeek(t, m)
 
-	p := businesscalendar.NewBusinessHoursView(loopback.New(m))
+	p := businesscalendar.NewBusinessHoursView(crud.LoopbackActingAs(nil, "u1", m))
 	var rerr error
 	p.Reload(func(err error) { rerr = err })
 	if rerr != nil {
@@ -47,7 +47,7 @@ func TestNewHolidaysView_CRUD(t *testing.T) {
 		t.Fatalf("AddHoliday: %v", err)
 	}
 
-	p := businesscalendar.NewHolidaysView(loopback.New(m))
+	p := businesscalendar.NewHolidaysView(crud.LoopbackActingAs(nil, "u1", m))
 	if _, ok := p.(view.Saver); !ok {
 		t.Error("holidays presenter must be save-capable")
 	}
@@ -73,7 +73,7 @@ func TestNewClosuresView_CRUD(t *testing.T) {
 		t.Fatalf("AddClosure: %v", err)
 	}
 
-	p := businesscalendar.NewClosuresView(loopback.New(m))
+	p := businesscalendar.NewClosuresView(crud.LoopbackActingAs(nil, "u1", m))
 	if _, ok := p.(view.Saver); !ok {
 		t.Error("closures presenter must be save-capable")
 	}
@@ -122,7 +122,7 @@ func TestHolidayItem_DescriptionIsTheRealDate(t *testing.T) {
 		t.Fatalf("AddHoliday: %v", err)
 	}
 
-	p := businesscalendar.NewHolidaysView(loopback.New(m))
+	p := businesscalendar.NewHolidaysView(crud.LoopbackActingAs(nil, "u1", m))
 	var rerr error
 	p.Reload(func(err error) { rerr = err })
 	if rerr != nil {
