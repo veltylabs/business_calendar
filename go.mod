@@ -8,7 +8,7 @@ require (
 	webtyp.com/ddl v0.0.49
 	webtyp.com/events v0.1.8
 	webtyp.com/fmt v1.0.0
-	webtyp.com/input v0.1.0
+	webtyp.com/input v0.2.0
 	webtyp.com/lang v0.1.16
 	webtyp.com/model v0.2.20
 	webtyp.com/orm v0.12.33
