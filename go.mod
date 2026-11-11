@@ -45,7 +45,7 @@ require (
 	webtyp.com/escape v0.1.0 // indirect
 	webtyp.com/fetch v0.1.30 // indirect
 	webtyp.com/filepath v0.1.0 // indirect
-	webtyp.com/filetype v0.0.6 // indirect
+	webtyp.com/filetype v0.1.0 // indirect
 	webtyp.com/json v0.5.40 // indirect
 	webtyp.com/keyring v0.2.9 // indirect
 	webtyp.com/mcp v0.3.24 // indirect
