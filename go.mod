@@ -5,7 +5,7 @@ go 1.26.8
 require (
 	webtyp.com/crud v0.0.17
 	webtyp.com/ddl v0.0.57
-	webtyp.com/events v0.1.8
+	webtyp.com/events v0.1.15
 	webtyp.com/fmt v1.0.3
 	webtyp.com/input v0.2.5
 	webtyp.com/lang v0.1.16
@@ -16,7 +16,7 @@ require (
 	webtyp.com/svg v0.3.33
 	webtyp.com/time v0.6.4
 	webtyp.com/unixid v0.3.1
-	webtyp.com/view v0.6.74
+	webtyp.com/view v0.6.87
 )
 
 require (
@@ -29,7 +29,3 @@ require (
 	webtyp.com/json v0.5.40 // indirect
 	webtyp.com/msgtype v0.1.0 // indirect
 )
-
-replace webtyp.com/events => ../../../webtyp/events
-
-replace webtyp.com/view => ../../../webtyp/view
