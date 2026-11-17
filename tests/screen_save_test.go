@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	businesscalendar "github.com/veltylabs/business_calendar"
-	"webtyp.com/model"
 	"webtyp.com/crud"
+	"webtyp.com/model"
 	"webtyp.com/view"
 )
 

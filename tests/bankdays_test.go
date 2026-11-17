@@ -116,11 +116,11 @@ func TestBankDayAfter(t *testing.T) {
 			expected: d(2026, 10, 13),
 		},
 		{
-			name:     "B9: negative days",
-			setup:    func() {},
-			from:     d(2026, 10, 12),
-			days:     -1,
-			err:      businesscalendar.ErrNegativeDays,
+			name:  "B9: negative days",
+			setup: func() {},
+			from:  d(2026, 10, 12),
+			days:  -1,
+			err:   businesscalendar.ErrNegativeDays,
 		},
 		{
 			name:     "B10: Mon + 10 -> Mon two weeks later",

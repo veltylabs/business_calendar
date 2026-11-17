@@ -1,9 +1,10 @@
 package tests
 
 import (
-	"webtyp.com/storage"
 	"errors"
 	"testing"
+	"webtyp.com/storage"
+	"webtyp.com/storage/mem"
 
 	"webtyp.com/ddl"
 	"webtyp.com/model"
@@ -15,8 +16,9 @@ import (
 // migrateConn is the database the migration sees: Exec does nothing, and
 // TableColumns answers which columns each table already has.
 type migrateConn struct {
-	existing  []tableColumns
-	failTable string
+	storage.Conn // mem: ddl reconstruye text_search a través de ella
+	existing     []tableColumns
+	failTable    string
 }
 
 type tableColumns struct {
@@ -26,7 +28,12 @@ type tableColumns struct {
 
 var errIntrospect = errors.New("introspection failed")
 
-func (c *migrateConn) Exec(string, ...any) (storage.Result, error) { return storage.Affected(0), nil }
+func (c *migrateConn) Exec(query string, args ...any) (storage.Result, error) {
+	if query == "" { // en lo que recordingCompiler compila cada sentencia DDL
+		return storage.Affected(0), nil
+	}
+	return c.Conn.Exec(query, args...)
+}
 
 func (c *migrateConn) TableColumns(table string) ([]string, error) {
 	if table == c.failTable {
@@ -44,6 +51,9 @@ func (c *migrateConn) TableColumns(table string) ([]string, error) {
 type recordingCompiler struct{ stmts []ddl.Stmt }
 
 func (r *recordingCompiler) CompileDDL(s ddl.Stmt, _ model.Model) (string, []any, error) {
+	if s.Table == "text_search_state" { // tabla propia de ddl, no de este repo
+		return "", nil, nil
+	}
 	r.stmts = append(r.stmts, s)
 	return "", nil, nil
 }
@@ -57,6 +67,9 @@ func columnsOf(m model.Model) []string {
 	var out []string
 	for _, f := range m.Schema() {
 		out = append(out, f.Name)
+	}
+	if len(model.TextSearchFields(m.Schema())) > 0 {
+		out = append(out, model.FieldTextSearch)
 	}
 	return out
 }
@@ -72,7 +85,7 @@ func upToDate() []tableColumns {
 // Branch "listing works, nothing missing": only the idempotent CREATE TABLE per table, in order.
 func TestMigrate_UpToDate_OnlyEnsuresTables(t *testing.T) {
 	comp := &recordingCompiler{}
-	if err := migrate.Migrate(&migrateConn{existing: upToDate()}, comp); err != nil {
+	if err := migrate.Migrate(&migrateConn{Conn: mem.New(), existing: upToDate()}, comp); err != nil {
 		t.Fatalf("Migrate: %v", err)
 	}
 	models := migrationModels()
@@ -95,7 +108,7 @@ func TestMigrate_NewField_AddsOnlyThatColumn(t *testing.T) {
 	existing[len(existing)-1].columns = cols[:len(cols)-1]
 
 	comp := &recordingCompiler{}
-	if err := migrate.Migrate(&migrateConn{existing: existing}, comp); err != nil {
+	if err := migrate.Migrate(&migrateConn{Conn: mem.New(), existing: existing}, comp); err != nil {
 		t.Fatalf("Migrate: %v", err)
 	}
 	var adds []ddl.Stmt
@@ -116,7 +129,7 @@ func TestMigrate_NewField_AddsOnlyThatColumn(t *testing.T) {
 func TestMigrate_IntrospectionFails_ReturnsErrorAndStops(t *testing.T) {
 	first := migrationModels()[0]
 	comp := &recordingCompiler{}
-	err := migrate.Migrate(&migrateConn{existing: upToDate(), failTable: first.ModelName()}, comp)
+	err := migrate.Migrate(&migrateConn{Conn: mem.New(), existing: upToDate(), failTable: first.ModelName()}, comp)
 	if !errors.Is(err, errIntrospect) {
 		t.Fatalf("got %v, want the introspection error", err)
 	}

@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	"webtyp.com/events/mock"
+	"webtyp.com/events/inprocess"
 	"webtyp.com/orm"
 	"webtyp.com/storage/mem"
 
@@ -13,7 +13,7 @@ import (
 
 func TestSeed_Load(t *testing.T) {
 	db := orm.New(mem.New())
-	broker := &mock.Broker{}
+	broker := &inprocess.Broker{}
 	ids := &fakeIDs{}
 
 	bc, err := businesscalendar.New(db, businesscalendar.Deps{

@@ -25,6 +25,6 @@ func Demo() (view.Demo, error) {
 		ActingAs:   "u1",
 		Modules:    []crud.Module{mod},
 		Migrations: []ddl.Step{{Name: businesscalendar.ModelName, Run: migrate.Migrate}},
-		Screens: func(d view.BrowserDeps) []view.Screen { return ui.Screens(d.Caller) },
+		Screens: func(d view.BrowserDeps) []view.Screen { return ui.Screens(d) },
 	}, nil
 }

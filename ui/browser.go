@@ -4,7 +4,6 @@ import (
 	businesscalendar "github.com/veltylabs/business_calendar"
 	"webtyp.com/lang"
 	"webtyp.com/model"
-	"webtyp.com/router"
 	"webtyp.com/view"
 )
 
@@ -27,7 +26,8 @@ const (
 // Screens declara las pantallas que este módulo ofrece al menú de la app.
 //
 // Ejemplo: screens := ui.Screens(caller)
-func Screens(caller router.Caller) []view.Screen {
+func Screens(d view.BrowserDeps) []view.Screen {
+	caller := d.Caller
 	return []view.Screen{{
 		ID:    ID,
 		Label: Label,

@@ -3,8 +3,9 @@
 package tests
 
 import (
-	"webtyp.com/router"
 	"testing"
+	"webtyp.com/router"
+	"webtyp.com/view"
 
 	"webtyp.com/model"
 
@@ -36,7 +37,7 @@ func (m *mockCaller) Dispatch(op router.Operation, args model.Encodable) {
 func TestWASM_BusinessCalendar_Screens(t *testing.T) {
 	mock := &mockCaller{}
 
-	screens := ui.Screens(mock)
+	screens := ui.Screens(view.BrowserDeps{Caller: mock})
 	if len(screens) != 1 {
 		t.Fatalf("se esperaba 1 pantalla raíz, pero devolvió %d", len(screens))
 	}
