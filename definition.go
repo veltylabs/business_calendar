@@ -12,11 +12,11 @@ var BusinessHoursModel = model.Definition{
 	Rules: model.Rules{Create: model.AddMyBusinessRule, Read: model.HaveNoBusinessRule, Update: model.AddMyBusinessRule},
 	Fields: model.Fields{
 		{Name: "id", Type: model.Text(), OmitEmpty: true, ServerOnly: true, DB: &model.FieldDB{PK: true}},
-		{Name: "day_of_week", Type: input.Number(), Label: "Day of week", DB: &model.FieldDB{Unique: true}, Item: model.ItemLabel},
-		{Name: "open_min", Type: input.Hour(), Label: "Opens at", OmitEmpty: true, Item: model.ItemDescription},
-		{Name: "close_min", Type: input.Hour(), Label: "Closes at", OmitEmpty: true, Item: model.ItemDescription},
-		{Name: "is_open", Type: input.Checkbox(), Label: "Open", Item: model.ItemDescription},
-		{Name: "notes", Type: input.Textarea(), Label: "Notes", Item: model.ItemDescription},
+		{Name: "day_of_week", Type: input.Number(), Label: "Day of week", DB: &model.FieldDB{Unique: true}},
+		{Name: "open_min", Type: input.Hour(), Label: "Opens at", OmitEmpty: true},
+		{Name: "close_min", Type: input.Hour(), Label: "Closes at", OmitEmpty: true},
+		{Name: "is_open", Type: input.Checkbox(), Label: "Open"},
+		{Name: "notes", Type: input.Textarea(), Label: "Notes"},
 		{Name: "updated_at", Type: model.NanoTime(), NotNull: true, ServerOnly: true},
 	},
 }
@@ -27,8 +27,8 @@ var HolidayModel = model.Definition{
 	Rules: model.Rules{Create: model.AddMyBusinessRule, Read: model.HaveNoBusinessRule, Delete: model.AddMyBusinessRule},
 	Fields: model.Fields{
 		{Name: "id", Type: model.Text(), OmitEmpty: true, ServerOnly: true, DB: &model.FieldDB{PK: true}},
-		{Name: "specific_date", Type: input.Number(), Label: "Date", NotNull: true, Item: model.ItemDescription}, // midnight UTC, seconds
-		{Name: "name", Type: input.Text(), Label: "Name", NotNull: true, Item: model.ItemLabel},
+		{Name: "specific_date", Type: input.Number(), Label: "Date", NotNull: true}, // midnight UTC, seconds
+		{Name: "name", Type: input.Text(), Label: "Name", NotNull: true},
 		{Name: "notes", Type: input.Textarea(), Label: "Notes"},
 		{Name: "updated_at", Type: model.NanoTime(), NotNull: true, ServerOnly: true},
 	},
@@ -40,8 +40,8 @@ var ClosureModel = model.Definition{
 	Rules: model.Rules{Create: model.AddMyBusinessRule, Read: model.HaveNoBusinessRule, Delete: model.AddMyBusinessRule},
 	Fields: model.Fields{
 		{Name: "id", Type: model.Text(), OmitEmpty: true, ServerOnly: true, DB: &model.FieldDB{PK: true}},
-		{Name: "specific_date", Type: input.Number(), Label: "Date", NotNull: true, Item: model.ItemDescription},
-		{Name: "reason", Type: input.Text(), Label: "Reason", NotNull: true, Item: model.ItemLabel},
+		{Name: "specific_date", Type: input.Number(), Label: "Date", NotNull: true},
+		{Name: "reason", Type: input.Text(), Label: "Reason", NotNull: true},
 		{Name: "updated_at", Type: model.NanoTime(), NotNull: true, ServerOnly: true},
 	},
 }

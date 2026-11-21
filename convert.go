@@ -22,5 +22,3 @@ func storedClock(field, hhmm string) (int, error) {
 	}
 	return m, nil
 }
-
-func formatClock(minutes int) string { return time.FormatMinutes(minutes) }

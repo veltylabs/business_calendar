@@ -53,7 +53,7 @@ func TestSeed_Load(t *testing.T) {
 	// never time.FormatDate, which applies the local offset and turns a
 	// UTC-midnight date into the previous day in Chile (UTC-3).
 	formattedDate := sept18.Item().Description
-	if formattedDate != "1789689600" {
-		t.Errorf("sept18 view date = %q, want %q", formattedDate, "1789689600")
+	if formattedDate != "2026-09-18" {
+		t.Errorf("sept18 view date = %q, want %q", formattedDate, "2026-09-18")
 	}
 }

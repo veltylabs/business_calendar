@@ -25,11 +25,11 @@ func TestNewBusinessHoursView_ListsWeek(t *testing.T) {
 	if len(items) != 7 {
 		t.Fatalf("expected 7 items, got %d", len(items))
 	}
-	if items[1].Label != "1" {
-		t.Errorf("expected Monday label 1, got %q", items[1].Label)
+	if items[1].Label != "Monday" {
+		t.Errorf("expected Monday label, got %q", items[1].Label)
 	}
-	if items[1].Description != "08:00 · 18:00 · true" {
-		t.Errorf("expected 08:00 · 18:00 · true description, got %q", items[1].Description)
+	if items[1].Description != "08:00–18:00" {
+		t.Errorf("expected 08:00–18:00 description, got %q", items[1].Description)
 	}
 	if _, ok := p.(view.Saver); !ok {
 		t.Error("business hours presenter must be save-capable (upsert)")
@@ -132,10 +132,10 @@ func TestHolidayItem_DescriptionIsTheRealDate(t *testing.T) {
 	if len(items) != 1 {
 		t.Fatalf("expected 1 item, got %d", len(items))
 	}
-	if items[0].Description != "1781913600" {
+	if items[0].Description != "2026-06-20" {
 		t.Fatalf("holiday Description = %q, want %q — the date shown to an admin must be the "+
 			"date they entered, not the Unix epoch misread",
-			items[0].Description, "1781913600")
+			items[0].Description, "2026-06-20")
 	}
 }
 
@@ -148,34 +148,34 @@ func TestItemsDeclaredOnFields(t *testing.T) {
 		Notes:     "note",
 	}
 	rowBH := bh.Item()
-	if rowBH.Label != "2" {
-		t.Errorf("BusinessHours title = %q, want 2", rowBH.Label)
+	if rowBH.Label != "Tuesday" {
+		t.Errorf("BusinessHours title = %q, want Tuesday", rowBH.Label)
 	}
-	if rowBH.Description != "09:00 · 17:00 · true · note" {
-		t.Errorf("BusinessHours detail = %q, want 09:00 · 17:00 · true · note", rowBH.Description)
+	if rowBH.Description != "09:00–17:00" {
+		t.Errorf("BusinessHours detail = %q, want 09:00–17:00", rowBH.Description)
 	}
 
 	h := businesscalendar.Holiday{
-		SpecificDate: 1234567890,
+		SpecificDate: 1767225600, // 2026-01-01T00:00:00Z
 		Name:         "New Year",
 	}
 	rowH := h.Item()
 	if rowH.Label != "New Year" {
 		t.Errorf("Holiday title = %q, want New Year", rowH.Label)
 	}
-	if rowH.Description != "1234567890" {
-		t.Errorf("Holiday detail = %q, want 1234567890", rowH.Description)
+	if rowH.Description != "2026-01-01" {
+		t.Errorf("Holiday detail = %q, want 2026-01-01", rowH.Description)
 	}
 
 	c := businesscalendar.Closure{
-		SpecificDate: 9876543210,
+		SpecificDate: 1789430400, // 2026-09-15T00:00:00Z
 		Reason:       "Maintenance",
 	}
 	rowC := c.Item()
 	if rowC.Label != "Maintenance" {
 		t.Errorf("Closure title = %q, want Maintenance", rowC.Label)
 	}
-	if rowC.Description != "9876543210" {
-		t.Errorf("Closure detail = %q, want 9876543210", rowC.Description)
+	if rowC.Description != "2026-09-15" {
+		t.Errorf("Closure detail = %q, want 2026-09-15", rowC.Description)
 	}
 }

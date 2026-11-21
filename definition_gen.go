@@ -6,7 +6,6 @@ import (
 	"webtyp.com/model"
 	"webtyp.com/orm"
 	"webtyp.com/crud"
-	"webtyp.com/fmt"
 	"webtyp.com/time"
 )
 
@@ -63,10 +62,6 @@ func (m *BusinessHours) Validate(action byte) error {
 
 func (*BusinessHours) Allow() model.Action     { return BusinessHoursModel.Allow }
 func (*BusinessHoursList) Allow() model.Action { return BusinessHoursModel.Allow }
-
-func (m *BusinessHours) Item() model.Item {
-	return model.Item{ID: m.Id, Label: fmt.Convert(m.DayOfWeek).String(), Description: model.JoinItem(m.OpenMin, m.CloseMin, fmt.Convert(m.IsOpen).String(), m.Notes)}
-}
 
 var BusinessHours_ = struct {
 	Id string
@@ -151,10 +146,6 @@ func (m *Holiday) Validate(action byte) error {
 func (*Holiday) Allow() model.Action     { return HolidayModel.Allow }
 func (*HolidayList) Allow() model.Action { return HolidayModel.Allow }
 
-func (m *Holiday) Item() model.Item {
-	return model.Item{ID: m.Id, Label: m.Name, Description: fmt.Convert(m.SpecificDate).String()}
-}
-
 var Holiday_ = struct {
 	Id string
 	SpecificDate string
@@ -230,10 +221,6 @@ func (m *Closure) Validate(action byte) error {
 
 func (*Closure) Allow() model.Action     { return ClosureModel.Allow }
 func (*ClosureList) Allow() model.Action { return ClosureModel.Allow }
-
-func (m *Closure) Item() model.Item {
-	return model.Item{ID: m.Id, Label: m.Reason, Description: fmt.Convert(m.SpecificDate).String()}
-}
 
 var Closure_ = struct {
 	Id string
