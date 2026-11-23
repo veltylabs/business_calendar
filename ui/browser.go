@@ -7,6 +7,15 @@ import (
 	"webtyp.com/view"
 )
 
+// Identidad de cada pantalla, para que la app las ponga en su menú.
+//
+// Ejemplo: Screens: []string{ui.HoursID, ui.HolidaysID, ui.ClosuresID}
+const (
+	HoursID    = ID + "." + TabHoursID
+	HolidaysID = ID + "." + TabHolidaysID
+	ClosuresID = ID + "." + TabClosuresID
+)
+
 const (
 	TabHoursID       = "hours"
 	TabHoursLabel    = "Horario"
@@ -35,21 +44,21 @@ func Screens(d view.BrowserDeps) []view.Screen {
 		Help:  descCalendarGroup,
 		Children: []view.Screen{
 			{
-				ID:         ID + "." + TabHoursID,
+				ID:         HoursID,
 				Label:      TabHoursLabel,
 				Icon:       ID,
 				Permission: model.ResourceOf(&businesscalendar.BusinessHoursModel),
 				Presenter:  businesscalendar.NewBusinessHoursView(caller, view.WithDescription(descHours)),
 			},
 			{
-				ID:         ID + "." + TabHolidaysID,
+				ID:         HolidaysID,
 				Label:      TabHolidaysLabel,
 				Icon:       ID,
 				Permission: model.ResourceOf(&businesscalendar.HolidayModel),
 				Presenter:  businesscalendar.NewHolidaysView(caller, view.WithDescription(descHolidays)),
 			},
 			{
-				ID:         ID + "." + TabClosuresID,
+				ID:         ClosuresID,
 				Label:      TabClosuresLabel,
 				Icon:       ID,
 				Permission: model.ResourceOf(&businesscalendar.ClosureModel),
