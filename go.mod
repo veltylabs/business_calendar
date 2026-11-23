@@ -14,7 +14,7 @@ require (
 	webtyp.com/router v0.5.0
 	webtyp.com/storage v0.2.8
 	webtyp.com/svg v0.3.33
-	webtyp.com/time v0.6.4
+	webtyp.com/time v0.6.7
 	webtyp.com/unixid v0.3.1
 	webtyp.com/view v0.6.87
 )
@@ -23,7 +23,7 @@ require (
 	webtyp.com/calendar v0.1.0 // indirect
 	webtyp.com/country v0.0.2 // indirect
 	webtyp.com/definitioncheck v0.0.10 // indirect
-	webtyp.com/dom v0.13.29 // indirect
+	webtyp.com/dom v0.13.34 // indirect
 	webtyp.com/escape v0.1.0 // indirect
 	webtyp.com/filetype v0.1.1 // indirect
 	webtyp.com/json v0.5.40 // indirect
